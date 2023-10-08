@@ -4,6 +4,7 @@ using Content.Shared.EntityEffects;
 using Content.Shared.Mind.Components;
 using Robust.Shared.Prototypes;
 using Content.Shared.Humanoid; //Delta-V - Banning humanoids from becoming ghost roles.
+using Content.Server.Psionics; //Nyano - Summary: pulls in the ability for the sentient creature to become psionic.
 
 namespace Content.Server.EntityEffects.Effects;
 
@@ -46,6 +47,7 @@ public sealed partial class MakeSentient : EntityEffect
 
         ghostRole = entityManager.AddComponent<GhostRoleComponent>(uid);
         entityManager.EnsureComponent<GhostTakeoverAvailableComponent>(uid);
+        entityManager.EnsureComponent<PotentialPsionicComponent>(uid); //Nyano - Summary:. Makes the animated body able to get psionics. 
 
         var entityData = entityManager.GetComponent<MetaDataComponent>(uid);
         ghostRole.RoleName = entityData.EntityName;

@@ -83,6 +83,7 @@ using Robust.Shared.Prototypes;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using Content.Shared._EinsteinEngines.Silicon.Components;
+using Robust.Shared.Random;
 
 namespace Content.Server.Cloning;
 
@@ -179,12 +180,163 @@ public sealed partial class CloningSystem : EntitySystem
                 Log.Error($"Tried to use invalid component registration for cloning: {componentName}");
                 continue;
             }
+            _cloningConsoleSystem.UpdateUserInterface(component.ConnectedConsole.Value, console);
+        }
 
-            // If the original does not have the component, then the clone shouldn't have it either.
-            RemComp(clone, componentRegistration.Type);
-            if (EntityManager.TryGetComponent(original, componentRegistration.Type, out var sourceComp)) // Does the original have this component?
+        private void OnExamined(EntityUid uid, CloningPodComponent component, ExaminedEvent args)
+        {
+            if (!args.IsInDetailsRange || !_powerReceiverSystem.IsPowered(uid))
+                return;
+
+            args.PushMarkup(Loc.GetString("cloning-pod-biomass", ("number", _material.GetMaterialAmount(uid, component.RequiredMaterial))));
+        }
+
+        public bool TryCloning(EntityUid uid, EntityUid bodyToClone, MindComponent mind, CloningPodComponent? clonePod, float failChanceModifier = 1)
+        {
+            if (!Resolve(uid, ref clonePod))
+                return false;
+
+            if (HasComp<ActiveCloningPodComponent>(uid))
+                return false;
+
+            if (ClonesWaitingForMind.TryGetValue(mind, out var clone))
             {
-                CopyComp(original, clone, sourceComp);
+                if (EntityManager.EntityExists(clone) &&
+                    !_mobStateSystem.IsDead(clone) &&
+                    TryComp<MindContainerComponent>(clone, out var cloneMindComp) &&
+                    (cloneMindComp.Mind == null || cloneMindComp.Mind == mind.Owner))
+                    return false; // Mind already has clone
+
+                ClonesWaitingForMind.Remove(mind);
+            }
+
+            if (mind.OwnedEntity != null && !_mobStateSystem.IsDead(mind.OwnedEntity.Value))
+                return false; // Body controlled by mind is not dead
+
+            // Yes, we still need to track down the client because we need to open the Eui
+            if (mind.UserId == null || !_playerManager.TryGetSessionById(mind.UserId.Value, out var client))
+                return false; // If we can't track down the client, we can't offer transfer. That'd be quite bad.
+
+            if (!TryComp<HumanoidAppearanceComponent>(bodyToClone, out var humanoid))
+                return false; // whatever body was to be cloned, was not a humanoid
+
+            if (!_prototype.TryIndex<SpeciesPrototype>(humanoid.Species, out var speciesPrototype))
+                return false;
+
+            if (!TryComp<PhysicsComponent>(bodyToClone, out var physics))
+                return false;
+
+            var cloningCost = (int) Math.Round(physics.FixturesMass * clonePod.BiomassRequirementMultiplier);
+
+            if (_configManager.GetCVar(CCVars.BiomassEasyMode))
+                cloningCost = (int) Math.Round(cloningCost * EasyModeCloningCost);
+
+            // Check if they have the uncloneable trait
+            if (TryComp<UncloneableComponent>(bodyToClone, out _))
+            {
+                if (clonePod.ConnectedConsole != null)
+                    _chatSystem.TrySendInGameICMessage(clonePod.ConnectedConsole.Value,
+                        Loc.GetString("cloning-console-uncloneable-trait-error"),
+                        InGameICChatType.Speak, false);
+                return false;
+            }
+
+            // biomass checks
+            var biomassAmount = _material.GetMaterialAmount(uid, clonePod.RequiredMaterial);
+
+            if (biomassAmount < cloningCost)
+            {
+                if (clonePod.ConnectedConsole != null)
+                    _chatSystem.TrySendInGameICMessage(clonePod.ConnectedConsole.Value, Loc.GetString("cloning-console-chat-error", ("units", cloningCost)), InGameICChatType.Speak, false);
+                return false;
+            }
+
+            _material.TryChangeMaterialAmount(uid, clonePod.RequiredMaterial, -cloningCost);
+            clonePod.UsedBiomass = cloningCost;
+            // end of biomass checks
+
+            // genetic damage checks
+            if (TryComp<DamageableComponent>(bodyToClone, out var damageable) &&
+                damageable.Damage.DamageDict.TryGetValue("Cellular", out var cellularDmg))
+            {
+                var chance = Math.Clamp((float) (cellularDmg / 100), 0, 1);
+                chance *= failChanceModifier;
+
+                if (cellularDmg > 0 && clonePod.ConnectedConsole != null)
+                    _chatSystem.TrySendInGameICMessage(clonePod.ConnectedConsole.Value, Loc.GetString("cloning-console-cellular-warning", ("percent", Math.Round(100 - chance * 100))), InGameICChatType.Speak, false);
+
+                if (_robustRandom.Prob(chance))
+                {
+                    UpdateStatus(uid, CloningPodStatus.Gore, clonePod);
+                    clonePod.FailedClone = true;
+                    AddComp<ActiveCloningPodComponent>(uid);
+                    return true;
+                }
+            }
+            // end of genetic damage checks
+
+            var mob = Spawn(speciesPrototype.Prototype, Transform(uid).MapPosition);
+            _humanoidSystem.CloneAppearance(bodyToClone, mob);
+
+            ///Nyano - Summary: adds the potential psionic trait to the reanimated mob. 
+            EnsureComp<PotentialPsionicComponent>(mob);
+
+            var ev = new CloningEvent(bodyToClone, mob);
+            RaiseLocalEvent(bodyToClone, ref ev);
+
+            if (!ev.NameHandled)
+                _metaSystem.SetEntityName(mob, MetaData(bodyToClone).EntityName);
+
+            var cloneMindReturn = EntityManager.AddComponent<BeingClonedComponent>(mob);
+            cloneMindReturn.Mind = mind;
+            cloneMindReturn.Parent = uid;
+            clonePod.BodyContainer.Insert(mob);
+            ClonesWaitingForMind.Add(mind, mob);
+            UpdateStatus(uid, CloningPodStatus.NoMind, clonePod);
+            var mindId = mind.Owner;
+            _euiManager.OpenEui(new AcceptCloningEui(mindId, mind, this), client);
+
+            AddComp<ActiveCloningPodComponent>(uid);
+
+            // TODO: Ideally, components like this should be components on the mind entity so this isn't necessary.
+            // Add on special job components to the mob.
+            if (_jobs.MindTryGetJob(mindId, out _, out var prototype))
+            {
+                foreach (var special in prototype.Special)
+                {
+                    if (special is AddComponentSpecial)
+                        special.AfterEquip(mob);
+                }
+            }
+
+            return true;
+        }
+
+        public void UpdateStatus(EntityUid podUid, CloningPodStatus status, CloningPodComponent cloningPod)
+        {
+            cloningPod.Status = status;
+            _appearance.SetData(podUid, CloningPodVisuals.Status, cloningPod.Status);
+        }
+
+        public override void Update(float frameTime)
+        {
+            var query = EntityQueryEnumerator<ActiveCloningPodComponent, CloningPodComponent>();
+            while (query.MoveNext(out var uid, out var _, out var cloning))
+            {
+                if (!_powerReceiverSystem.IsPowered(uid))
+                    continue;
+
+                if (cloning.BodyContainer.ContainedEntity == null && !cloning.FailedClone)
+                    continue;
+
+                cloning.CloningProgress += frameTime;
+                if (cloning.CloningProgress < cloning.CloningTime)
+                    continue;
+
+                if (cloning.FailedClone)
+                    EndFailedCloning(uid, cloning);
+                else
+                    Eject(uid, cloning);
             }
         }
 

@@ -54,6 +54,10 @@
     - GeneralAccess
     - AllAccess
     special:
+    - !type:AddComponentSpecial
+    components:
+    - type: PsionicBonusChance #Nyano - Summary: makes it more likely to become psionic.
+      flatBonus: 0.025
     - !type:AddImplantSpecial
       implants: [ MindShieldImplant ]
     - !type:AddComponentSpecial

@@ -14,7 +14,7 @@ internal sealed class ChatManager : IChatManager
     [Dependency] private readonly IEntitySystemManager _systems = default!;
 
     private ISawmill _sawmill = default!;
-
+    public event Action? PermissionsUpdated; //Nyano - Summary: need to be able to update perms for new psionics.
     public void Initialize()
     {
         _sawmill = Logger.GetSawmill("chat");
@@ -31,15 +31,15 @@ internal sealed class ChatManager : IChatManager
         // See server-side manager. This just exists for shared code.
     }
 
-    public void SendMessage(string text, ChatSelectChannel channel)
-    {
-        var str = text.ToString();
-        switch (channel)
+        public void SendMessage(string text, ChatSelectChannel channel)
         {
-            case ChatSelectChannel.Console:
-                // run locally
-                _consoleHost.ExecuteCommand(text);
-                break;
+            var str = text.ToString();
+            switch (channel)
+            {
+                case ChatSelectChannel.Console:
+                    // run locally
+                    _consoleHost.ExecuteCommand(text);
+                    break;
 
             case ChatSelectChannel.LOOC:
                 _consoleHost.ExecuteCommand($"looc \"{CommandParsing.Escape(str)}\"");
@@ -81,8 +81,28 @@ internal sealed class ChatManager : IChatManager
                 _consoleHost.ExecuteCommand($"whisper \"{CommandParsing.Escape(str)}\"");
                 break;
 
+            //Nyano - Summary: sends the command for telepath communication.
+            case ChatSelectChannel.Telepathic:
+                _consoleHost.ExecuteCommand($"tsay \"{CommandParsing.Escape(str)}\"");
+                break;
+
+            //Nyano - Summary: sends the command for telepath communication.
+            case ChatSelectChannel.Telepathic:
+               _consoleHost.ExecuteCommand($"tsay \"{CommandParsing.Escape(str)}\"");
+                break;
+
             default:
                 throw new ArgumentOutOfRangeException(nameof(channel), channel, null);
+        }
+        //Nyano - Summary: fires off the update permissions script. 
+        public void UpdatePermissions()
+        {
+            PermissionsUpdated?.Invoke();
+        }
+        //Nyano - Summary: fires off the update permissions script. 
+        public void UpdatePermissions()
+        {
+            PermissionsUpdated?.Invoke();
         }
     }
 }

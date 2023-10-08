@@ -264,6 +264,11 @@
         type: Add
         time: 5
         refresh: false
+      - !type:ChemRerollPsionic #Nyano - Summary: lets the imbiber become psionic. 
+        conditions:
+        - !type:ReagentThreshold
+          reagent: SpaceDrugs
+          min: 15
 
 - type: reagent
   id: Bananadine

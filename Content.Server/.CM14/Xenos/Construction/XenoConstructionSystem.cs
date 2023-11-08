@@ -1,13 +1,13 @@
 ﻿using System.Numerics;
 using Content.Server.Spreader;
-using Content.Shared._CM14.Xenos.Construction;
+using Content.Shared.CM14.Xenos.Construction;
 using Content.Shared.Atmos;
 using Content.Shared.Coordinates;
 using Content.Shared.Coordinates.Helpers;
 using Robust.Server.GameObjects;
 using Robust.Shared.Map;
 using XenoWeedableComponent = Content.Shared._CM14.Xenos.Construction.Nest.XenoWeedableComponent;
-using XenoWeedsComponent = Content.Shared._CM14.Xenos.Construction.XenoWeedsComponent;
+using XenoWeedsComponent = Content.Shared.CM14.Xenos.Construction.XenoWeedsComponent;
 
 namespace Content.Server.CM14.Xenos.Construction;
 
@@ -72,7 +72,7 @@ public sealed class XenoConstructionSystem : SharedXenoConstructionSystem
 
             for (var i = 0; i < 4; i++)
             {
-                var dir = (AtmosDirection) (1 << i);
+                var dir = (AtmosDirection)(1 << i);
                 var pos = neighbor.Tile.GridIndices.Offset(dir);
                 if (!_mapSystem.TryGetTileRef(gridOwner, neighbor.Grid, pos, out var adjacent))
                     continue;

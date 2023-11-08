@@ -265,7 +265,7 @@
     base: weedwall
     mode: Corners
   - type: XenoNestSurface
- 
+
 - type: edgeSpreader
   id: XenoWeeds
   updatesPerSecond: 2

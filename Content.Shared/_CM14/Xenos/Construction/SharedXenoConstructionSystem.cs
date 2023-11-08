@@ -1,4 +1,6 @@
-﻿using System.Collections.Immutable;
+﻿// Disabled legacy full-featured SharedXenoConstructionSystem in favor of Content.Shared.CM14.Xenos.Construction.SharedXenoConstructionSystem
+#if false
+using System.Collections.Immutable;
 using System.Linq;
 using Content.Shared._CM14.Xenos.Construction.Events;
 using Content.Shared._CM14.Xenos.Plasma;
@@ -462,3 +464,4 @@ public abstract class SharedXenoConstructionSystem : EntitySystem
         return false;
     }
 }
+#endif

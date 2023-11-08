@@ -1,4 +1,5 @@
-﻿using Content.Server.Actions;
+﻿using System;
+using Content.Server.Actions;
 using Content.Server.Administration;
 using Content.Shared.Administration;
 using Content.Shared.CM14.Xenos;
@@ -44,30 +45,40 @@ public sealed class EvolutionCooldownCommand : LocalizedCommands
         }
 
         var actions = _entities.System<ActionsSystem>();
-        var any = false;
-        foreach (var action in xeno.Actions.Values)
-        {
-            if (!_entities.HasComponent<XenoEvolveActionComponent>(action))
-                continue;
 
+        // Prefer dedicated EvolveAction if present
+        if (_entities.EntityExists(xeno.EvolveAction))
+        {
             if (seconds == 0)
-            {
-                actions.ClearCooldown(action);
-            }
+                actions.ClearCooldown(xeno.EvolveAction);
             else
+                actions.SetCooldown(xeno.EvolveAction, _timing.CurTime, _timing.CurTime + TimeSpan.FromSeconds(seconds));
+        }
+        else
+        {
+            // Fallback: scan legacy Actions dictionary for any action tagged with XenoEvolveActionComponent
+            var any = false;
+            foreach (var action in xeno.Actions.Values)
             {
-                actions.SetCooldown(action, _timing.CurTime, _timing.CurTime + TimeSpan.FromSeconds(seconds));
+                if (!_entities.HasComponent<XenoEvolveActionComponent>(action))
+                    continue;
+
+                if (seconds == 0)
+                    actions.ClearCooldown(action);
+                else
+                    actions.SetCooldown(action, _timing.CurTime, _timing.CurTime + TimeSpan.FromSeconds(seconds));
+
+                any = true;
             }
 
-            any = true;
-        }
-
-        if (!any)
-        {
-            shell.WriteError(Loc.GetString("cmd-evolutioncooldown-no-evolve-action", ("entity", entity)));
-            return;
+            if (!any)
+            {
+                shell.WriteError(Loc.GetString("cmd-evolutioncooldown-no-evolve-action", ("entity", entity)));
+                return;
+            }
         }
 
         shell.WriteLine(Loc.GetString("cmd-evolutioncooldown-set-cooldown", ("seconds", seconds)));
     }
 }
+

@@ -1,23 +1,22 @@
 using System;
 using Robust.Shared.Serialization;
-using Robust.Shared.GameStates;
-using Robust.Shared.Serialization.TypeSerializers.Implementations.Custom;
-using Robust.Shared.Player;
 using Content.Shared.UserInterface;
-using Content.Shared.Actions;
 
 namespace Content.Shared.CM14.Xenos.Evolution;
 
-// UI key used by shared evolution UI
-public enum XenoEvolutionUIKey : byte { Key }
-
-// Messages for the evolution BUI
-public sealed class EvolveBuiMessage : BoundUserInterfaceMessage
+[Serializable, NetSerializable]
+public enum XenoEvolutionUIKey : byte
 {
-    public required int Choice { get; init; }
+    Key
 }
 
-// Action event to open the evolution UI
-public sealed partial class XenoOpenEvolutionsEvent : InstantActionEvent
+[Serializable, NetSerializable]
+public sealed class EvolveBuiMessage : BoundUserInterfaceMessage
 {
+    public readonly int Choice;
+
+    public EvolveBuiMessage(int choice)
+    {
+        Choice = choice;
+    }
 }

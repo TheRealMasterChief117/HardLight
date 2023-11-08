@@ -8,16 +8,28 @@ namespace Content.Shared.CM14.Xenos;
 [RegisterComponent, NetworkedComponent, AutoGenerateComponentState]
 public sealed partial class XenoComponent : Component
 {
+    // Evolution
+    [DataField]
+    public TimeSpan EvolveIn;
+
     [DataField, AutoNetworkedField]
     [ViewVariables(VVAccess.ReadWrite)]
     public List<EntProtoId> EvolvesTo = new();
 
+    [DataField]
+    public EntProtoId EvolveActionId = "ActionXenoEvolve";
+
+    [DataField]
+    public EntityUid? EvolveAction;
+
+    // Actions
     [DataField, AutoNetworkedField]
     public List<EntProtoId> ActionIds = new();
 
     [DataField]
     public Dictionary<EntProtoId, EntityUid> Actions = new();
 
+    // Plasma/effects
     [DataField, AutoNetworkedField]
     [ViewVariables(VVAccess.ReadWrite)]
     public int Plasma;

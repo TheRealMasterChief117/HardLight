@@ -1,30 +1,18 @@
 {
   "version": 1,
   "license": "CC-BY-SA-3.0",
-  "copyright": "Taken from cmss13 at https://github.com/cmss13-devs/cmss13/blob/cfa259bbd2d627ed94a359fa8c0dec63006f49fa/icons/mob/hud/actions_xeno.dmi",
+  "copyright": "Taken from cmss13 at https://github.com/cmss13-devs/cmss13/blob/cfa259bbd2d627ed94a359fa8c0dec63006f49fa/icons/mob/hud/actions_xeno.dmi and modified by DrSmugleaf",
   "size": {
     "x": 32,
     "y": 32
   },
   "states": [
-    {
-      "name": "template"
-    },
-    {
-      "name": "template_active"
-    },
-    {
-      "name": "template_on"
-    },
-    {
-      "name": "blank"
-    },
-    {
-      "name": "border_reference"
-    },
-    {
-      "name": "mark_danger"
-    },
+    { "name": "template" },
+    { "name": "template_active" },
+    { "name": "template_on" },
+    { "name": "blank" },
+    { "name": "border_reference" },
+    { "name": "mark_danger" },
     {
       "name": "mark_aide"
     },

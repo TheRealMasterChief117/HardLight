@@ -37,7 +37,7 @@ public sealed partial class RadarBlipSystem : EntitySystem
             var radarXform = Transform(uid);
             var radarPosition = _xform.GetWorldPosition(uid);
             var radarGrid = _xform.GetGrid(uid);
-            
+
             var blipQuery = EntityQueryEnumerator<RadarBlipComponent, TransformComponent>();
 
             while (blipQuery.MoveNext(out var blipUid, out var blip, out var blipXform))
@@ -56,7 +56,7 @@ public sealed partial class RadarBlipSystem : EntitySystem
                 {
                     if (blipGrid != null)
                         continue;
-                    
+
                     // For free-floating blips without a grid, use world position with null grid
                     blips.Add((null, blipPosition, blip.Scale, blip.RadarColor, blip.Shape));
                 }
@@ -65,15 +65,15 @@ public sealed partial class RadarBlipSystem : EntitySystem
                     // If we're requiring grid, make sure they're on the same grid
                     if (blipGrid != radarGrid)
                         continue;
-                    
+
                     // For grid-aligned blips, store grid NetEntity and grid-local position
                     if (blipGrid != null)
                     {
-                        // Local position relative to grid 
+                        // Local position relative to grid
                         var gridMatrix = _xform.GetWorldMatrix(blipGrid.Value);
                         Matrix3x2.Invert(gridMatrix, out var invGridMatrix);
                         var localPos = Vector2.Transform(blipPosition, invGridMatrix);
-                        
+
                         // Add grid-relative blip with grid entity ID
                         blips.Add((GetNetEntity(blipGrid.Value), localPos, blip.Scale, blip.RadarColor, blip.Shape));
                     }

@@ -58,9 +58,6 @@
   - type: InputMover
   - type: LagCompensation
   - type: MobMover
-  - type: Actions
-  - type: Alerts
-  - type: Appearance
   - type: DoAfter
   - type: Examiner
   - type: Eye
@@ -99,8 +96,7 @@
     fixtures:
       fix1:
         shape:
-          !type:PhysShapeCircle
-          radius: 0.25
+          !type:PhysShapeCircle { radius: 0.25 }
         density: 1000
         mask:
         - MobMask
@@ -164,10 +160,8 @@
     qualities:
     - Prying
   - type: Prying
-    pryPowered: !type:Bool
-      true
-    force: !type:Bool
-      true
+    pryPowered: true
+    force: true
     useSound:
       path: /Audio/Items/crowbar.ogg
 
@@ -204,6 +198,18 @@
   parent:
   - CMXenoBase
   abstract: true
+
+- type: entity
+  id: CMXenoAI
+  parent: CMXenoBase
+  abstract: true
+  components:
+#  - type: HTN # TODO CM14 needs to not target nested marines
+#    rootTask:
+#      task: CMXenoCompound
+  - type: NpcFactionMember
+    factions:
+    - Xeno
 
 - type: entity
   id: CMXenoDeveloped

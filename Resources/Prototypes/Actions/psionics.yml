@@ -276,30 +276,104 @@
   description: action-description-telekinetic-pulse
   noSpawn: true
   components:
-  - type: InstantAction
-    icon: { sprite : Interface/Actions/psionics.rsi, state: telekinetic_pulse }
-    useDelay: 45
-    checkCanInteract: false
-    event: !type:AnomalyPowerActionEvent
-            settings:
-              powerName: "Telekinetic Pulse"
-              overchargeFeedback: "shadeskip-overcharge-feedback" # The text behind this is fine.
-              overchargeCooldown: 120
-              overchargeRecoil:
-                groups:
-                  Burn: -100 #This will be divided by the caster's Dampening.
-              minGlimmer: 6
-              maxGlimmer: 8
-              doSupercritical: false
-            entitySpawnEntries:
-              - settings:
-                  spawnOnPulse: true
-                  minAmount: 1
-                  maxAmount: 1
-                  maxRange: 0.5
-                spawns:
-                - EffectFlashTelekineticPulse
-            gravity:
-              maxThrowRange: 3
-              maxThrowStrength: 5
-              spaceRange: 3
+    - type: InstantAction
+      icon: { sprite: Interface/Actions/psionics.rsi, state: telekinetic_pulse }
+      useDelay: 45
+      checkCanInteract: false
+      event: !type:AnomalyPowerActionEvent
+        settings:
+          powerName: "Telekinetic Pulse"
+          overchargeFeedback: "shadeskip-overcharge-feedback" # The text behind this is fine.
+          overchargeCooldown: 120
+          overchargeRecoil:
+            groups:
+              Burn: -100 #This will be divided by the caster's Dampening.
+          minGlimmer: 6
+          maxGlimmer: 8
+          doSupercritical: false
+        entitySpawnEntries:
+          - settings:
+              spawnOnPulse: true
+              minAmount: 1
+              maxAmount: 1
+              maxRange: 0.5
+            spawns:
+              - EffectFlashTelekineticPulse
+        gravity:
+          maxThrowRange: 3
+          maxThrowStrength: 5
+          spaceRange: 3
+
+- type: entity
+  id: ActionShadowkinShadeskip
+  name: action-name-shadeskip
+  description: action-description-shadowkin-shadeskip
+  noSpawn: true
+  components:
+    - type: InstantAction
+      icon: { sprite: Interface/Actions/shadowkin_icons.rsi, state: shadeskip }
+      useDelay: 10
+      checkCanInteract: false
+      event: !type:AnomalyPowerActionEvent
+        settings:
+          powerName: "Shadowkin-Shadeskip"
+          manaCost: 25
+          checkInsulation: false
+          minGlimmer: 0
+          maxGlimmer: 0
+          doSupercritical: false
+        entitySpawnEntries:
+          - settings:
+              spawnOnPulse: true
+              minAmount: 5
+              maxAmount: 10
+              maxRange: 2.5
+            spawns:
+              - ShadowkinShadow
+          - settings:
+              spawnOnPulse: true
+              minAmount: 1
+              maxAmount: 1
+              maxRange: 0.5
+            spawns:
+              - EffectFlashShadowkinShadeskip
+
+- type: entity
+  id: ActionDarkSwap
+  name: action-name-darkswap
+  description: action-description-darkswap
+  noSpawn: true
+  components:
+    - type: InstantAction
+      icon: { sprite: Interface/Actions/shadowkin_icons.rsi, state: darkswap }
+      useDelay: 10
+      checkCanInteract: false
+      event: !type:DarkSwapActionEvent
+        manaCost: 100
+        checkInsulation: false
+
+- type: entity
+  id: ActionPyrokineticFlare
+  name: action-name-pyrokinetic-flare
+  description: action-description-pyrokinetic-flare
+  noSpawn: true
+  components:
+    - type: InstantAction
+      icon: { sprite: Interface/Actions/psionics.rsi, state: pyrokinetic_flare }
+      useDelay: 25
+      checkCanInteract: false
+      event: !type:AnomalyPowerActionEvent
+        settings:
+          powerName: "Pyrokinetic Flare"
+          minGlimmer: 3
+          maxGlimmer: 5
+          doSupercritical: false
+        entitySpawnEntries:
+          - settings:
+              spawnOnPulse: true
+              spawnOnSuperCritical: true
+              minAmount: 1
+              maxAmount: 3
+              maxRange: 1
+            spawns:
+              - EffectPyrokineticFlare

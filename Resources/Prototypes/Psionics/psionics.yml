@@ -218,3 +218,39 @@
   initializationFeedback: telekinetic-pulse-power-initialization-feedback
   metapsionicFeedback: telekinetic-pulse-power-metapsionic-feedback
   amplificationModifier: 1
+
+- type: psionicPower
+  id: ShadowkinPowers
+  name: Shadowkin Powers
+  description: shadowkin-powers-description
+  actions:
+    - ActionShadowkinShadeskip
+    - ActionDarkSwap
+  powerSlotCost: 1
+
+- type: psionicPower
+  id: EtherealVisionPower
+  name: Ethereal Vision
+  description: ethereal-vision-powers-description
+  components:
+    - type: ShowEthereal
+  powerSlotCost: 0
+
+- type: psionicPower
+  id: DarkSwapPower
+  name: DarkSwap
+  description: darkswap-power-description
+  actions:
+    - ActionDarkSwap
+  powerSlotCost: 1
+
+- type: psionicPower
+  id: PyrokineticFlare
+  name: Pyrokinetic Flare
+  description: pyrokinetic-flare-power-description
+  actions:
+    - ActionPyrokineticFlare
+  powerSlotCost: 1
+  initializationFeedback: pyrokinetic-flare-power-initialization-feedback
+  metapsionicFeedback: pyrokinetic-flare-power-metapsionic-feedback
+  amplificationModifier: 0.25

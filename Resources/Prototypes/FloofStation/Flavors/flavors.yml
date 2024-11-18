@@ -345,3 +345,37 @@
   flavorType: Complex
   description: flavor-complex-nikkonectar
 
+- type: flavor
+  id: numbingtranquility
+  flavorType: Complex
+  description: flavor-complex-numbing-tranquility
+
+- type: flavor
+  id: bluepumpkin
+  flavorType: Complex
+  description: flavor-complex-blue-pumpkin
+
+- type: flavor
+  id: strange
+  flavorType: Base
+  description: flavor-base-strange
+
+- type: flavor
+  id: cherry
+  flavorType: Complex
+  description: flavor-complex-cherry
+
+- type: flavor
+  id: walnut
+  flavorType: Complex
+  description: flavor-complex-walnut
+
+- type: flavor
+  id: despair
+  flavorType: Complex
+  description: flavor-complex-despair
+
+- type: flavor
+  id: truenature
+  flavorType: Complex
+  description: flavor-complex-true-nature

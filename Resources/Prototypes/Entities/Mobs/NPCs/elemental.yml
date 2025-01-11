@@ -72,7 +72,9 @@
   - type: InputMover
   - type: MobMover
   - type: ZombieImmune
-  - type: ProtectedFromStepTriggers
+  - type: ClothingRequiredStepTriggerImmune
+    slots: All
+  - type: Dispellable
 
 - type: entity
   abstract: true
@@ -101,6 +103,14 @@
       - SimpleHostile
   - type: Damageable
     damageContainer: StructuralInorganic
+  - type: Psionic
+    removable: false
+    roller: false
+    assayFeedback:
+      - orecrab-feedback
+  - type: InnatePsionicPowers
+    powersToAdd:
+      - TelepathyPower
 
 - type: entity
   parent: MobOreCrab
@@ -362,6 +372,14 @@
     solution: bloodstream
   - type: DrainableSolution
     solution: bloodstream
+  - type: Psionic
+    removable: false
+    roller: false
+    assayFeedback:
+      - reagent-slime-feedback
+  - type: InnatePsionicPowers
+    powersToAdd:
+      - TelepathyPower
 
 - type: entity
   name: Reagent Slime Spawner

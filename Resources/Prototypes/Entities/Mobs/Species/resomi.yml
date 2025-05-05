@@ -195,7 +195,7 @@
       Female: UnisexResomi
       Unsexed: UnisexResomi
   - type: Speech
-    allowedEmotes: ['Chirp']
+    allowedEmotes: ['Chirp', 'Hisses', 'Purr', 'Growl']
   - type: Tag
     tags:
     - CanPilot

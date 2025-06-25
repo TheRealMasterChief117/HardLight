@@ -455,6 +455,9 @@
       - FoodSnack
       - Meat
       - ReptilianFood
+      - AvianFood # Starlight
+  - type: Sprite
+    state: nutribrick-open
   - type: Food
   - type: SolutionContainerManager
     solutions:

@@ -62,6 +62,8 @@
       collection: Whistles
     Weh:
       collection: Weh
+    Hew:
+      collection: Hew
     Gasp:
       collection: FemaleGasp
     DefaultDeathgasp:
@@ -104,6 +106,10 @@
       collection: MaleGasp
     DefaultDeathgasp:
       collection: MaleDeathGasp
+    Weh:
+      collection: Weh
+    Hew:
+      collection: Hew
 
 - type: emoteSounds
   id: FemaleFelionoid
@@ -144,6 +150,10 @@
       collection: FemaleGasp
     DefaultDeathgasp:
       collection: FemaleDeathGasp
+    Weh:
+      collection: Weh
+    Hew:
+      collection: Hew
 
 - type: emoteSounds
   id: MaleCyclorite
@@ -164,6 +174,10 @@
       collection: CycloriteWhistle
     Yawn:
       collection: CycloriteYawn
+    Weh:
+      collection: Weh
+    Hew:
+      collection: Hew
 
 - type: emoteSounds
   id: FemaleCyclorite
@@ -184,6 +198,10 @@
       collection: CycloriteWhistle
     Yawn:
       collection: CycloriteYawn
+    Weh:
+      collection: Weh
+    Hew:
+      collection: Hew
 
 # Avali Sounds
 - type: emoteSounds
@@ -194,7 +212,7 @@
     Scream:
       path: /Audio/_Starlight/Effects/avali_scream.ogg
     Laugh:
-      collection: MaleLaugh
+      collection: ResomiLaugh
     Sneeze:
       collection: MaleSneezes
     Cough:
@@ -205,6 +223,28 @@
       collection: Snores
     Sigh:
       collection: MaleSigh
+    Weh:
+      collection: Weh
+    Hew:
+      collection: Hew
+    Gasp:
+      collection: MaleGasp
+    DefaultDeathgasp:
+      collection: MaleDeathGasp
+    Hisses:
+      collection: FelionoidHisses
+    Purr:
+      collection: FelionoidPurrs
+    Growl:
+      collection: FelionoidGrowls
+    Trill:
+      collection: FelionoidTrills
+    Scree:
+      collection: ResomiScrees
+    Call:
+      collection: ResomiCalls
+    Squawk:
+      collection: ResomiSquawk
     Crying:
       collection: MaleCry
     Honk:
@@ -241,3 +281,109 @@
       collection: FemaleGasp
     DefaultDeathgasp:
       collection: FemaleDeathGasp
+    Hisses:
+      collection: FelionoidHisses
+    Purr:
+      collection: FelionoidPurrs
+    Growl:
+      collection: FelionoidGrowls
+    Trill:
+      collection: FelionoidTrills
+    Scree:
+      collection: ResomiScrees
+    Call:
+      collection: ResomiCalls
+    Squawk:
+      collection: ResomiSquawk
+    Crying:
+      collection: FemaleCry
+    Honk:
+      collection: BikeHorn
+    Whistle:
+      path: /Audio/Voice/Resomi/resomi_whistle.ogg
+    Chirp:
+      collection: ResomiChirp
+
+- type: emoteSounds
+  id: MaleShadekin
+  params:
+    variation: 0.125
+  sounds:
+    Scream:
+      collection: ShadekinMaleScreams
+    Laugh:
+      collection: MaleLaugh
+    Sneeze:
+      collection: MaleSneezes
+    Cough:
+      collection: MaleCoughs
+    Yawn:
+      collection: MaleYawn
+    Snore:
+      collection: Snores
+    Sigh:
+      collection: MaleSigh
+    Crying:
+      collection: MaleCry
+    Whistle:
+      collection: Whistles
+    Weh:
+      collection: Weh
+    Hew:
+      collection: Hew
+    Gasp:
+      collection: MaleGasp
+    DefaultDeathgasp:
+      collection: MaleDeathGasp
+    Mar:
+      path: /Audio/_Starlight/Voice/Shadekin/mar.ogg
+    Wurble:
+      path: /Audio/_Starlight/Voice/Shadekin/wurble.ogg
+    Hisses:
+      collection: FelionoidHisses
+    Purr:
+      collection: FelionoidPurrs
+    Growl:
+      collection: FelionoidGrowls
+
+- type: emoteSounds
+  id: FemaleShadekin
+  params:
+    variation: 0.125
+  sounds:
+    Scream:
+      collection: ShadekinFemaleScreams
+    Laugh:
+      collection: FemaleLaugh
+    Sneeze:
+      collection: FemaleSneezes
+    Cough:
+      collection: FemaleCoughs
+    Yawn:
+      collection: FemaleYawn
+    Snore:
+      collection: Snores
+    Sigh:
+      collection: FemaleSigh
+    Crying:
+      collection: FemaleCry
+    Whistle:
+      collection: Whistles
+    Weh:
+      collection: Weh
+    Hew:
+      collection: Hew
+    Gasp:
+      collection: FemaleGasp
+    DefaultDeathgasp:
+      collection: FemaleDeathGasp
+    Mar:
+      path: /Audio/_Starlight/Voice/Shadekin/mar.ogg
+    Wurble:
+      path: /Audio/_Starlight/Voice/Shadekin/wurble.ogg
+    Hisses:
+      collection: FelionoidHisses
+    Purr:
+      collection: FelionoidPurrs
+    Growl:
+      collection: FelionoidGrowls

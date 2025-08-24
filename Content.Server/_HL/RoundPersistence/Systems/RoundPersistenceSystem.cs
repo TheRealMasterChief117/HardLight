@@ -163,6 +163,7 @@ public sealed class RoundPersistenceSystem : EntitySystem
         });
     }    /// <summary>
     /// HARDLIGHT: Restore expedition data directly to console from persistence storage
+    /// TODO: This method needs to be rewritten to work with station-based expedition data instead of LocalExpeditionData
     /// </summary>
     private void RestoreConsoleExpeditionData(EntityUid consoleUid, SalvageExpeditionConsoleComponent consoleComp)
     {
@@ -176,53 +177,9 @@ public sealed class RoundPersistenceSystem : EntitySystem
         var gridUid = xform.GridUid.Value;
         var gridName = MetaData(gridUid).EntityName;
 
-        // Look for stored expedition data for this console/grid
-        var persistenceQuery = AllEntityQuery<RoundPersistenceComponent>();
-        while (persistenceQuery.MoveNext(out var persistenceUid, out var persistence))
-        {
-            // Check stored console data for this grid/shuttle
-            if (persistence.ConsoleData.TryGetValue(gridName, out var storedConsoleData))
-            {
-                Log.Info($"Restoring expedition data for console {ToPrettyString(consoleUid)} on grid {gridName}");
-
-                // Restore the local expedition data directly
-                if (consoleComp.LocalExpeditionData == null)
-                {
-                    consoleComp.LocalExpeditionData = new SalvageExpeditionDataComponent();
-                }
-
-                var localData = consoleComp.LocalExpeditionData;
-
-                // Clear existing missions and restore from persistence
-                localData.Missions.Clear();
-                foreach (var (index, persistedMission) in storedConsoleData.Missions)
-                {
-                    localData.Missions[index] = new SalvageMissionParams
-                    {
-                        Index = persistedMission.Index,
-                        Seed = persistedMission.Seed,
-                        Difficulty = persistedMission.Difficulty,
-                        MissionType = (SalvageMissionType)persistedMission.MissionType
-                    };
-                }
-
-                // Restore other properties
-                localData.ActiveMission = storedConsoleData.ActiveMission;
-                localData.NextIndex = storedConsoleData.NextIndex;
-                localData.Cooldown = storedConsoleData.Cooldown;
-                localData.NextOffer = storedConsoleData.NextOffer;
-                localData.CanFinish = storedConsoleData.CanFinish;
-                localData.CooldownTime = storedConsoleData.CooldownTime;
-
-                // Update the console UI by raising the dirty event
-                Dirty(consoleUid, consoleComp);
-
-                Log.Info($"Successfully restored {storedConsoleData.Missions.Count} missions for console on {gridName}");
-                return;
-            }
-        }
-
-        Log.Debug($"No stored expedition data found for console {ToPrettyString(consoleUid)} on grid {gridName}");
+        Log.Info($"Console expedition data restoration temporarily disabled for {gridName} - LocalExpeditionData system removed");
+        // TODO: Implement station-based expedition data restoration
+        // The LocalExpeditionData system has been eliminated in favor of pure server-side station lookup
     }
 
     /// <summary>
@@ -422,49 +379,12 @@ public sealed class RoundPersistenceSystem : EntitySystem
 
     /// <summary>
     /// Save expedition data from all salvage consoles
+    /// TODO: Reimplement using station-based expedition data instead of LocalExpeditionData
     /// </summary>
     private void SaveConsoleData(RoundPersistenceComponent persistence)
     {
-        var consoleQuery = EntityQueryEnumerator<SalvageExpeditionConsoleComponent>();
-        while (consoleQuery.MoveNext(out var consoleUid, out var consoleComp))
-        {
-            if (consoleComp.LocalExpeditionData == null)
-                continue;
-
-            // Get the grid name as identifier
-            var gridUid = Transform(consoleUid).GridUid;
-            if (gridUid == null)
-                continue;
-
-            var gridName = MetaData(gridUid.Value).EntityName;
-            if (string.IsNullOrEmpty(gridName))
-                continue;
-
-            var expeditionData = consoleComp.LocalExpeditionData;
-            var persistedMissions = new Dictionary<ushort, PersistedMissionParams>();
-
-            foreach (var (index, mission) in expeditionData.Missions)
-            {
-                persistedMissions[index] = new PersistedMissionParams
-                {
-                    Index = mission.Index,
-                    Seed = mission.Seed,
-                    Difficulty = mission.Difficulty,
-                    MissionType = (int)mission.MissionType
-                };
-            }
-
-            persistence.ConsoleData[gridName] = new StoredConsoleData
-            {
-                Missions = persistedMissions,
-                ActiveMission = expeditionData.ActiveMission,
-                NextIndex = expeditionData.NextIndex,
-                Cooldown = expeditionData.Cooldown,
-                NextOffer = expeditionData.NextOffer,
-                CanFinish = expeditionData.CanFinish,
-                CooldownTime = expeditionData.CooldownTime
-            };
-        }
+        // Console data saving temporarily disabled - LocalExpeditionData system has been eliminated
+        // TODO: Implement station-based expedition data saving
     }
 
     /// <summary>

@@ -250,18 +250,24 @@ public sealed partial class SalvageSystem
         }
         difficulties.Sort((x, y) => { return Comparer<int>.Default.Compare(x.value, y.value); });
 
+        // HARDLIGHT: Always start mission indices from 0 for consistency
+        var missionIndex = 0;
         for (var i = 0; i < MissionLimit; i++)
         {
             var mission = new SalvageMissionParams
             {
-                Index = component.NextIndex,
+                Index = (ushort)missionIndex,
                 MissionType = (SalvageMissionType)_random.NextByte((byte)SalvageMissionType.Max + 1), // Frontier
                 Seed = _random.Next(),
                 Difficulty = difficulties[i].id,
             };
 
-            component.Missions[component.NextIndex++] = mission;
+            component.Missions[(ushort)missionIndex] = mission;
+            missionIndex++;
         }
+
+        // Update NextIndex to continue from where we left off if more missions are generated later
+        component.NextIndex = (ushort)missionIndex;
         // End Frontier: generate missions from an arbitrary set of difficulties
     }
 
@@ -331,22 +337,19 @@ public sealed partial class SalvageSystem
     // HARDLIGHT: Also handle the event on expedition consoles for round persistence
     private void OnExpeditionSpawnCompleteConsole(EntityUid uid, SalvageExpeditionConsoleComponent component, ExpeditionSpawnCompleteEvent ev)
     {
-        // Handle expedition completion events sent to consoles when station entities don't exist
-        if (component.LocalExpeditionData != null &&
-            component.LocalExpeditionData.ActiveMission == ev.MissionIndex &&
+        // Handle expedition completion events sent to consoles via station data
+        var stationData = GetStationExpeditionData(uid);
+        if (stationData != null &&
+            stationData.ActiveMission == ev.MissionIndex &&
             !ev.Success)
         {
-            component.LocalExpeditionData.ActiveMission = 0;
-            component.LocalExpeditionData.Cooldown = false;
+            stationData.ActiveMission = 0;
+            stationData.Cooldown = false;
 
             // Update the console UI
-            if (TryComp<UserInterfaceComponent>(uid, out var uiComp))
-            {
-                var state = GetState(component.LocalExpeditionData);
-                _ui.SetUiState((uid, uiComp), SalvageConsoleUiKey.Expedition, state);
-            }
+            UpdateConsole((uid, component));
 
-            Log.Info($"Expedition console {uid} handled failed mission {ev.MissionIndex} via LocalExpeditionData");
+            Log.Info($"Expedition console {uid} handled failed mission {ev.MissionIndex} via station expedition data");
         }
     }
 

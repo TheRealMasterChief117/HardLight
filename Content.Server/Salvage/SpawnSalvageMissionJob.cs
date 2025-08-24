@@ -134,16 +134,12 @@ public sealed class SpawnSalvageMissionJob : Job<bool>
             {
                 _sawmill.Warning($"Cannot raise ExpeditionSpawnCompleteEvent: Station entity {Station} no longer exists (likely due to round persistence)");
 
-                // For round persistence, try to find a console with local expedition data to notify
+                // For round persistence, notify all consoles - they will filter based on their station
                 var consoleQuery = _entManager.AllEntityQueryEnumerator<SalvageExpeditionConsoleComponent>();
                 while (consoleQuery.MoveNext(out var consoleUid, out var consoleComp))
                 {
-                    if (consoleComp.LocalExpeditionData != null)
-                    {
-                        _sawmill.Info($"Notifying expedition console {consoleUid} of mission completion via LocalExpeditionData");
-                        _entManager.EventBus.RaiseLocalEvent(consoleUid, ev);
-                        break; // Only notify the first console found
-                    }
+                    _sawmill.Info($"Notifying expedition console {consoleUid} of mission completion");
+                    _entManager.EventBus.RaiseLocalEvent(consoleUid, ev);
                 }
             }
 

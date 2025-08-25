@@ -116,8 +116,8 @@ namespace Content.Client.Shuttles.Save
         {
             // Don't clear locally loaded ships - server message is for server-side ships only
             // The client handles local ship files independently
-            Logger.Info($"Instance #{_instanceId}: Received {message.ShipNames.Count} available ships from server (not clearing local ships)");
-            Logger.Info($"Instance #{_instanceId}: Current state before processing: {_staticAvailableShips.Count} ships, {_staticCachedShipData.Count} cached");
+            Logger.Debug($"Instance #{_instanceId}: Received {message.ShipNames.Count} available ships from server (not clearing local ships)");
+            Logger.Debug($"Instance #{_instanceId}: Current state before processing: {_staticAvailableShips.Count} ships, {_staticCachedShipData.Count} cached");
 
             // Only add server ships that aren't already in our local list
             foreach (var serverShip in message.ShipNames)
@@ -125,7 +125,7 @@ namespace Content.Client.Shuttles.Save
                 if (!_staticAvailableShips.Contains(serverShip))
                 {
                     _staticAvailableShips.Add(serverShip);
-                    Logger.Info($"Instance #{_instanceId}: Added server ship: {serverShip}");
+                    Logger.Debug($"Instance #{_instanceId}: Added server ship: {serverShip}");
                 }
             }
 
@@ -272,7 +272,7 @@ namespace Content.Client.Shuttles.Save
                     }
                 }
 
-                Logger.Info($"Instance #{_instanceId}: Final result: Loaded {_staticAvailableShips.Count} saved ships from Exports directory");
+                Logger.Debug($"Instance #{_instanceId}: Final result: Loaded {_staticAvailableShips.Count} saved ships from Exports directory");
 
                 // Trigger UI update
                 _staticOnShipsUpdated?.Invoke();

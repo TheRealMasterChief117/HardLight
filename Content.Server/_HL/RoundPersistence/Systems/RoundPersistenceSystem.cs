@@ -5,6 +5,7 @@ using Content.Server._NF.RoundNotifications.Events;
 using Content.Server.Salvage;
 using Content.Server.Salvage.Expeditions;
 using Content.Server.Shuttles.Components;
+using Content.Server.Shuttles.Systems;
 using Content.Server.Station.Components;
 using Content.Server.Station.Systems;
 using Content.Server.StationRecords;
@@ -18,7 +19,6 @@ using Content.Shared.Salvage.Expeditions;
 using Content.Shared.Salvage.Expeditions.Modifiers;
 using Content.Shared._NF.ShuttleRecords.Components;
 using Content.Shared._NF.ShuttleRecords;
-using Content.Shared.Shuttles.Components;
 using RobustTimer = Robust.Shared.Timing.Timer;
 using Content.Shared.StationRecords;
 using Content.Shared.CrewManifest;
@@ -57,6 +57,7 @@ public sealed class RoundPersistenceSystem : EntitySystem
     [Dependency] private readonly IConfigurationManager _cfg = default!;
     [Dependency] private readonly MetaDataSystem _metaDataSystem = default!;
     [Dependency] private readonly SalvageSystem _salvageSystem = default!;
+    [Dependency] private readonly ShuttleSystem _shuttle = default!;
 
     private ISawmill _sawmill = default!;
 
@@ -537,54 +538,80 @@ public sealed class RoundPersistenceSystem : EntitySystem
     }
 
     /// <summary>
-    /// Ensure shuttles are properly assigned to the new station after round restart.
-    /// This fixes the "no owning station found" error for salvage missions.
+    /// Ensure shuttles are properly docked to the station after round restart.
+    /// Only docks shuttles that belong to this specific station based on saved shuttle records.
     /// </summary>
     private void RestoreShuttleStationAssignments(EntityUid stationUid, string stationName, RoundPersistenceComponent persistence)
     {
-        // Find all shuttles with expedition consoles that should belong to this station
-        var shuttleConsoleQuery = AllEntityQuery<SalvageExpeditionConsoleComponent, TransformComponent>();
-        var shuttlesAssigned = 0;
-
-        while (shuttleConsoleQuery.MoveNext(out var consoleUid, out _, out var xform))
+        // Get the station's grids for docking
+        if (!TryComp<StationDataComponent>(stationUid, out var stationData) || stationData.Grids.Count == 0)
         {
-            // Get the grid this console is on
-            var shuttleGrid = xform.GridUid;
-            if (shuttleGrid == null || !TryComp<ShuttleComponent>(shuttleGrid, out var shuttleComp))
-                continue;
+            _sawmill.Warning($"Station {stationName} has no grids for shuttle docking");
+            return;
+        }
 
-            // Check if this shuttle has expedition data that matches this station
-            var currentStation = _station.GetOwningStation(shuttleGrid.Value);
+        var targetGrid = stationData.Grids.First(); // Use the first/main grid as the docking target
+        var shuttlesDocked = 0;
 
-            // Only assign shuttles that are truly unowned or have malformed station data to avoid stealing from other stations
-            if (currentStation == null || !EntityManager.EntityExists(currentStation.Value))
+        // Only dock shuttles that belong to THIS specific station based on saved shuttle records
+        if (persistence.ShuttleRecords.TryGetValue(stationName, out var stationShuttleRecords))
+        {
+            foreach (var shuttleRecord in stationShuttleRecords)
             {
-                // Add the shuttle grid to this station using the proper StationSystem method
-                _station.AddGridToStation(stationUid, shuttleGrid.Value);
-                shuttlesAssigned++;
+                if (!EntityManager.TryGetEntity(shuttleRecord.EntityUid, out var shuttleUid) ||
+                    !EntityManager.EntityExists(shuttleUid.Value))
+                {
+                    continue; // Shuttle no longer exists
+                }
 
-                _sawmill.Info($"Assigned shuttle grid {shuttleGrid} (with expedition console {consoleUid}) to station {stationName}");
+                // Check if this shuttle is already assigned to the correct station
+                var currentStation = _station.GetOwningStation(shuttleUid.Value);
+                if (currentStation == stationUid)
+                {
+                    continue; // Already properly assigned
+                }
+
+                // Try to dock this shuttle to its proper station
+                if (TryComp<ShuttleComponent>(shuttleUid, out var shuttleComp) &&
+                    _shuttle.TryFTLDock(shuttleUid.Value, shuttleComp, targetGrid))
+                {
+                    shuttlesDocked++;
+                    _sawmill.Info($"Docked shuttle {shuttleRecord.Name} ({shuttleUid}) to its home station {stationName}");
+                }
+                else
+                {
+                    _sawmill.Warning($"Failed to dock shuttle {shuttleRecord.Name} ({shuttleUid}) to station {stationName}");
+                }
             }
         }
 
-        // Also check for any shuttle grids that have saved ship data but no station assignment
-        foreach (var (netEntity, shipData) in persistence.ShipData)
+        // Also check for any shuttle grids in ship data that don't have station assignments
+        // But only assign them to the FIRST station processed to avoid multiple assignments
+        if (stationName == persistence.StationRecords.Keys.FirstOrDefault())
         {
-            if (TryGetEntity(netEntity, out var shuttleUid) &&
-                TryComp<ShuttleComponent>(shuttleUid, out var shuttleComp) &&
-                _station.GetOwningStation(shuttleUid.Value) == null)
+            foreach (var (netEntity, shipData) in persistence.ShipData)
             {
-                // This shuttle has no station ownership but has saved data - assign it to this station
-                _station.AddGridToStation(stationUid, shuttleUid.Value);
-                shuttlesAssigned++;
-
-                _sawmill.Info($"Assigned unowned shuttle {shipData.ShipName} ({shuttleUid}) to station {stationName}");
+                if (TryGetEntity(netEntity, out var shuttleUid) &&
+                    TryComp<ShuttleComponent>(shuttleUid, out var shuttleComp) &&
+                    _station.GetOwningStation(shuttleUid.Value) == null)
+                {
+                    // Only assign unowned shuttles to avoid conflicts
+                    if (_shuttle.TryFTLDock(shuttleUid.Value, shuttleComp, targetGrid))
+                    {
+                        shuttlesDocked++;
+                        _sawmill.Info($"Docked unowned shuttle {shipData.ShipName} ({shuttleUid}) to station {stationName}");
+                    }
+                    else
+                    {
+                        _sawmill.Warning($"Failed to dock shuttle {shipData.ShipName} ({shuttleUid}) to station {stationName}");
+                    }
+                }
             }
         }
 
-        if (shuttlesAssigned > 0)
+        if (shuttlesDocked > 0)
         {
-            _sawmill.Info($"Assigned {shuttlesAssigned} shuttles to station {stationName}");
+            _sawmill.Info($"Docked {shuttlesDocked} shuttles to station {stationName}");
         }
     }
 

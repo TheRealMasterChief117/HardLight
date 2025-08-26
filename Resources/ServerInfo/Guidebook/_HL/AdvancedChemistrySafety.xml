@@ -1,47 +1,51 @@
 ﻿<Document>
-# The Widow System - Elite Narcotic Synthesis
+# Advanced Chemical Safety: The Widow System
 
-[color=#ff4444]WARNING: The following information describes extremely dangerous chemical synthesis procedures. Widow and its precursors are lethal substances with severe addiction potential. This information is provided for educational and emergency medical purposes only.[/color]
+[color=#ff4444]RESTRICTED DOCUMENT - LEVEL 5 CLEARANCE REQUIRED[/color]
+[color=#ff4444]WARNING: The following information describes extremely dangerous chemical synthesis procedures. This information is provided for emergency medical response and safety awareness only.[/color]
 
-The Widow System represents the most complex and dangerous narcotic synthesis chain known to NT chemistry. It consists of a three-stage synthesis process culminating in the creation of Widow, a substance that provides unparalleled combat enhancement at the cost of extreme health risks and addiction potential.
+The Widow System represents the most complex and dangerous narcotic synthesis chain documented in NT space. This document serves as a safety reference for medical personnel who may encounter victims of Widow-related incidents.
 
-## Overview of the System
+## System Overview
+
+The Widow synthesis chain consists of three primary stages with an intentional failure mechanism:
 
 ### Stage 1: Widow's Bite
-<GuideReagentEmbed Reagent="WidowsBite"/>
-
-A dark purple precursor chemical that serves as the foundation of the synthesis chain. Relatively safe compared to later stages, providing mild stimulant effects and serving as a "gateway" introduction to the system.
-
-**Synthesis:** Dynamoxine + Diphenhydramine + Epinephrine (350K minimum temperature)
-**Yield:** 2 units from 3 units of input
+- **Description:** Dark purple precursor chemical
+- **Properties:** Mild stimulant effects, relatively stable
+- **Synthesis Requirements:** High temperature (350K minimum)
+- **Safety Profile:** Low-moderate risk
 
 ### Stage 2: Widow's Venom  
-<GuideReagentEmbed Reagent="WidowsVenom"/>
-
-A volatile green-black liquid with significant combat enhancement properties. Represents the intermediate stage where the synthesis becomes truly dangerous, both in creation and consumption.
-
-**Synthesis:** Widow's Bite + Grit + Fentanyl + Phenol (370K minimum temperature)
-**Yield:** 4 units from 7 units of input
+- **Description:** Volatile green-black liquid
+- **Properties:** Combat enhancement, increased toxicity
+- **Synthesis Requirements:** Very high temperature (370K minimum)
+- **Safety Profile:** High risk - requires containment protocols
 
 ### Stage 3A: Widow (Successful Synthesis)
-<GuideReagentEmbed Reagent="Widow"/>
-
-The pinnacle of narcotic chemistry - an inky black substance that provides extreme combat enhancement. Requires specialized equipment and precise temperature control to synthesize safely.
-
-**Synthesis:** Widow's Venom + Abyssal Blood + Artifexium + Phalanximine + Leporazine (250K maximum temperature, [color=#4444ff]REQUIRES CRYOSTASIS BEAKER[/color])
-**Yield:** 3 units from 6 units of rare components
+- **Description:** Inky black substance that appears to absorb light
+- **Properties:** Extreme combat enhancement, severe addiction potential
+- **Synthesis Requirements:** [color=#4444ff]CRYOSTASIS BEAKER MANDATORY[/color] + precise temperature control (250K maximum)
+- **Safety Profile:** EXTREME RISK - Level 5 containment required
+- **Visual Indicator:** Causes user's blood to turn completely black
 
 ### Stage 3B: Widow's Ruin (Failed Synthesis)
-<GuideReagentEmbed Reagent="WidowsRuin"/>
+- **Description:** Putrid dark sludge created from synthesis failure
+- **Properties:** Combines ALL negative effects of corrupted synthesis ingredients
+- **Creation Conditions:** Synthesis attempted without proper cryostasis equipment
+- **Safety Profile:** EXTREME HAZARD - treat as chemical weapon
+- **Corrupted Component Effects:**
+  - Abyssal Blood corruption: Severe hypothermia and temperature regulation failure
+  - Artifexium corruption: Reality distortion, confusion, disorientation  
+  - Phalanximine corruption: Severe nausea instead of healing properties
+  - Widow's Venom corruption: Uncontrolled muscle spasms and jitters
+  - Leporazine corruption: Complete thermoregulatory system breakdown
 
-The catastrophic result of attempting Widow synthesis without proper cryostasis equipment. An extremely toxic substance that causes severe multi-organ damage including hard-to-treat cellular damage.
-
-**Created When:** Attempting Widow synthesis without a cryostasis beaker or at temperatures above 250K
-
-### The Addiction Factor: Widow's Curse
-<GuideReagentEmbed Reagent="WidowsCurse"/>
-
-The biological addiction component created by Widow use. Far more severe than standard addiction chemicals, causing blindness, severe movement penalties, and stronger resistance to treatment.
+### Addiction Component: Widow's Curse
+- **Description:** Biological addiction metabolite
+- **Properties:** More severe than standard addiction chemicals
+- **Effects:** Blindness, severe movement impairment, treatment resistance
+- **Duration:** Extended withdrawal periods compared to standard narcotics
 
 ## Critical Safety Information
 

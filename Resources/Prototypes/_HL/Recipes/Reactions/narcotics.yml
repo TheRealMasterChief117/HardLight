@@ -33,13 +33,12 @@
   products:
     WidowsVenom: 4
 
-# Stage 3A: Widow synthesis (Elite product - requires cryostasis beaker)
+# Stage 3A: Widow synthesis (Elite product - requires cryostasis beaker preparation)
+# NOTE: Pre-mix components in cryostasis beaker, then transfer to cold vessel for reaction
 - type: reaction
   id: Widow
   maxTemp: 250
   impact: High
-  requiredMixerCategories:
-  - Cryostasis
   reactants:
     WidowsVenom:
       amount: 2

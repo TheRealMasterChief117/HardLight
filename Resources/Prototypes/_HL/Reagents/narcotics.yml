@@ -29,6 +29,7 @@
           - "widows-bite-effect-calm"
           - "widows-bite-effect-focused"
           - "widows-bite-effect-alert"
+          - "widows-bite-effect-energy"
         probability: 0.1
 
 # Stage 2: WidowsVenom - Dangerous combat precursor
@@ -49,12 +50,14 @@
         sprintSpeedModifier: 1.25
       - !type:PopupMessage
         type: Local
-        visualType: Medium
+        visualType: Large
         messages:
           - "widows-venom-effect-power"
           - "widows-venom-effect-invincible"
           - "widows-venom-effect-enhanced"
-        probability: 0.12
+          - "widows-venom-effect-bloodlust"
+          - "widows-venom-effect-rage"
+        probability: 0.15
       - !type:GenericStatusEffect
         key: SeeingRainbows
         component: SeeingRainbows
@@ -99,10 +102,28 @@
     Narcotic:
       metabolismRate: 0.1
       effects:
+      # Blood corruption effect
+      - !type:ChangeBloodReagent
+        bloodReagent: BloodBlack
+        conditions:
+        - !type:ReagentThreshold
+          min: 1
       # Elite performance benefits
       - !type:MovespeedModifier
         walkSpeedModifier: 1.5
         sprintSpeedModifier: 1.5
+      - !type:PopupMessage
+        type: Local
+        visualType: Large
+        messages:
+          - "widow-effect-predator"
+          - "widow-effect-coldblood"
+          - "widow-effect-hunter"
+          - "widow-effect-abyssal"
+          - "widow-effect-killer"
+          - "widow-effect-darkness"
+          - "widow-effect-apex"
+        probability: 0.2
       - !type:ResetNarcolepsy
         conditions:
         - !type:ReagentThreshold
@@ -174,7 +195,10 @@
         messages:
           - "widow-overdose-psychosis-1"
           - "widow-overdose-psychosis-2"
-          - "widow-overdose-hallucination"
+          - "widow-overdose-psychosis-3"
+          - "widow-overdose-hallucination-1"
+          - "widow-overdose-hallucination-2"
+          - "widow-overdose-hallucination-3"
         probability: 0.15
       # Extreme doses (21u+) - Lethal territory
       - !type:HealthChange
@@ -221,15 +245,37 @@
         visualType: LargeCaution
         messages:
           - "widows-ruin-effect-burning"
-          - "widows-ruin-effect-agony"
+          - "widows-ruin-effect-agony"  
           - "widows-ruin-effect-regret"
+          - "widows-ruin-effect-freezing"
+          - "widows-ruin-effect-confusion"
+          - "widows-ruin-effect-nausea"
+          - "widows-ruin-effect-corruption"
+          - "widows-ruin-effect-madness"
         probability: 0.3
+      # Base toxic effects from failed synthesis
       - !type:HealthChange
         damage:
           types:
             Poison: 8
             Caustic: 5
             Asphyxiation: 3
+      # Corrupted Abyssal Blood - extreme hypothermia
+      - !type:AdjustTemperature
+        amount: -25000
+      # Corrupted Artifexium - reality distortion/confusion
+      - !type:GenericStatusEffect
+        key: Drunk
+        component: Drunk
+        time: 10
+        type: Add
+        probability: 0.4
+      # Corrupted Phalanximine - severe nausea instead of healing
+      - !type:ChemVomit
+        probability: 0.4
+      # Corrupted Widow's Venom - uncontrolled jitters instead of enhancement
+      - !type:Jitter
+        time: 15
       # Progressive damage (2u+)
       - !type:HealthChange
         conditions:
@@ -241,6 +287,21 @@
             Caustic: 8
             Cold: 4
             Cellular: 2
+      # Corrupted Leporazine - complete temperature regulation failure
+      - !type:AdjustTemperature
+        conditions:
+        - !type:ReagentThreshold
+          min: 2
+        amount: -35000
+      # Enhanced confusion from concentrated Artifexium corruption
+      - !type:GenericStatusEffect
+        conditions:
+        - !type:ReagentThreshold
+          min: 3
+        key: Dizzy
+        component: Dizzy
+        time: 20
+        type: Add
       # Catastrophic effects (5u+)
       - !type:ChemVomit
         conditions:
@@ -256,6 +317,7 @@
             Poison: 25
             Caustic: 15
             Asphyxiation: 10
+      # Complete system failure - paralysis from corrupted synthesis
       - !type:Paralyze
         conditions:
         - !type:ReagentThreshold
@@ -277,6 +339,12 @@
     Poison:
       metabolismRate: 0.005
       effects:
+      # Blood corruption effect
+      - !type:ChangeBloodReagent
+        bloodReagent: BloodBlack
+        conditions:
+        - !type:ReagentThreshold
+          min: 1
       # Enhanced withdrawal messages
       - !type:PopupMessage
         type: Local

@@ -24,55 +24,65 @@ reagent-desc-widows-curse = The biological aftermath of Widow use. A dark addict
 
 ## Effect Messages
 
-### WidowsBite Effects (Stage 1 - Gateway)
-widows-bite-effect-calm = You feel unexpectedly calm.
+### WidowsBite Effects (Stage 1 - Gateway to Darkness)
+widows-bite-effect-calm = You feel eerily calm.
 widows-bite-effect-focused = Your mind sharpens with clarity.
-widows-bite-effect-alert = Your nerves tingle with awareness.
-widows-bite-effect-energy = Gentle stimulation flows through you.
+widows-bite-effect-alert = Your nerves tingle dangerously.
+widows-bite-effect-energy = Dark energy flows through you.
+widows-bite-effect-hunger = Something stirs within you.
 
-### WidowsVenom Effects (Stage 2 - Combat Enhancement)  
-widows-venom-effect-power = Raw power surges through your veins.
-widows-venom-effect-invincible = You feel like you could take on the world.
-widows-venom-effect-enhanced = Your body feels enhanced beyond limits.
-widows-venom-effect-bloodlust = Your senses sharpen to predatory focus.
-widows-venom-effect-rage = Controlled aggression flows through you.
+### WidowsVenom Effects (Stage 2 - Violent Enhancement)  
+widows-venom-effect-power = Violent power surges through you!
+widows-venom-effect-invincible = You feel unstoppable and merciless!
+widows-venom-effect-enhanced = Your body transcends human limits!
+widows-venom-effect-bloodlust = Predatory hunger overwhelms you!
+widows-venom-effect-rage = Controlled violence burns within!
+widows-venom-effect-lethal = Every movement becomes a weapon.
 
-### Widow Effects (Stage 3 - Ultimate Combat Drug)
-widow-effect-predator = You can smell fear on everyone around you.
-widow-effect-coldblood = Ice-cold calculation flows through your mind.
-widow-effect-hunter = Every movement becomes fluid and lethal.
-widow-effect-abyssal = The void whispers combat secrets to you.
-widow-effect-killer = Time slows when violence calls.
-widow-effect-darkness = You move like death incarnate.
-widow-effect-apex = You have become the perfect weapon.
+### Widow Effects (Stage 3 - Abyssal Combat Enhancement)
+widow-effect-predator = You can smell fear radiating from everyone.
+widow-effect-coldblood = Abyssal ice flows through your veins.
+widow-effect-hunter = Your limbs move with inhuman precision.
+widow-effect-abyssal = The abyss whispers killing secrets.
+widow-effect-void = Reality bends around your darkened form.
+widow-effect-darkness = You become one with the shadows.
+widow-effect-apex = The void has made you a perfect killer.
+widow-effect-wraith = Your blood turns to liquid darkness.
+widow-effect-demon = Something inhuman stirs within you.
 
-### Widow Overdose Effects (Violent Psychosis)
-widow-overdose-psychosis-1 = REALITY SHATTERS - the fragments show screaming faces!
-widow-overdose-psychosis-2 = The walls BLEED and SCREAM your name!
-widow-overdose-psychosis-3 = Your reflection splits into violent fragments DEMANDING BLOOD!
-widow-overdose-hallucination-1 = Shadows tear from the walls and reach for your throat!
-widow-overdose-hallucination-2 = The floor dissolves into an abyss of burning shapes!
-widow-overdose-hallucination-3 = Everything transforms into weapons pointed at YOU!
+### Widow Overdose Effects (Abyssal Psychosis)
+widow-overdose-psychosis-1 = The ABYSS SHATTERS reality - fragments show SCREAMING SOULS!
+widow-overdose-psychosis-2 = Abyssal apparitions BLEED from the walls!
+widow-overdose-psychosis-3 = The void splits you into fragments DEMANDING SACRIFICE!
+widow-overdose-hallucination-1 = Abyssal claws tear from shadows seeking your throat!
+widow-overdose-hallucination-2 = The floor cracks open revealing the BURNING ABYSS!
+widow-overdose-hallucination-3 = Everything becomes void-touched weapons aimed at YOU!
+widow-overdose-abyssal-1 = The darkness FLOWS through your veins like poison!
+widow-overdose-abyssal-2 = Abyssal whispers SCREAM kill commands in your mind!
 
-### WidowsRuin Effects (Failed Synthesis)
-widows-ruin-effect-burning = Liquid fire courses through your veins!
-widows-ruin-effect-agony = Every cell screams in agony!
-widows-ruin-effect-regret = You immediately regret this.
-widows-ruin-effect-freezing = Bone-deep cold spreads through you!
-widows-ruin-effect-confusion = Reality fractures around you!
-widows-ruin-effect-nausea = Your stomach churns violently!
-widows-ruin-effect-corruption = Corrupted chemicals burn inside you.
-widows-ruin-effect-madness = Your mind reels from chemical chaos.
+### WidowsRuin Effects (Abyssal Corruption)
+widows-ruin-effect-burning = Corrupted fire burns through your veins!
+widows-ruin-effect-agony = Every cell screams as darkness invades!
+widows-ruin-effect-regret = The void mocks your failed ambition.
+widows-ruin-effect-freezing = Abyssal cold spreads from your core!
+widows-ruin-effect-confusion = Reality fractures into dark fragments!
+widows-ruin-effect-nausea = Your body rejects the void's poison!
+widows-ruin-effect-corruption = The abyss devours you from within.
+widows-ruin-effect-madness = Darkness claws at your sanity.
+widows-ruin-effect-void = The failed void burns like acid.
+widows-ruin-effect-twisted = Your flesh writhes with corruption.
 
-### WidowsCurse Withdrawal Effects (Severe Addiction)
-widows-curse-withdrawal-1 = Your body trembles with desperate need.
-widows-curse-withdrawal-2 = The world feels gray and lifeless.
-widows-curse-withdrawal-3 = Every heartbeat is pure suffering.
-widows-curse-withdrawal-4 = You would do anything for another hit.
-widows-curse-withdrawal-5 = The darkness calls, promising relief.
-widows-curse-withdrawal-6 = Everything feels wrong without the drug.
-widows-curse-withdrawal-7 = Your senses ache without chemical embrace.
-widows-curse-withdrawal-8 = Withdrawal claws at your sanity.
+### WidowsCurse Withdrawal Effects (Abyssal Addiction)
+widows-curse-withdrawal-1 = Your body convulses, craving darkness.
+widows-curse-withdrawal-2 = The void has abandoned you.
+widows-curse-withdrawal-3 = Every heartbeat echoes with emptiness.
+widows-curse-withdrawal-4 = You would kill for the abyss's embrace.
+widows-curse-withdrawal-5 = The darkness calls from beyond reality.
+widows-curse-withdrawal-6 = Reality feels hollow without the void.
+widows-curse-withdrawal-7 = Your corrupted blood burns with need.
+widows-curse-withdrawal-8 = Abyssal withdrawal tears at your soul.
+widows-curse-withdrawal-9 = The void's absence is agony incarnate.
+widows-curse-withdrawal-10 = You feel the abyss slipping away forever.
 
 ## Black Blood
 reagent-name-black-blood = black blood

@@ -171,6 +171,46 @@ public sealed class BloodstreamSystem : EntitySystem
                 // Reset the drunk and stutter time to zero
                 bloodstream.StatusTime = TimeSpan.Zero;
             }
+            
+            // Generic blood restoration system - restore original blood when no blood-changing effects remain
+            if (bloodstream.OriginalBloodReagent != null && bloodstream.BloodReagent != bloodstream.OriginalBloodReagent)
+            {
+                // Check if any blood-changing reagents are still present
+                if (ShouldRestoreBlood(uid, bloodstream))
+                {
+                    ChangeBloodReagent(uid, bloodstream.OriginalBloodReagent.Value, bloodstream);
+                    bloodstream.OriginalBloodReagent = null;
+                }
+            }
+        }
+    }
+
+    /// <summary>
+    /// Determines if blood should be restored to its original reagent.
+    /// Uses component-based tracking to detect active blood-changing effects.
+    /// This works for any blood-changing effect without hardcoding or prototype inspection.
+    /// </summary>
+    private bool ShouldRestoreBlood(EntityUid uid, BloodstreamComponent bloodstream)
+    {
+        // Simple and efficient: check if there's an active blood modification tracker
+        return !HasComp<BloodModificationTrackerComponent>(uid);
+    }
+
+    /// <summary>
+    /// Decrements the blood modification tracker when a blood-changing effect ends.
+    /// This should be called when reagents with ChangeBloodReagent effects are metabolized away.
+    /// </summary>
+    public void DecrementBloodModificationTracker(EntityUid uid)
+    {
+        if (TryComp<BloodModificationTrackerComponent>(uid, out var tracker))
+        {
+            tracker.ActiveEffects--;
+            
+            // Remove the component when no more active effects remain
+            if (tracker.ActiveEffects <= 0)
+            {
+                RemCompDeferred<BloodModificationTrackerComponent>(uid);
+            }
         }
     }
 
@@ -454,6 +494,12 @@ public sealed class BloodstreamSystem : EntitySystem
             || reagent == component.BloodReagent)
         {
             return;
+        }
+
+        // Store the original blood reagent if not already stored
+        if (component.OriginalBloodReagent == null)
+        {
+            component.OriginalBloodReagent = component.BloodReagent;
         }
 
         if (!_solutionContainerSystem.ResolveSolution(uid, component.BloodSolutionName, ref component.BloodSolution, out var bloodSolution))

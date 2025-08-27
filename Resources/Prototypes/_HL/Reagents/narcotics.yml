@@ -15,13 +15,27 @@
     Narcotic:
       metabolismRate: 0.3
       effects:
+      # Stronger than Dynamoxine alone (1.15 -> 1.2)
       - !type:MovespeedModifier
-        walkSpeedModifier: 1.1
-        sprintSpeedModifier: 1.1
+        walkSpeedModifier: 1.2
+        sprintSpeedModifier: 1.2
+      # Anti-jitter from Diphenhydramine
       - !type:GenericStatusEffect
         key: Jitter
-        time: 5.0
+        time: 8.0
         type: Remove
+      # Enhanced stamina from stimulant combination
+      - !type:GenericStatusEffect
+        key: StaminaModifier
+        component: StaminaModifier
+        time: 15
+        type: Add
+      # Mild pain resistance from precursor effects
+      - !type:GenericStatusEffect
+        key: Adrenaline
+        component: IgnoreSlowOnDamage
+        time: 10
+        type: Add
       - !type:PopupMessage
         type: Local
         visualType: Medium
@@ -30,7 +44,8 @@
           - "widows-bite-effect-focused"
           - "widows-bite-effect-alert"
           - "widows-bite-effect-energy"
-        probability: 0.1
+          - "widows-bite-effect-hunger"
+        probability: 0.2
 
 # Stage 2: WidowsVenom - Dangerous combat precursor
 - type: reagent
@@ -45,9 +60,32 @@
     Narcotic:
       metabolismRate: 0.2
       effects:
+      # Major speed boost combining all precursors
       - !type:MovespeedModifier
-        walkSpeedModifier: 1.25
-        sprintSpeedModifier: 1.25
+        walkSpeedModifier: 1.4
+        sprintSpeedModifier: 1.4
+      # Superior stamina enhancement
+      - !type:GenericStatusEffect
+        key: StaminaModifier
+        component: StaminaModifier
+        time: 25
+        type: Add
+      # Pain immunity from combat focus
+      - !type:GenericStatusEffect
+        key: Adrenaline
+        component: IgnoreSlowOnDamage
+        time: 30
+        type: Add
+      # Resistance to stuns (minor)
+      - !type:GenericStatusEffect
+        key: Stun
+        time: 5
+        type: Remove
+      # Resistance to knockdown
+      - !type:GenericStatusEffect
+        key: KnockedDown
+        time: 5
+        type: Remove
       - !type:PopupMessage
         type: Local
         visualType: Large
@@ -57,7 +95,8 @@
           - "widows-venom-effect-enhanced"
           - "widows-venom-effect-bloodlust"
           - "widows-venom-effect-rage"
-        probability: 0.15
+          - "widows-venom-effect-lethal"
+        probability: 0.25
       - !type:GenericStatusEffect
         key: SeeingRainbows
         component: SeeingRainbows
@@ -108,6 +147,11 @@
         conditions:
         - !type:ReagentThreshold
           min: 1
+      # Cleanup blood modification tracker when reagent is nearly gone
+      - !type:DecrementBloodModificationTracker
+        conditions:
+        - !type:ReagentThreshold
+          max: 0.01
       # Elite performance benefits
       - !type:MovespeedModifier
         walkSpeedModifier: 1.5
@@ -120,9 +164,11 @@
           - "widow-effect-coldblood"
           - "widow-effect-hunter"
           - "widow-effect-abyssal"
-          - "widow-effect-killer"
+          - "widow-effect-void"
           - "widow-effect-darkness"
           - "widow-effect-apex"
+          - "widow-effect-wraith"
+          - "widow-effect-demon"
         probability: 0.2
       - !type:ResetNarcolepsy
         conditions:
@@ -165,7 +211,7 @@
         conditions:
         - !type:ReagentThreshold
           min: 8
-        amount: -15000
+        amount: -800
       - !type:Jitter
         conditions:
         - !type:ReagentThreshold
@@ -199,7 +245,9 @@
           - "widow-overdose-hallucination-1"
           - "widow-overdose-hallucination-2"
           - "widow-overdose-hallucination-3"
-        probability: 0.15
+          - "widow-overdose-abyssal-1"
+          - "widow-overdose-abyssal-2"
+        probability: 0.25
       # Extreme doses (21u+) - Lethal territory
       - !type:HealthChange
         conditions:
@@ -213,7 +261,7 @@
         conditions:
         - !type:ReagentThreshold
           min: 23
-        amount: -50000
+        amount: -2000
       # Elite addiction system
       - !type:AdjustReagent
         conditions:
@@ -252,6 +300,8 @@
           - "widows-ruin-effect-nausea"
           - "widows-ruin-effect-corruption"
           - "widows-ruin-effect-madness"
+          - "widows-ruin-effect-void"
+          - "widows-ruin-effect-twisted"
         probability: 0.3
       # Base toxic effects from failed synthesis
       - !type:HealthChange
@@ -260,9 +310,9 @@
             Poison: 8
             Caustic: 5
             Asphyxiation: 3
-      # Corrupted Abyssal Blood - extreme hypothermia
+      # Corrupted Abyssal Blood - extreme hypothermia  
       - !type:AdjustTemperature
-        amount: -25000
+        amount: -1000
       # Corrupted Artifexium - reality distortion/confusion
       - !type:GenericStatusEffect
         key: Drunk
@@ -292,7 +342,7 @@
         conditions:
         - !type:ReagentThreshold
           min: 2
-        amount: -35000
+        amount: -1500
       # Enhanced confusion from concentrated Artifexium corruption
       - !type:GenericStatusEffect
         conditions:
@@ -322,7 +372,7 @@
         conditions:
         - !type:ReagentThreshold
           min: 8
-        probability: 0.15
+        probability: 0.25
         paralyzeTime: 8
 
 # Elite Addiction Chemical: WidowsCurse
@@ -337,7 +387,7 @@
   recognizable: false
   metabolisms:
     Poison:
-      metabolismRate: 0.005
+      metabolismRate: 0.01
       effects:
       # Blood corruption effect
       - !type:ChangeBloodReagent
@@ -345,6 +395,11 @@
         conditions:
         - !type:ReagentThreshold
           min: 1
+      # Cleanup blood modification tracker when reagent is nearly gone
+      - !type:DecrementBloodModificationTracker
+        conditions:
+        - !type:ReagentThreshold
+          max: 0.01
       # Enhanced withdrawal messages
       - !type:PopupMessage
         type: Local
@@ -355,7 +410,7 @@
           - "widows-curse-withdrawal-3"
           - "widows-curse-withdrawal-4"
           - "widows-curse-withdrawal-5"
-        probability: 0.12
+        probability: 0.22
         conditions:
         - !type:ReagentThreshold
           reagent: Widow

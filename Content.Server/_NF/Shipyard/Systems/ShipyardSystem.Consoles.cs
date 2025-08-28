@@ -19,6 +19,7 @@ using Robust.Shared.Containers;
 using Robust.Shared.Prototypes;
 using Robust.Shared.Utility;
 using Content.Server.Maps;
+using Content.Server.Mind;
 using Content.Shared.Radio;
 using System.Linq;
 using Content.Server.Administration.Logs;
@@ -74,7 +75,7 @@ public sealed partial class ShipyardSystem : SharedShipyardSystem
 
     public void InitializeConsole()
     {
-
+        SubscribeLocalEvent<ShipyardConsoleComponent, ShipyardConsoleLoadMessage>(OnLoadMessage);
     }
 
     private void OnPurchaseMessage(EntityUid shipyardConsoleUid, ShipyardConsoleComponent component, ShipyardConsolePurchaseMessage args)
@@ -410,7 +411,7 @@ public sealed partial class ShipyardSystem : SharedShipyardSystem
             return;
         }
 
-        if (!TryComp<Mind.MindComponent>(mindContainerComp.Mind.Value, out var mindComp) || mindComp.UserId == null)
+        if (!TryComp<MindComponent>(mindContainerComp.Mind.Value, out var mindComp) || mindComp.UserId == null)
         {
             ConsolePopup(player, "Unable to load ship - player mind user not found");
             PlayDenySound(player, uid, component);

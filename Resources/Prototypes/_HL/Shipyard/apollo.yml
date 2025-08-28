@@ -1,0 +1,43 @@
+# Author Info
+# GitHub: BlueNexus
+# Discord: BlueNexa
+
+# Maintainer Info
+# GitHub: BlueNexus
+# Discord: BlueNexa
+
+# Shuttle Notes:
+#
+- type: vessel
+  id: Apollo
+  parent: BaseVessel
+  name: THI Apollo
+  description: A medium, armoured medevac and search and rescue shuttle, with a frontal boarding ramp. Manufactured by Tennosai Heavy Industries.
+  price: 118750 # ~95000$ on mapinit + 25% markup
+  category: Medium
+  group: Medical
+  shuttlePath: /Maps/_HL/Shuttles/apollo.yml
+  class:
+  - Medical
+  engine:
+  - AME
+
+- type: gameMap
+  id: Apollo
+  mapName: 'Apollo'
+  mapPath: /Maps/_HL/Shuttles/apollo.yml
+  minPlayers: 0
+  stations:
+    Apollo:
+      stationProto: StandardFrontierVessel
+      components:
+        - type: StationNameSetup
+          mapNameTemplate: 'Apollo {1}'
+          nameGenerator:
+            !type:NanotrasenNameGenerator
+            prefixCreator: '14'
+        - type: StationJobs
+          availableJobs:
+            ContractorInterview: [ 0, 0 ]
+            PilotInterview: [ 0, 0 ]
+            MercenaryInterview: [ 0, 0 ]

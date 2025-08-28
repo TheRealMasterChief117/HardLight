@@ -271,7 +271,7 @@
         - !type:ReagentThreshold
           min: 3
         reagent: WidowsCurse
-        amount: 3.5
+        amount: 0.5
 
 # Stage 3B: Ruin - Failed synthesis (extremely nasty poison)
 - type: reagent
@@ -348,9 +348,9 @@
         conditions:
         - !type:ReagentThreshold
           min: 3
-        key: Dizzy
-        component: Dizzy
-        time: 20
+        key: Drunk
+        component: Drunk
+        time: 15
         type: Add
       # Catastrophic effects (5u+)
       - !type:ChemVomit
@@ -387,7 +387,7 @@
   recognizable: false
   metabolisms:
     Poison:
-      metabolismRate: 0.01
+      metabolismRate: 0.02
       effects:
       # Blood corruption effect
       - !type:ChangeBloodReagent
@@ -425,7 +425,17 @@
         - !type:ReagentThreshold
           reagent: Widow
           max: 0.01
-        time: 20
+        time: 12
+      # Remove blindness when taking more Widow
+      - !type:GenericStatusEffect
+        key: TemporaryBlindness
+        component: TemporaryBlindness
+        conditions:
+        - !type:ReagentThreshold
+          reagent: Widow
+          min: 1.0
+        time: 1
+        type: Remove
       # Worse movement penalties than Addictine
       - !type:MovespeedModifier
         walkSpeedModifier: 0.85

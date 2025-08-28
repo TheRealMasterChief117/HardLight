@@ -107,7 +107,6 @@ public sealed partial class ShipyardSystem : SharedShipyardSystem
     SubscribeLocalEvent<StationDeedSpawnerComponent, MapInitEvent>(OnInitDeedSpawner);
 
         // Initialize console-specific functionality
-        InitializeConsole();
     }
 
     public override void Shutdown()

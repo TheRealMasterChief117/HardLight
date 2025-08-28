@@ -84,8 +84,18 @@ curse-withdrawal-8 = Withdrawal tears at you.
 curse-withdrawal-9 = The absence is agony.
 curse-withdrawal-10 = You feel it slipping away.
 
+## Abyssal Cleansing Serum (Widow Treatment)
+reagent-name-abyssal-cleansing-serum = Abyssal Cleansing Serum
+reagent-desc-abyssal-cleansing-serum = A specialized treatment synthesized from corrupted blood. Burns away abyssal addiction through aggressive purification. The process is traumatic but effective.
+
+### Abyssal Cleansing Serum Effects
+abyssal-cleansing-effect-purifying = Fire burns through your veins as corruption is cleansed away.
+abyssal-cleansing-effect-clearing = Your vision clears as the darkness is burned out.
+abyssal-cleansing-effect-stabilizing = The serum scorches away the last traces of corruption.
+
 ## Black Blood
 reagent-name-black-blood = black blood
 reagent-desc-black-blood = Corrupted blood, blackened by unknown chemicals. An ominous sign.
 
 reagent-effect-guidebook-change-blood-reagent = Changes blood reagent to {$reagent}
+reagent-effect-guidebook-restore-blood-reagent = Restores blood to its original type

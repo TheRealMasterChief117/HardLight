@@ -71,3 +71,20 @@
       amount: 1
   products:
     Ruin: 3
+
+# Advanced Widow Treatment Synthesis
+- type: reaction
+  id: AbyssalCleansingSerum
+  minTemp: 350
+  impact: High
+  reactants:
+    BloodBlack:
+      amount: 5
+    Ethylredoxrazine:
+      amount: 3
+    Stellibinin:
+      amount: 3
+    Phalanximine:
+      amount: 2
+  products:
+    AbyssalCleansingSerum: 2

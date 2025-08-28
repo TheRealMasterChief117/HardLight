@@ -40,6 +40,12 @@ public sealed class BloodstreamSystem : EntitySystem
     [Dependency] private readonly SharedStutteringSystem _stutteringSystem = default!;
     [Dependency] private readonly AlertsSystem _alertsSystem = default!;
 
+    /// <summary>
+    /// Cache of reagent IDs that have ChangeBloodReagent effects.
+    /// Built at startup for performance optimization.
+    /// </summary>
+    private readonly HashSet<string> _bloodAffectingReagents = new();
+
     public override void Initialize()
     {
         base.Initialize();
@@ -48,6 +54,9 @@ public sealed class BloodstreamSystem : EntitySystem
         SubscribeLocalEvent<BloodstreamComponent, MapInitEvent>(OnMapInit);
         SubscribeLocalEvent<BloodstreamComponent, EntityUnpausedEvent>(OnUnpaused);
         SubscribeLocalEvent<BloodstreamComponent, DamageChangedEvent>(OnDamageChanged);
+
+        // Build cache of blood-affecting reagents for performance
+        BuildBloodAffectingReagentsCache();
         SubscribeLocalEvent<BloodstreamComponent, HealthBeingExaminedEvent>(OnHealthBeingExamined);
         SubscribeLocalEvent<BloodstreamComponent, BeingGibbedEvent>(OnBeingGibbed);
         SubscribeLocalEvent<BloodstreamComponent, ApplyMetabolicMultiplierEvent>(OnApplyMetabolicMultiplier);
@@ -186,32 +195,58 @@ public sealed class BloodstreamSystem : EntitySystem
     }
 
     /// <summary>
-    /// Determines if blood should be restored to its original reagent.
-    /// Uses component-based tracking to detect active blood-changing effects.
-    /// This works for any blood-changing effect without hardcoding or prototype inspection.
+    /// Builds a cache of reagent IDs that have ChangeBloodReagent effects.
+    /// This is called at startup for performance optimization.
     /// </summary>
-    private bool ShouldRestoreBlood(EntityUid uid, BloodstreamComponent bloodstream)
+    private void BuildBloodAffectingReagentsCache()
     {
-        // Simple and efficient: check if there's an active blood modification tracker
-        return !HasComp<BloodModificationTrackerComponent>(uid);
+        _bloodAffectingReagents.Clear();
+        
+        foreach (var reagentProto in _prototypeManager.EnumeratePrototypes<ReagentPrototype>())
+        {
+            // Check all metabolism effects for ChangeBloodReagent
+            foreach (var metabolism in reagentProto.Metabolisms.Values)
+            {
+                if (metabolism.Effects.Any(effect => effect is ChangeBloodReagent))
+                {
+                    _bloodAffectingReagents.Add(reagentProto.ID);
+                    break; // Found one, no need to check other metabolisms
+                }
+            }
+        }
     }
 
     /// <summary>
-    /// Decrements the blood modification tracker when a blood-changing effect ends.
-    /// This should be called when reagents with ChangeBloodReagent effects are metabolized away.
+    /// Determines if blood should be restored to its original reagent.
+    /// Dynamically checks if any blood-affecting reagents are present in the bloodstream.
+    /// This eliminates race conditions and manual tracking requirements.
     /// </summary>
+    private bool ShouldRestoreBlood(EntityUid uid, BloodstreamComponent bloodstream)
+    {
+        // Get the entity's chemical solution
+        if (!_solutionContainerSystem.ResolveSolution(uid, bloodstream.ChemicalSolutionName, 
+            ref bloodstream.ChemicalSolution, out var chemSolution))
+            return true; // No chemicals = safe to restore
+
+        // Check if any blood-affecting reagents are present in meaningful quantities
+        foreach (var (reagentId, quantity) in chemSolution.Contents)
+        {
+            if (quantity > FixedPoint2.Zero && _bloodAffectingReagents.Contains(reagentId.Prototype))
+                return false; // Found active blood-changing reagent
+        }
+        
+        return true; // No blood-affecting reagents found
+    }
+
+    /// <summary>
+    /// Legacy method for compatibility. No longer needed with dynamic blood restoration.
+    /// </summary>
+    [Obsolete("Use dynamic blood restoration instead")]
     public void DecrementBloodModificationTracker(EntityUid uid)
     {
-        if (TryComp<BloodModificationTrackerComponent>(uid, out var tracker))
-        {
-            tracker.ActiveEffects--;
-            
-            // Remove the component when no more active effects remain
-            if (tracker.ActiveEffects <= 0)
-            {
-                RemCompDeferred<BloodModificationTrackerComponent>(uid);
-            }
-        }
+        // Legacy compatibility - remove tracker component if it exists
+        if (HasComp<BloodModificationTrackerComponent>(uid))
+            RemCompDeferred<BloodModificationTrackerComponent>(uid);
     }
 
     private void OnComponentInit(Entity<BloodstreamComponent> entity, ref ComponentInit args)

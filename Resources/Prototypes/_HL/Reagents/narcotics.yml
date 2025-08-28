@@ -147,11 +147,6 @@
         conditions:
         - !type:ReagentThreshold
           min: 1
-      # Cleanup blood modification tracker when reagent is nearly gone
-      - !type:DecrementBloodModificationTracker
-        conditions:
-        - !type:ReagentThreshold
-          max: 0.01
       # Performance benefits
       - !type:MovespeedModifier
         walkSpeedModifier: 1.5
@@ -271,7 +266,7 @@
         - !type:ReagentThreshold
           min: 3
         reagent: WidowsCurse
-        amount: 0.5
+        amount: 1.0
 
 # Stage 3B: Ruin - Failed synthesis (extremely nasty poison)
 - type: reagent
@@ -389,17 +384,12 @@
     Poison:
       metabolismRate: 0.02
       effects:
-      # Blood corruption effect
+      # Blood corruption effect - addiction keeps blood black
       - !type:ChangeBloodReagent
         bloodReagent: BloodBlack
         conditions:
         - !type:ReagentThreshold
           min: 1
-      # Cleanup blood modification tracker when reagent is nearly gone
-      - !type:DecrementBloodModificationTracker
-        conditions:
-        - !type:ReagentThreshold
-          max: 0.01
       # Enhanced withdrawal messages
       - !type:PopupMessage
         type: Local
@@ -465,3 +455,79 @@
           types:
             Asphyxiation: 1
             Poison: 0.5
+
+# Specialized Widow Treatment Chemical
+- type: reagent
+  id: AbyssalCleansingSerum
+  name: reagent-name-abyssal-cleansing-serum
+  group: Medicine
+  desc: reagent-desc-abyssal-cleansing-serum
+  physicalDesc: reagent-physical-desc-shimmering
+  flavor: medicine
+  color: "#2d0a2d"
+  recognizable: true
+  metabolisms:
+    Medicine:
+      metabolismRate: 0.05
+      effects:
+      # Accelerated WidowsCurse removal
+      - !type:AdjustReagent
+        reagent: WidowsCurse
+        amount: -0.3
+      # Blood purification - restore to original blood type
+      - !type:RestoreBloodReagent
+        conditions:
+        - !type:ReagentThreshold
+          min: 1
+      # Remove withdrawal blindness
+      - !type:GenericStatusEffect
+        key: TemporaryBlindness
+        component: TemporaryBlindness
+        time: 1
+        type: Remove
+      # Improve withdrawal movement penalties
+      - !type:MovespeedModifier
+        walkSpeedModifier: 1.1
+        sprintSpeedModifier: 1.2
+        conditions:
+        - !type:ReagentThreshold
+          min: 1
+      # Prevent new WidowsCurse accumulation temporarily
+      - !type:AdjustReagent
+        conditions:
+        - !type:ReagentThreshold
+          reagent: Widow
+          min: 1
+        reagent: WidowsCurse
+        amount: -0.5
+      # Purification trauma - burning out the corruption causes physical stress
+      - !type:HealthChange
+        conditions:
+        - !type:ReagentThreshold
+          min: 1
+        damage:
+          types:
+            Heat: 4.0
+            Poison: 2.0
+      # Temperature spike from purification process
+      - !type:AdjustTemperature
+        conditions:
+        - !type:ReagentThreshold
+          min: 1
+        amount: 1200
+      # Treatment progress messages
+      - !type:PopupMessage
+        type: Local
+        visualType: Medium
+        messages:
+          - "abyssal-cleansing-effect-purifying"
+          - "abyssal-cleansing-effect-clearing"
+          - "abyssal-cleansing-effect-stabilizing"
+        probability: 0.15
+      # Paralysis during treatment - patient must remain still for purification
+      - !type:Paralyze
+        conditions:
+        - !type:ReagentThreshold
+          min: 1
+        probability: 1.0
+        paralyzeTime: 2

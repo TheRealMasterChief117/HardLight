@@ -22,16 +22,15 @@ using Content.Server.Maps;
 using Content.Server.Mind;
 using Content.Shared.Mind;
 using Robust.Shared.EntitySerialization.Systems;
+using Robust.Shared.Map;
 using Content.Shared.Radio;
 using System.Linq;
 using Content.Server.Administration.Logs;
 using Content.Shared.Mobs.Components;
 using Content.Shared.Mobs.Systems;
-using Content.Server.Maps;
 using Content.Shared.StationRecords;
 using Content.Server.Chat.Systems;
 using Content.Server.Chat.Managers;
-using Content.Server.Mind;
 using Content.Server.Preferences.Managers;
 using Content.Server.StationRecords;
 using Content.Server.StationRecords.Systems;
@@ -72,6 +71,7 @@ public sealed partial class ShipyardSystem : SharedShipyardSystem
     [Dependency] private readonly IChatManager _chatManager = default!;
     [Dependency] private readonly MindSystem _mind = default!;
     [Dependency] private readonly ShuttleRecordsSystem _shuttleRecordsSystem = default!;
+    [Dependency] private readonly IMapManager _mapManager = default!;
 
     private static readonly Regex DeedRegex = new(@"\s*\([^()]*\)");
 
@@ -440,11 +440,14 @@ public sealed partial class ShipyardSystem : SharedShipyardSystem
                 // Write YAML data to a temporary file
                 if (await gridSaveSystem.WriteYamlToUserData(tempFileName, args.YamlData))
                 {
+                    // Create a blank uninitialized map for loading, just like the save system does
+                    var tempMapId = _mapManager.CreateMap();
+
                     // Load the grid from the temporary file using MapLoaderSystem
                     var mapLoader = EntityManager.System<MapLoaderSystem>();
-                    if (mapLoader.TryLoadGrid(null, new ResPath($"/UserData/{tempFileName}"), out var loadedGrid))
+                    if (mapLoader.TryLoadGrid(tempMapId, new ResPath($"/UserData/{tempFileName}"), out var loadedGrid))
                     {
-                        // Post-process the loaded ship
+                        // Post-process the loaded ship (this will teleport it to the target location)
                         await gridSaveSystem.PostProcessLoadedShip(loadedGrid.Value, targetId, playerSession.UserId.ToString());
 
                         // Note: ConsolePopup can't be called from async context, would need proper callback

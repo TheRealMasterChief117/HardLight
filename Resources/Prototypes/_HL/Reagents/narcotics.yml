@@ -1,13 +1,13 @@
-# Widow Elite Narcotic System
-# Three-stage synthesis: WidowsBite -> WidowsVenom -> Widow (or WidowsRuin if failed)
+# Widow Narcotic System
+# Three-stage synthesis: Bite -> Venom -> Widow (or Ruin if failed)
 # With custom addiction system: WidowsCurse
 
-# Stage 1: WidowsBite - Safe gateway precursor
+# Stage 1: Bite - Safe gateway precursor
 - type: reagent
-  id: WidowsBite
-  name: reagent-name-widows-bite
+  id: Bite
+  name: reagent-name-bite
   group: Narcotics
-  desc: reagent-desc-widows-bite
+  desc: reagent-desc-bite
   physicalDesc: reagent-physical-desc-viscous
   flavor: bitter
   color: "#4a0e4e"
@@ -40,19 +40,19 @@
         type: Local
         visualType: Medium
         messages:
-          - "widows-bite-effect-calm"
-          - "widows-bite-effect-focused"
-          - "widows-bite-effect-alert"
-          - "widows-bite-effect-energy"
-          - "widows-bite-effect-hunger"
+          - "bite-effect-calm"
+          - "bite-effect-focused"
+          - "bite-effect-alert"
+          - "bite-effect-energy"
+          - "bite-effect-hunger"
         probability: 0.2
 
-# Stage 2: WidowsVenom - Dangerous combat precursor
+# Stage 2: Venom - Dangerous combat precursor
 - type: reagent
-  id: WidowsVenom
-  name: reagent-name-widows-venom
+  id: Venom
+  name: reagent-name-venom
   group: Narcotics
-  desc: reagent-desc-widows-venom
+  desc: reagent-desc-venom
   physicalDesc: reagent-physical-desc-volatile
   flavor: metallic
   color: "#1a3d1a"
@@ -90,12 +90,12 @@
         type: Local
         visualType: Large
         messages:
-          - "widows-venom-effect-power"
-          - "widows-venom-effect-invincible"
-          - "widows-venom-effect-enhanced"
-          - "widows-venom-effect-bloodlust"
-          - "widows-venom-effect-rage"
-          - "widows-venom-effect-lethal"
+          - "venom-effect-power"
+          - "venom-effect-invincible"
+          - "venom-effect-enhanced"
+          - "venom-effect-bloodlust"
+          - "venom-effect-rage"
+          - "venom-effect-lethal"
         probability: 0.25
       - !type:GenericStatusEffect
         key: SeeingRainbows
@@ -127,7 +127,7 @@
             Poison: 2
             Asphyxiation: 1
 
-# Stage 3A: Widow - Elite final product (successful synthesis)
+# Stage 3A: Widow - Final product (successful synthesis)
 - type: reagent
   id: Widow
   name: reagent-name-widow
@@ -152,7 +152,7 @@
         conditions:
         - !type:ReagentThreshold
           max: 0.01
-      # Elite performance benefits
+      # Performance benefits
       - !type:MovespeedModifier
         walkSpeedModifier: 1.5
         sprintSpeedModifier: 1.5
@@ -262,7 +262,7 @@
         - !type:ReagentThreshold
           min: 23
         amount: -2000
-      # Elite addiction system
+      # Addiction system
       - !type:AdjustReagent
         conditions:
         - !type:ReagentThreshold
@@ -273,12 +273,12 @@
         reagent: WidowsCurse
         amount: 3.5
 
-# Stage 3B: WidowsRuin - Failed synthesis (extremely nasty poison)
+# Stage 3B: Ruin - Failed synthesis (extremely nasty poison)
 - type: reagent
-  id: WidowsRuin
-  name: reagent-name-widows-ruin
+  id: Ruin
+  name: reagent-name-ruin
   group: Toxins
-  desc: reagent-desc-widows-ruin
+  desc: reagent-desc-ruin
   physicalDesc: reagent-physical-desc-putrid
   flavor: horrible
   color: "#1a0d1a"
@@ -292,16 +292,16 @@
         type: Local
         visualType: LargeCaution
         messages:
-          - "widows-ruin-effect-burning"
-          - "widows-ruin-effect-agony"  
-          - "widows-ruin-effect-regret"
-          - "widows-ruin-effect-freezing"
-          - "widows-ruin-effect-confusion"
-          - "widows-ruin-effect-nausea"
-          - "widows-ruin-effect-corruption"
-          - "widows-ruin-effect-madness"
-          - "widows-ruin-effect-void"
-          - "widows-ruin-effect-twisted"
+          - "ruin-effect-burning"
+          - "ruin-effect-agony"  
+          - "ruin-effect-regret"
+          - "ruin-effect-freezing"
+          - "ruin-effect-confusion"
+          - "ruin-effect-nausea"
+          - "ruin-effect-corruption"
+          - "ruin-effect-madness"
+          - "ruin-effect-void"
+          - "ruin-effect-twisted"
         probability: 0.3
       # Base toxic effects from failed synthesis
       - !type:HealthChange
@@ -323,7 +323,7 @@
       # Corrupted Phalanximine - severe nausea instead of healing
       - !type:ChemVomit
         probability: 0.4
-      # Corrupted Widow's Venom - uncontrolled jitters instead of enhancement
+      # Corrupted Venom - uncontrolled jitters instead of enhancement
       - !type:Jitter
         time: 15
       # Progressive damage (2u+)
@@ -375,7 +375,7 @@
         probability: 0.25
         paralyzeTime: 8
 
-# Elite Addiction Chemical: WidowsCurse
+# Addiction Chemical: WidowsCurse
 - type: reagent
   id: WidowsCurse
   name: reagent-name-widows-curse
@@ -405,11 +405,11 @@
         type: Local
         visualType: LargeCaution
         messages:
-          - "widows-curse-withdrawal-1"
-          - "widows-curse-withdrawal-2"
-          - "widows-curse-withdrawal-3"
-          - "widows-curse-withdrawal-4"
-          - "widows-curse-withdrawal-5"
+          - "curse-withdrawal-1"
+          - "curse-withdrawal-2"
+          - "curse-withdrawal-3"
+          - "curse-withdrawal-4"
+          - "curse-withdrawal-5"
         probability: 0.22
         conditions:
         - !type:ReagentThreshold

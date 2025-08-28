@@ -1,9 +1,9 @@
-# Widow Elite Narcotic Synthesis Reactions
+# Widow Narcotic Synthesis Reactions
 # Three-stage synthesis with cryostasis beaker requirement for final product
 
-# Stage 1: WidowsBite synthesis (Safe gateway)
+# Stage 1: Bite synthesis (Safe gateway)
 - type: reaction
-  id: WidowsBite
+  id: Bite
   minTemp: 350
   impact: Medium
   reactants:
@@ -14,15 +14,15 @@
     Epinephrine:
       amount: 1
   products:
-    WidowsBite: 2
+    Bite: 2
 
-# Stage 2: WidowsVenom synthesis (Dangerous precursor)
+# Stage 2: Venom synthesis (Dangerous precursor)
 - type: reaction
-  id: WidowsVenom
+  id: Venom
   minTemp: 370
   impact: Medium
   reactants:
-    WidowsBite:
+    Bite:
       amount: 2
     Grit:
       amount: 2
@@ -31,7 +31,7 @@
     Phenol:
       amount: 1
   products:
-    WidowsVenom: 4
+    Venom: 4
 
 # Stage 3A: Widow synthesis (Elite product - requires cryostasis beaker preparation)
 # NOTE: Pre-mix components in cryostasis beaker, then transfer to cold vessel for reaction
@@ -40,7 +40,7 @@
   maxTemp: 250
   impact: High
   reactants:
-    WidowsVenom:
+    Venom:
       amount: 2
     AbyssalBlood:
       amount: 1
@@ -53,13 +53,13 @@
   products:
     Widow: 3
 
-# Stage 3B: WidowsRuin synthesis (Failed attempt - without cryostasis beaker)
+# Stage 3B: Ruin synthesis (Failed attempt - without cryostasis beaker)
 - type: reaction
-  id: WidowsRuin
+  id: Ruin
   minTemp: 250
   impact: High
   reactants:
-    WidowsVenom:
+    Venom:
       amount: 2
     AbyssalBlood:
       amount: 1
@@ -70,4 +70,4 @@
     Leporazine:
       amount: 1
   products:
-    WidowsRuin: 3
+    Ruin: 3

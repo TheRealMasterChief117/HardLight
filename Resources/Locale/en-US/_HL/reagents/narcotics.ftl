@@ -1,88 +1,88 @@
-# Widow Elite Narcotic System - Localization Strings
+# Widow Narcotic System - Localization Strings
 
 ## Reagent Names and Descriptions
 
-### WidowsBite (Stage 1)
-reagent-name-widows-bite = Widow's Bite
-reagent-desc-widows-bite = A dark purple precursor chemical with mild stimulant properties. The first step in a dangerous synthesis.
+### Bite (Stage 1)
+reagent-name-bite = Bite
+reagent-desc-bite = A dark purple precursor chemical with mild stimulant properties. The first step in a dangerous synthesis.
 
-### WidowsVenom (Stage 2) 
-reagent-name-widows-venom = Widow's Venom
-reagent-desc-widows-venom = A toxic green-black liquid with potent combat enhancing properties. Highly unstable and dangerous.
+### Venom (Stage 2) 
+reagent-name-venom = Venom
+reagent-desc-venom = A toxic green-black liquid with potent combat enhancing properties. Highly unstable and dangerous.
 
 ### Widow (Final Elite Product)
 reagent-name-widow = Widow
-reagent-desc-widow = An inky black liquid that seems to absorb light. The most dangerous and powerful narcotic known to science.
+reagent-desc-widow = An inky black liquid that seems to absorb light. The most dangerous and powerful narcotic known to science, infused with abyssal power.
 
-### WidowsRuin (Failed Synthesis)
-reagent-name-widows-ruin = Widow's Ruin
-reagent-desc-widows-ruin = A putrid dark sludge created from a failed synthesis attempt. Extremely toxic and corrosive to organic tissue.
+### Ruin (Failed Synthesis)
+reagent-name-ruin = Ruin
+reagent-desc-ruin = A putrid dark sludge created from a failed synthesis attempt. Extremely toxic and corrosive to organic tissue.
 
-### WidowsCurse (Elite Addiction)
+### WidowsCurse (Addiction)
 reagent-name-widows-curse = Widow's Curse
 reagent-desc-widows-curse = The biological aftermath of Widow use. A dark addiction that consumes both body and mind.
 
 ## Effect Messages
 
-### WidowsBite Effects (Stage 1 - Gateway to Darkness)
-widows-bite-effect-calm = You feel eerily calm.
-widows-bite-effect-focused = Your mind sharpens with clarity.
-widows-bite-effect-alert = Your nerves tingle dangerously.
-widows-bite-effect-energy = Dark energy flows through you.
-widows-bite-effect-hunger = Something stirs within you.
+### Bite Effects (Stage 1)
+bite-effect-calm = You feel calm.
+bite-effect-focused = Your mind feels clear.
+bite-effect-alert = Your nerves tingle.
+bite-effect-energy = Energy flows through you.
+bite-effect-hunger = You feel restless.
 
-### WidowsVenom Effects (Stage 2 - Violent Enhancement)  
-widows-venom-effect-power = Violent power surges through you!
-widows-venom-effect-invincible = You feel unstoppable and merciless!
-widows-venom-effect-enhanced = Your body transcends human limits!
-widows-venom-effect-bloodlust = Predatory hunger overwhelms you!
-widows-venom-effect-rage = Controlled violence burns within!
-widows-venom-effect-lethal = Every movement becomes a weapon.
+### Venom Effects (Stage 2)  
+venom-effect-power = Power surges through you!
+venom-effect-invincible = You feel unstoppable!
+venom-effect-enhanced = Your body feels enhanced!
+venom-effect-bloodlust = You feel predatory.
+venom-effect-rage = Violence burns within you.
+venom-effect-lethal = Your reflexes sharpen.
 
-### Widow Effects (Stage 3 - Abyssal Combat Enhancement)
-widow-effect-predator = You can smell fear radiating from everyone.
-widow-effect-coldblood = Abyssal ice flows through your veins.
-widow-effect-hunter = Your limbs move with inhuman precision.
-widow-effect-abyssal = The abyss whispers killing secrets.
-widow-effect-void = Reality bends around your darkened form.
-widow-effect-darkness = You become one with the shadows.
-widow-effect-apex = The void has made you a perfect killer.
-widow-effect-wraith = Your blood turns to liquid darkness.
-widow-effect-demon = Something inhuman stirs within you.
+### Widow Effects (Stage 3)
+widow-effect-predator = You sense everything around you.
+widow-effect-coldblood = Cold darkness flows through your veins.
+widow-effect-hunter = Your movements become precise.
+widow-effect-abyssal = The abyss whispers to you.
+widow-effect-void = Reality feels distant.
+widow-effect-darkness = Shadows seem to bend toward you.
+widow-effect-apex = You feel perfectly focused.
+widow-effect-wraith = Your blood feels cold.
+widow-effect-demon = Something powerful stirs within you.
 
-### Widow Overdose Effects (Abyssal Psychosis)
-widow-overdose-psychosis-1 = The ABYSS SHATTERS reality - fragments show SCREAMING SOULS!
-widow-overdose-psychosis-2 = Abyssal apparitions BLEED from the walls!
-widow-overdose-psychosis-3 = The void splits you into fragments DEMANDING SACRIFICE!
-widow-overdose-hallucination-1 = Abyssal claws tear from shadows seeking your throat!
-widow-overdose-hallucination-2 = The floor cracks open revealing the BURNING ABYSS!
-widow-overdose-hallucination-3 = Everything becomes void-touched weapons aimed at YOU!
-widow-overdose-abyssal-1 = The darkness FLOWS through your veins like poison!
-widow-overdose-abyssal-2 = Abyssal whispers SCREAM kill commands in your mind!
+### Widow Overdose Effects
+widow-overdose-psychosis-1 = Reality fragments before your eyes!
+widow-overdose-psychosis-2 = Dark shapes bleed from the walls!
+widow-overdose-psychosis-3 = The void splits your mind!
+widow-overdose-hallucination-1 = Shadows reach for your throat!
+widow-overdose-hallucination-2 = The floor cracks open beneath you!
+widow-overdose-hallucination-3 = Everything becomes a weapon!
+widow-overdose-abyssal-1 = Darkness burns through your veins!
+widow-overdose-abyssal-2 = Abyssal whispers flood your mind!
 
-### WidowsRuin Effects (Abyssal Corruption)
-widows-ruin-effect-burning = Corrupted fire burns through your veins!
-widows-ruin-effect-agony = Every cell screams as darkness invades!
-widows-ruin-effect-regret = The void mocks your failed ambition.
-widows-ruin-effect-freezing = Abyssal cold spreads from your core!
-widows-ruin-effect-confusion = Reality fractures into dark fragments!
-widows-ruin-effect-nausea = Your body rejects the void's poison!
-widows-ruin-effect-corruption = The abyss devours you from within.
-widows-ruin-effect-madness = Darkness claws at your sanity.
-widows-ruin-effect-void = The failed void burns like acid.
-widows-ruin-effect-twisted = Your flesh writhes with corruption.
+### Ruin Effects
+ruin-effect-burning = Fire burns through your veins!
+ruin-effect-agony = Every cell screams in pain!
+ruin-effect-regret = You feel overwhelming regret.
+ruin-effect-freezing = Cold spreads from your core!
+ruin-effect-confusion = Reality fractures around you!
+ruin-effect-nausea = Your body rejects the poison!
+ruin-effect-corruption = Corruption spreads through you.
+ruin-effect-madness = Your mind feels fractured.
+ruin-effect-void = The failed synthesis burns.
+ruin-effect-twisted = Your body feels wrong.
 
-### WidowsCurse Withdrawal Effects (Abyssal Addiction)
-widows-curse-withdrawal-1 = Your body convulses, craving darkness.
-widows-curse-withdrawal-2 = The void has abandoned you.
-widows-curse-withdrawal-3 = Every heartbeat echoes with emptiness.
-widows-curse-withdrawal-4 = You would kill for the abyss's embrace.
-widows-curse-withdrawal-5 = The darkness calls from beyond reality.
-widows-curse-withdrawal-6 = Reality feels hollow without the void.
-widows-curse-withdrawal-7 = Your corrupted blood burns with need.
-widows-curse-withdrawal-8 = Abyssal withdrawal tears at your soul.
-widows-curse-withdrawal-9 = The void's absence is agony incarnate.
-widows-curse-withdrawal-10 = You feel the abyss slipping away forever.
+### WidowsCurse Withdrawal Effects
+curse-withdrawal-1 = Your body convulses with need.
+curse-withdrawal-2 = You feel abandoned by darkness.
+curse-withdrawal-3 = Every heartbeat feels empty.
+curse-withdrawal-4 = You crave the abyss desperately.
+curse-withdrawal-5 = Darkness calls to you.
+curse-withdrawal-6 = Reality feels hollow.
+curse-withdrawal-7 = Your blood burns with need.
+curse-withdrawal-8 = Withdrawal tears at you.
+curse-withdrawal-9 = The absence is agony.
+curse-withdrawal-10 = You feel it slipping away.
 
 ## Black Blood
 reagent-name-black-blood = black blood

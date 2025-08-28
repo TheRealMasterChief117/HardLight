@@ -30,7 +30,7 @@
       prototype: Avali
       requiredLegs: 2
     - type: Inventory
-      speciesId: avali
+      speciesId: Avali
       displacements:
         jumpsuit:
           sizeMaps:

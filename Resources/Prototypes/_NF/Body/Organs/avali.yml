@@ -50,10 +50,8 @@
   id: OrganAvaliKidneys
   parent: OrganHumanKidneys
   categories: [ HideSpawnMenu ]
-#Placeholder until sprited
 
 - type: entity
   id: OrganAvaliLungs
   parent: OrganHumanLungs
   categories: [ HideSpawnMenu ]
-#Placeholder until sprited

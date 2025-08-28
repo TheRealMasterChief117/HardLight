@@ -118,7 +118,6 @@ public sealed partial class ShipyardSystem : SharedShipyardSystem
     {
         if (!_enabled)
             return;
-        InitializeConsole();
     }
 
     private void OnRoundRestart(RoundRestartCleanupEvent ev)

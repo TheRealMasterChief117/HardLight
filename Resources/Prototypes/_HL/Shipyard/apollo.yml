@@ -11,8 +11,8 @@
 - type: vessel
   id: Apollo
   parent: BaseVessel
-  name: THI Apollo
-  description: A medium, high-performance armoured medevac and search and rescue shuttle, with an armoury and frontal boarding ramp. Manufactured by Tennosai Heavy Industries.
+  name: ID Apollo
+  description: A medium, high-performance armoured medevac and search and rescue shuttle, with an armoury and frontal boarding ramp. Manufactured by Interdyne for the civilian market.
   price: 115000 # ~91000$ on mapinit + 25% markup
   category: Medium
   group: Medical

@@ -1,6 +1,7 @@
 using Content.Server.Access.Systems;
 using Content.Server.Popups;
 using Content.Server.Radio.EntitySystems;
+using Content.Server.Shuttles.Systems;
 using Content.Server._NF.Bank;
 using Content.Server._NF.Shipyard.Components;
 using Content.Server._NF.ShuttleRecords;
@@ -429,47 +430,29 @@ public sealed partial class ShipyardSystem : SharedShipyardSystem
             return;
         }
 
-        // Use ShipyardGridSaveSystem to load the ship from YAML data
-        var gridSaveSystem = EntityManager.System<ShipyardGridSaveSystem>();
+        // Use ShipSerializationSystem to load the ship from YAML data directly
+        var shipSerializationSystem = EntityManager.System<ShipSerializationSystem>();
 
-        // Create a temporary file with the YAML data and load it
-        var tempFileName = $"temp_load_{DateTime.UtcNow.Ticks}.yml";
         _ = Task.Run(async () =>
         {
             try
             {
-                // Write YAML data to a temporary file
-                if (await gridSaveSystem.WriteYamlToUserData(tempFileName, args.YamlData))
-                {
-                    // Create a blank uninitialized map for loading, just like the save system does
-                    var tempMapId = _mapManager.CreateMap();
+                // Deserialize the ship data from YAML string
+                var shipGridData = shipSerializationSystem.DeserializeShipGridDataFromYaml(args.YamlData, playerSession.UserId);
+                
+                // Get the target location where the ship should spawn
+                var targetTransform = Transform(targetId);
+                var targetMapId = targetTransform.MapID;
+                var targetPosition = targetTransform.WorldPosition;
 
-                    // Load the grid from the temporary file using MapLoaderSystem
-                    var mapLoader = EntityManager.System<MapLoaderSystem>();
-                    if (mapLoader.TryLoadGrid(tempMapId, new ResPath($"/UserData/{tempFileName}"), out var loadedGrid))
-                    {
-                        // Post-process the loaded ship (this will teleport it to the target location)
-                        await gridSaveSystem.PostProcessLoadedShip(loadedGrid.Value, targetId, playerSession.UserId.ToString());
+                // Reconstruct the ship on the target map at the target position
+                var loadedGridUid = shipSerializationSystem.ReconstructShipOnMap(shipGridData, targetMapId, targetPosition);
 
-                        // Note: ConsolePopup can't be called from async context, would need proper callback
-                        _sawmill.Info("Ship loaded successfully for player " + playerSession.UserId);
-                    }
-                    else
-                    {
-                        _sawmill.Error("Failed to load ship from YAML data for player " + playerSession.UserId);
-                    }
-
-                    // Clean up temporary file
-                    await gridSaveSystem.DeleteTempFile(tempFileName);
-                }
-                else
-                {
-                    _sawmill.Error("Failed to create temporary file for ship loading for player " + playerSession.UserId);
-                }
+                _sawmill.Info($"Ship loaded successfully for player {playerSession.UserId} at {targetPosition}");
             }
             catch (Exception ex)
             {
-                _sawmill.Error($"Error loading ship for player {playerSession.UserId}: {ex.Message}");
+                _sawmill.Error($"Failed to load ship from YAML data for player {playerSession.UserId}: {ex}");
             }
         });
     }

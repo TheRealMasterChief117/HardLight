@@ -1,3 +1,4 @@
+using System.Linq;
 using Content.Server.Body.Components;
 using Content.Server.EntityEffects.Effects;
 using Content.Server.Fluids.EntitySystems;
@@ -205,9 +206,9 @@ public sealed class BloodstreamSystem : EntitySystem
         foreach (var reagentProto in _prototypeManager.EnumeratePrototypes<ReagentPrototype>())
         {
             // Check all metabolism effects for ChangeBloodReagent
-            foreach (var metabolism in reagentProto.Metabolisms.Values)
+            foreach (var metabolism in reagentProto.Metabolisms?.Values ?? [])
             {
-                if (metabolism.Effects.Any(effect => effect is ChangeBloodReagent))
+                if (metabolism.Effects?.Any(effect => effect is ChangeBloodReagent) == true)
                 {
                     _bloodAffectingReagents.Add(reagentProto.ID);
                     break; // Found one, no need to check other metabolisms
@@ -582,5 +583,18 @@ public sealed class BloodstreamSystem : EntitySystem
         bloodData.Add(dnaData);
 
         return bloodData;
+    }
+
+    /// <summary>
+    /// Clears the original blood reagent stored in the bloodstream component.
+    /// Used when blood has been restored to its original state.
+    /// </summary>
+    public void ClearOriginalBloodReagent(EntityUid uid, BloodstreamComponent? bloodstream = null)
+    {
+        if (!Resolve(uid, ref bloodstream))
+            return;
+
+        bloodstream.OriginalBloodReagent = null;
+        // No need to dirty - BloodstreamComponent is server-only and not networked
     }
 }

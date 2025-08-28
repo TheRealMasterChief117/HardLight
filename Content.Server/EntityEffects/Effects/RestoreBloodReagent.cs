@@ -25,8 +25,8 @@ public sealed partial class RestoreBloodReagent : EntityEffect
                 var sys = args.EntityManager.System<BloodstreamSystem>();
                 sys.ChangeBloodReagent(args.TargetEntity, bloodstream.OriginalBloodReagent.Value, bloodstream);
                 
-                // Clear the original blood reagent since we've restored it
-                bloodstream.OriginalBloodReagent = null;
+                // Use system method to clear the original blood reagent
+                sys.ClearOriginalBloodReagent(args.TargetEntity, bloodstream);
                 
                 // Remove any blood modification tracker since we're actively purifying
                 if (args.EntityManager.TryGetComponent<BloodModificationTrackerComponent>(args.TargetEntity, out var tracker))

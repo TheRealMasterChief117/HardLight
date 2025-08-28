@@ -98,8 +98,8 @@
           - "venom-effect-lethal"
         probability: 0.25
       - !type:GenericStatusEffect
-        key: SeeingRainbows
-        component: SeeingRainbows
+        key: AbyssalWhispers
+        component: AbyssalWhispers
         type: Add
         time: 8
         refresh: false
@@ -267,6 +267,18 @@
           min: 3
         reagent: WidowsCurse
         amount: 1.0
+      # Abyssal whispers - atmospheric audio effect
+      - !type:PopupMessage
+        type: Local
+        visualType: Small
+        messages:
+          - "widow-whisper-1"
+          - "widow-whisper-2"
+          - "widow-whisper-3"
+        probability: 0.02
+      - !type:EmitSoundEffect
+        sound: /Audio/_NF/Effects/bloodcult/whispers.ogg
+        probability: 0.05
 
 # Stage 3B: Ruin - Failed synthesis (extremely nasty poison)
 - type: reagent
@@ -382,7 +394,7 @@
   recognizable: false
   metabolisms:
     Poison:
-      metabolismRate: 0.01
+      metabolismRate: 0.05
       effects:
       # Blood corruption effect - addiction keeps blood black
       - !type:ChangeBloodReagent
@@ -453,8 +465,8 @@
           max: 0.01
         damage:
           types:
-            Asphyxiation: 1
-            Poison: 0.5
+            Asphyxiation: 0.5
+            Poison: 0.25
 
 # Specialized Widow Treatment Chemical
 - type: reagent

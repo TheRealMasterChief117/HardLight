@@ -50,6 +50,11 @@ widow-effect-apex = You feel perfectly focused.
 widow-effect-wraith = Your blood feels cold.
 widow-effect-demon = Something powerful stirs within you.
 
+### Widow Whispers (Subtle Audio Cues)
+widow-whisper-1 = You hear distant whispers.
+widow-whisper-2 = Something calls from the darkness.
+widow-whisper-3 = The abyss murmurs softly.
+
 ### Widow Overdose Effects
 widow-overdose-psychosis-1 = Reality fragments before your eyes!
 widow-overdose-psychosis-2 = Dark shapes bleed from the walls!

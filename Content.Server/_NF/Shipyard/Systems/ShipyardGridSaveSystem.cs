@@ -1,6 +1,7 @@
 using Content.Server._NF.Shipyard.Components;
 using Content.Shared._NF.Shipyard.Components;
 using Content.Shared._NF.Shipyard.Events;
+using Content.Shared.Shuttles.Save; // For SendShipSaveDataClientMessage
 using Content.Server.Maps;
 using Content.Server.Atmos.Components;
 using Content.Server.Atmos.EntitySystems;
@@ -108,7 +109,7 @@ public sealed class ShipyardGridSaveSystem : EntitySystem
         // Save the ship using our new grid-based system
         _ = Task.Run(async () =>
         {
-            var success = await TrySaveGridAsShip(shuttleUid.Value, deed.ShuttleName ?? "Unknown_Ship", playerSession.UserId.ToString());
+            var success = await TrySaveGridAsShip(shuttleUid.Value, deed.ShuttleName ?? "Unknown_Ship", playerSession.UserId.ToString(), playerSession);
 
             if (success)
             {
@@ -126,7 +127,7 @@ public sealed class ShipyardGridSaveSystem : EntitySystem
     /// <summary>
     /// Saves a grid to a YAML file using MapLoaderSystem, after cleaning it of problematic components.
     /// </summary>
-    public async Task<bool> TrySaveGridAsShip(EntityUid gridUid, string shipName, string playerUserId)
+    public async Task<bool> TrySaveGridAsShip(EntityUid gridUid, string shipName, string playerUserId, ICommonSession playerSession)
     {
         if (!_entityManager.HasComponent<MapGridComponent>(gridUid))
         {
@@ -153,22 +154,39 @@ public sealed class ShipyardGridSaveSystem : EntitySystem
 
             _sawmill.Info($"Successfully moved and cleaned grid to {tempGridUid}");
 
-            // Step 3: Save the grid using MapLoaderSystem
+            // Step 3: Save the grid using MapLoaderSystem to a temporary file
             var fileName = $"{shipName}.yml";
-            var filePath = new ResPath(fileName);
+            var tempFilePath = new ResPath("/") / "UserData" / fileName;
             _sawmill.Info($"Attempting to save grid as {fileName}");
 
-            var success = _mapLoader.TrySaveGrid(tempGridUid.Value, filePath);
+            bool success = _mapLoader.TrySaveGrid(tempGridUid.Value, tempFilePath);
 
             if (success)
             {
                 _sawmill.Info($"Successfully saved grid to {fileName}");
-                // Step 4: Move the file to the exports folder
-                await MoveToExportsFolder(fileName, playerUserId, shipName);
 
-                // Step 5: Delete the original grid
-                _entityManager.DeleteEntity(gridUid);
-                _sawmill.Info($"Deleted original grid {gridUid}");
+                // Step 4: Read the YAML file and send to client
+                try
+                {
+                    using var fileStream = _resourceManager.UserData.OpenRead(tempFilePath);
+                    using var reader = new StreamReader(fileStream);
+                    var yamlContent = await reader.ReadToEndAsync();
+
+                    // Send the YAML data to the client for local saving
+                    var saveMessage = new SendShipSaveDataClientMessage(shipName, yamlContent);
+                    RaiseNetworkEvent(saveMessage, playerSession);
+
+                    _sawmill.Info($"Sent ship data '{shipName}' to client {playerSession.Name} for local saving");
+
+                    // Clean up the temporary server file
+                    _resourceManager.UserData.Delete(tempFilePath);
+                    _sawmill.Info($"Deleted temporary server file {tempFilePath}");
+                }
+                catch (Exception ex)
+                {
+                    _sawmill.Error($"Failed to read/send YAML file: {ex}");
+                    success = false;
+                }
             }
             else
             {
@@ -187,8 +205,20 @@ public sealed class ShipyardGridSaveSystem : EntitySystem
             // Step 6: Clean up temporary resources
             if (tempMapId.HasValue)
             {
+                // Give systems time to finish processing before cleanup
+                await Task.Delay(100);
+
                 _mapManager.DeleteMap(tempMapId.Value);
                 _sawmill.Info($"Cleaned up temporary map {tempMapId}");
+            }
+
+            // Delete the original grid after all processing is complete
+            if (_entityManager.EntityExists(gridUid))
+            {
+                // Additional delay to ensure all systems finish processing
+                await Task.Delay(200);
+                _entityManager.DeleteEntity(gridUid);
+                _sawmill.Info($"Deleted original grid {gridUid}");
             }
         }
     }
@@ -249,6 +279,13 @@ public sealed class ShipyardGridSaveSystem : EntitySystem
         {
             try
             {
+                // Check if entity still exists before processing
+                if (!_entityManager.EntityExists(entity))
+                {
+                    _sawmill.Warning($"Entity {entity} no longer exists during cleanup, skipping");
+                    continue;
+                }
+
                 // Remove session-specific components that shouldn't be saved
                 if (_entityManager.RemoveComponent<ActorComponent>(entity))
                     componentsRemoved++;
@@ -286,110 +323,55 @@ public sealed class ShipyardGridSaveSystem : EntitySystem
     }
 
     /// <summary>
-    /// Moves the saved grid file to the exports folder for the player.
-    /// </summary>
-    private async Task MoveToExportsFolder(string fileName, string playerUserId, string shipName)
-    {
-        try
-        {
-            _sawmill.Info($"Attempting to move {fileName} to exports folder for player {playerUserId}");
-
-            // The file should have been saved to UserData by MapLoaderSystem
-            var userDataPath = new ResPath("/") / "UserData";
-            var sourcePath = userDataPath / fileName;
-
-            // Create exports directory structure: UserData/exports/[playerUserId]/
-            var exportsDir = userDataPath / "exports" / playerUserId;
-            var targetPath = exportsDir / fileName;
-
-            // Ensure the exports directory exists
-            try
-            {
-                _resourceManager.UserData.CreateDir(exportsDir);
-                _sawmill.Info($"Created exports directory: {exportsDir}");
-            }
-            catch (Exception ex)
-            {
-                _sawmill.Warning($"Could not create exports directory {exportsDir}: {ex.Message}");
-                return;
-            }
-
-            // Try to move the file
-            if (_resourceManager.UserData.Exists(sourcePath))
-            {
-                // Read the source file
-                using var sourceStream = _resourceManager.UserData.OpenRead(sourcePath);
-                using var reader = new StreamReader(sourceStream);
-                var content = await reader.ReadToEndAsync();
-
-                // Write to the target location
-                using var targetStream = _resourceManager.UserData.OpenWrite(targetPath);
-                using var writer = new StreamWriter(targetStream);
-                await writer.WriteAsync(content);
-
-                // Delete the source file
-                _resourceManager.UserData.Delete(sourcePath);
-
-                _sawmill.Info($"Successfully moved {fileName} to exports folder: {targetPath}");
-            }
-            else
-            {
-                _sawmill.Error($"Source file not found: {sourcePath}");
-            }
-        }
-        catch (Exception ex)
-        {
-            _sawmill.Error($"Failed to move file to exports folder: {ex}");
-        }
-    }
-
-    /// <summary>
-    /// Writes YAML data to a temporary file in UserData.
+    /// Writes YAML data to a temporary file in UserData for loading
     /// </summary>
     public async Task<bool> WriteYamlToUserData(string fileName, string yamlData)
     {
         try
         {
-            var userDataPath = new ResPath("/") / "UserData" / fileName;
+            var userDataPath = _resourceManager.UserData;
+            var filePath = userDataPath / fileName;
 
-            using var stream = _resourceManager.UserData.OpenWrite(userDataPath);
-            using var writer = new StreamWriter(stream);
+            await using var stream = userDataPath.OpenWrite(fileName);
+            await using var writer = new StreamWriter(stream);
             await writer.WriteAsync(yamlData);
 
-            _sawmill.Info($"Successfully wrote YAML data to {userDataPath}");
+            _sawmill.Info($"Temporary YAML file written: {filePath}");
             return true;
         }
         catch (Exception ex)
         {
-            _sawmill.Error($"Failed to write YAML data to file: {ex}");
+            _sawmill.Error($"Failed to write temporary YAML file {fileName}: {ex}");
             return false;
         }
     }
 
     /// <summary>
-    /// Post-processes a loaded ship by creating a deed and setting it up.
+    /// Post-processes a loaded ship by teleporting it to the target location and cleaning up references
     /// </summary>
-    public async Task PostProcessLoadedShip(EntityUid loadedGrid, EntityUid targetId, string playerUserId)
+    public async Task PostProcessLoadedShip(EntityUid gridEntity, EntityUid targetId, string playerUserId)
     {
         try
         {
-            // Move the grid to the main map (you may want to implement proper docking logic here)
-            var allMaps = _mapManager.GetAllMapIds();
-            if (allMaps.Any())
+            // Get the target shipyard position
+            if (!_entityManager.TryGetComponent<TransformComponent>(targetId, out var targetTransform))
             {
-                var mainMapId = allMaps.First();
-                var mainMapEnt = _mapManager.GetMapEntityIdOrThrow(mainMapId);
-                _transformSystem.SetCoordinates(loadedGrid, new EntityCoordinates(mainMapEnt, System.Numerics.Vector2.Zero));
+                _sawmill.Error($"Target {targetId} does not have a transform component");
+                return;
             }
 
-            // Create a deed for the loaded ship
-            var deed = _entityManager.EnsureComponent<ShuttleDeedComponent>(targetId);
-            deed.ShuttleUid = _entityManager.GetNetEntity(loadedGrid);
-            deed.ShuttleName = "Loaded Ship"; // You could extract this from YAML metadata
-            deed.ShuttleOwner = playerUserId;
-            deed.PurchasedWithVoucher = true; // Mark as loaded ship
+            // Get the grid's transform
+            if (!_entityManager.TryGetComponent<TransformComponent>(gridEntity, out var gridTransform))
+            {
+                _sawmill.Error($"Loaded grid {gridEntity} does not have a transform component");
+                return;
+            }
 
-            _sawmill.Info($"Created deed for loaded ship {loadedGrid} for player {playerUserId}");
+            // Teleport the grid to the target location
+            var targetCoords = targetTransform.Coordinates.Offset(new Vector2(0, 5)); // Offset to avoid overlapping
+            _transformSystem.SetCoordinates(gridEntity, targetCoords);
+
+            _sawmill.Info($"Ship {gridEntity} teleported to target location for player {playerUserId}");
         }
         catch (Exception ex)
         {
@@ -398,22 +380,24 @@ public sealed class ShipyardGridSaveSystem : EntitySystem
     }
 
     /// <summary>
-    /// Deletes a temporary file from UserData.
+    /// Deletes a temporary file from UserData
     /// </summary>
     public async Task DeleteTempFile(string fileName)
     {
         try
         {
-            var userDataPath = new ResPath("/") / "UserData" / fileName;
-            if (_resourceManager.UserData.Exists(userDataPath))
+            var userDataPath = _resourceManager.UserData;
+            var filePath = userDataPath / fileName;
+
+            if (userDataPath.Exists(fileName))
             {
-                _resourceManager.UserData.Delete(userDataPath);
-                _sawmill.Info($"Deleted temporary file: {userDataPath}");
+                userDataPath.Delete(fileName);
+                _sawmill.Info($"Temporary file deleted: {filePath}");
             }
         }
         catch (Exception ex)
         {
-            _sawmill.Error($"Failed to delete temporary file: {ex}");
+            _sawmill.Error($"Failed to delete temporary file {fileName}: {ex}");
         }
     }
 }

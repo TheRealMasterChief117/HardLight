@@ -75,6 +75,12 @@ public sealed partial class ShipyardSystem : SharedShipyardSystem
 
     private static readonly Regex DeedRegex = new(@"\s*\([^()]*\)");
 
+    private void InitializeConsole()
+    {
+        // Console initialization logic would go here
+        // This method was called during OnShipyardStartup
+    }
+
     private void OnPurchaseMessage(EntityUid shipyardConsoleUid, ShipyardConsoleComponent component, ShipyardConsolePurchaseMessage args)
     {
         if (args.Actor is not { Valid: true } player)

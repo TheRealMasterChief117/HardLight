@@ -13,9 +13,12 @@ using Content.Shared._NF.Shipyard.Components;
 using Content.Shared.Access.Systems;
 using Content.Shared.Access.Components;
 using Content.Shared.Ghost;
+using Content.Shared.Mind.Components;
 using Robust.Server.GameObjects;
 using Robust.Shared.Containers;
 using Robust.Shared.Prototypes;
+using Robust.Shared.Utility;
+using Content.Server.Maps;
 using Content.Shared.Radio;
 using System.Linq;
 using Content.Server.Administration.Logs;
@@ -35,6 +38,8 @@ using Content.Server.Shuttles.Components;
 using Content.Server._NF.Station.Components;
 using System.Text.RegularExpressions;
 using Content.Shared.UserInterface;
+using System;
+using System.Threading.Tasks;
 using Robust.Shared.Audio.Systems;
 using Content.Shared.Access;
 using Content.Shared._NF.Bank.BUI;
@@ -70,43 +75,6 @@ public sealed partial class ShipyardSystem : SharedShipyardSystem
     public void InitializeConsole()
     {
 
-    }
-
-    private void OnLoadMessage(EntityUid shipyardConsoleUid, ShipyardConsoleComponent component, ShipyardConsoleLoadMessage args)
-    {
-        if (args.Actor is not { Valid: true } player)
-            return;
-
-        if (component.TargetIdSlot.ContainerSlot?.ContainedEntity is not { Valid: true } targetId)
-        {
-            ConsolePopup(player, Loc.GetString("shipyard-console-no-idcard"));
-            PlayDenySound(player, shipyardConsoleUid, component);
-            return;
-        }
-
-        if (!HasComp<IdCardComponent>(targetId))
-        {
-            ConsolePopup(player, Loc.GetString("shipyard-console-invalid-idcard"));
-            PlayDenySound(player, shipyardConsoleUid, component);
-            return;
-        }
-
-        // Check if ID card already has a deed
-        if (HasComp<ShuttleDeedComponent>(targetId))
-        {
-            ConsolePopup(player, "ID card already has a ship deed!");
-            PlayDenySound(player, shipyardConsoleUid, component);
-            return;
-        }
-
-        // Get player session for the loading
-        if (!_player.TryGetSessionByEntity(player, out var playerSession))
-        {
-            return;
-        }
-
-        // Call the ship loading method directly with the specific console and ID card
-        LoadShipOnConsole(args.YamlData, playerSession, shipyardConsoleUid, targetId);
     }
 
     private void OnPurchaseMessage(EntityUid shipyardConsoleUid, ShipyardConsoleComponent component, ShipyardConsolePurchaseMessage args)
@@ -405,6 +373,98 @@ public sealed partial class ShipyardSystem : SharedShipyardSystem
 
         ConsolePopup(player, $"Ship {deed.ShuttleName} has been saved!");
         PlayConfirmSound(player, uid, component);
+    }
+
+    public void OnLoadMessage(EntityUid uid, ShipyardConsoleComponent component, ShipyardConsoleLoadMessage args)
+    {
+        if (args.Actor is not { Valid: true } player)
+            return;
+
+        if (component.TargetIdSlot.ContainerSlot?.ContainedEntity is not { Valid: true } targetId)
+        {
+            ConsolePopup(player, Loc.GetString("shipyard-console-no-idcard"));
+            PlayDenySound(player, uid, component);
+            return;
+        }
+
+        if (!TryComp<IdCardComponent>(targetId, out var idCard))
+        {
+            ConsolePopup(player, "Invalid ID card");
+            PlayDenySound(player, uid, component);
+            return;
+        }
+
+        // Check if the ID card already has a deed
+        if (HasComp<ShuttleDeedComponent>(targetId))
+        {
+            ConsolePopup(player, "ID card already has a ship deed");
+            PlayDenySound(player, uid, component);
+            return;
+        }
+
+        // Get player session for loading
+        if (!TryComp<MindContainerComponent>(player, out var mindContainerComp) || !mindContainerComp.HasMind)
+        {
+            ConsolePopup(player, "Unable to load ship - player mind not found");
+            PlayDenySound(player, uid, component);
+            return;
+        }
+
+        if (!TryComp<Mind.MindComponent>(mindContainerComp.Mind.Value, out var mindComp) || mindComp.UserId == null)
+        {
+            ConsolePopup(player, "Unable to load ship - player mind user not found");
+            PlayDenySound(player, uid, component);
+            return;
+        }
+
+        var playerSession = _player.GetSessionById(mindComp.UserId.Value);
+        if (playerSession == null)
+        {
+            ConsolePopup(player, "Unable to load ship - player session not found");
+            PlayDenySound(player, uid, component);
+            return;
+        }
+
+        // Use ShipyardGridSaveSystem to load the ship from YAML data
+        var gridSaveSystem = EntityManager.System<ShipyardGridSaveSystem>();
+
+        // Create a temporary file with the YAML data and load it
+        var tempFileName = $"temp_load_{DateTime.UtcNow.Ticks}.yml";
+        _ = Task.Run(async () =>
+        {
+            try
+            {
+                // Write YAML data to a temporary file
+                if (await gridSaveSystem.WriteYamlToUserData(tempFileName, args.YamlData))
+                {
+                    // Load the grid from the temporary file using MapLoaderSystem
+                    var mapLoader = EntityManager.System<MapLoaderSystem>();
+                    if (mapLoader.TryLoadGrid(null, new ResPath($"/UserData/{tempFileName}"), out var loadedGrid))
+                    {
+                        // Post-process the loaded ship
+                        await gridSaveSystem.PostProcessLoadedShip(loadedGrid.Value, targetId, playerSession.UserId.ToString());
+
+                        // Note: ConsolePopup can't be called from async context, would need proper callback
+                        _sawmill.Info("Ship loaded successfully for player " + playerSession.UserId);
+                    }
+                    else
+                    {
+                        _sawmill.Error("Failed to load ship from YAML data for player " + playerSession.UserId);
+                    }
+
+                    // Clean up temporary file
+                    await gridSaveSystem.DeleteTempFile(tempFileName);
+                }
+                else
+                {
+                    _sawmill.Error("Failed to create temporary file for ship loading for player " + playerSession.UserId);
+                }
+            }
+            catch (Exception ex)
+            {
+                _sawmill.Error($"Error loading ship for player {playerSession.UserId}: {ex.Message}");
+            }
+        });
     }
 
     public void OnSellMessage(EntityUid uid, ShipyardConsoleComponent component, ShipyardConsoleSellMessage args)

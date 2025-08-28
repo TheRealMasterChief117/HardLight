@@ -13,7 +13,7 @@
   parent: BaseVessel
   name: THI Apollo
   description: A medium, high-performance armoured medevac and search and rescue shuttle, with an armoury and frontal boarding ramp. Manufactured by Tennosai Heavy Industries.
-  price: 118750 # ~95000$ on mapinit + 25% markup
+  price: 115000 # ~91000$ on mapinit + 25% markup
   category: Medium
   group: Medical
   shuttlePath: /Maps/_HL/Shuttles/apollo.yml

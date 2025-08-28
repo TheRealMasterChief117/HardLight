@@ -330,9 +330,10 @@ public sealed class ShipyardGridSaveSystem : EntitySystem
         try
         {
             var userDataPath = _resourceManager.UserData;
-            var filePath = userDataPath / fileName;
+            var resPath = new ResPath(fileName);
+            var filePath = userDataPath.GetFullPath(resPath);
 
-            await using var stream = userDataPath.OpenWrite(fileName);
+            await using var stream = userDataPath.OpenWrite(resPath);
             await using var writer = new StreamWriter(stream);
             await writer.WriteAsync(yamlData);
 
@@ -387,11 +388,12 @@ public sealed class ShipyardGridSaveSystem : EntitySystem
         try
         {
             var userDataPath = _resourceManager.UserData;
-            var filePath = userDataPath / fileName;
+            var resPath = new ResPath(fileName);
+            var filePath = userDataPath.GetFullPath(resPath);
 
-            if (userDataPath.Exists(fileName))
+            if (userDataPath.Exists(resPath))
             {
-                userDataPath.Delete(fileName);
+                userDataPath.Delete(resPath);
                 _sawmill.Info($"Temporary file deleted: {filePath}");
             }
         }

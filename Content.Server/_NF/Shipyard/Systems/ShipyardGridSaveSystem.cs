@@ -331,13 +331,12 @@ public sealed class ShipyardGridSaveSystem : EntitySystem
         {
             var userDataPath = _resourceManager.UserData;
             var resPath = new ResPath(fileName);
-            var filePath = userDataPath.GetFullPath(resPath);
 
             await using var stream = userDataPath.OpenWrite(resPath);
             await using var writer = new StreamWriter(stream);
             await writer.WriteAsync(yamlData);
 
-            _sawmill.Info($"Temporary YAML file written: {filePath}");
+            _sawmill.Info($"Temporary YAML file written: {resPath}");
             return true;
         }
         catch (Exception ex)
@@ -347,59 +346,4 @@ public sealed class ShipyardGridSaveSystem : EntitySystem
         }
     }
 
-    /// <summary>
-    /// Post-processes a loaded ship by teleporting it to the target location and cleaning up references
-    /// </summary>
-    public async Task PostProcessLoadedShip(EntityUid gridEntity, EntityUid targetId, string playerUserId)
-    {
-        try
-        {
-            // Get the target shipyard position
-            if (!_entityManager.TryGetComponent<TransformComponent>(targetId, out var targetTransform))
-            {
-                _sawmill.Error($"Target {targetId} does not have a transform component");
-                return;
-            }
-
-            // Get the grid's transform
-            if (!_entityManager.TryGetComponent<TransformComponent>(gridEntity, out var gridTransform))
-            {
-                _sawmill.Error($"Loaded grid {gridEntity} does not have a transform component");
-                return;
-            }
-
-            // Teleport the grid to the target location
-            var targetCoords = targetTransform.Coordinates.Offset(new Vector2(0, 5)); // Offset to avoid overlapping
-            _transformSystem.SetCoordinates(gridEntity, targetCoords);
-
-            _sawmill.Info($"Ship {gridEntity} teleported to target location for player {playerUserId}");
-        }
-        catch (Exception ex)
-        {
-            _sawmill.Error($"Failed to post-process loaded ship: {ex}");
-        }
-    }
-
-    /// <summary>
-    /// Deletes a temporary file from UserData
-    /// </summary>
-    public async Task DeleteTempFile(string fileName)
-    {
-        try
-        {
-            var userDataPath = _resourceManager.UserData;
-            var resPath = new ResPath(fileName);
-            var filePath = userDataPath.GetFullPath(resPath);
-
-            if (userDataPath.Exists(resPath))
-            {
-                userDataPath.Delete(resPath);
-                _sawmill.Info($"Temporary file deleted: {filePath}");
-            }
-        }
-        catch (Exception ex)
-        {
-            _sawmill.Error($"Failed to delete temporary file {fileName}: {ex}");
-        }
-    }
 }

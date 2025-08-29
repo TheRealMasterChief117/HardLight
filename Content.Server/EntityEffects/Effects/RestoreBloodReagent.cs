@@ -1,6 +1,7 @@
 using Content.Server.Body.Components;
 using Content.Server.Body.Systems;
 using Content.Shared.EntityEffects;
+using Content.Shared.Localizations;
 using Robust.Shared.Prototypes;
 
 namespace Content.Server.EntityEffects.Effects;

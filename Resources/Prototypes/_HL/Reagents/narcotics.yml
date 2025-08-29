@@ -97,15 +97,6 @@
           - "venom-effect-rage"
           - "venom-effect-lethal"
         probability: 0.25
-      - !type:GenericStatusEffect
-        key: AbyssalWhispers
-        component: AbyssalWhispers
-        type: Add
-        time: 8
-        refresh: false
-        conditions:
-        - !type:ReagentThreshold
-          min: 3
       - !type:AdjustReagent
         conditions:
         - !type:ReagentThreshold
@@ -200,13 +191,14 @@
           min: 6
         damage:
           types:
-            Poison: 1
+            Poison: 0.5
             Asphyxiation: 0.5
+            Cold: 0.5
       - !type:AdjustTemperature
         conditions:
         - !type:ReagentThreshold
           min: 8
-        amount: -800
+        amount: -9000
       - !type:Jitter
         conditions:
         - !type:ReagentThreshold
@@ -218,9 +210,10 @@
           min: 13
         damage:
           types:
-            Poison: 5
-            Asphyxiation: 3
+            Poison: 3
+            Asphyxiation: 2
             Caustic: 2
+            Cold: 3
       - !type:Paralyze
         conditions:
         - !type:ReagentThreshold
@@ -256,7 +249,7 @@
         conditions:
         - !type:ReagentThreshold
           min: 23
-        amount: -2000
+        amount: -26250
       # Addiction system
       - !type:AdjustReagent
         conditions:
@@ -266,7 +259,7 @@
         - !type:ReagentThreshold
           min: 3
         reagent: WidowsCurse
-        amount: 1.0
+        amount: 0.75
       # Abyssal whispers - atmospheric audio effect
       - !type:PopupMessage
         type: Local
@@ -276,9 +269,6 @@
           - "widow-whisper-2"
           - "widow-whisper-3"
         probability: 0.02
-      - !type:EmitSoundEffect
-        sound: /Audio/_NF/Effects/bloodcult/whispers.ogg
-        probability: 0.05
 
 # Stage 3B: Ruin - Failed synthesis (extremely nasty poison)
 - type: reagent
@@ -294,6 +284,21 @@
     Poison:
       metabolismRate: 0.5
       effects:
+      # Convert any existing widow to ruin at 1:1 ratio, 0.5u per tick (seed crystal effect)
+      - !type:AdjustReagent
+        conditions:
+        - !type:ReagentThreshold
+          reagent: Widow
+          min: 0.1
+        reagent: Widow
+        amount: -0.5
+      - !type:AdjustReagent
+        conditions:
+        - !type:ReagentThreshold
+          reagent: Widow
+          min: 0.1
+        reagent: Ruin
+        amount: 0.5
       # Immediate devastating effects
       - !type:PopupMessage
         type: Local
@@ -314,21 +319,19 @@
       - !type:HealthChange
         damage:
           types:
-            Poison: 8
-            Caustic: 5
+            Poison: 5
+            Caustic: 3
             Asphyxiation: 3
+            Cold: 5
       # Corrupted Abyssal Blood - extreme hypothermia  
       - !type:AdjustTemperature
-        amount: -1000
+        amount: -10000
       # Corrupted Artifexium - reality distortion/confusion
       - !type:GenericStatusEffect
         key: Drunk
         component: Drunk
         time: 10
         type: Add
-        probability: 0.4
-      # Corrupted Phalanximine - severe nausea instead of healing
-      - !type:ChemVomit
         probability: 0.4
       # Corrupted Venom - uncontrolled jitters instead of enhancement
       - !type:Jitter
@@ -340,16 +343,16 @@
           min: 2
         damage:
           types:
-            Poison: 15
-            Caustic: 8
-            Cold: 4
-            Cellular: 2
+            Poison: 8
+            Caustic: 5
+            Cold: 12
+            Cellular: 4
       # Corrupted Leporazine - complete temperature regulation failure
       - !type:AdjustTemperature
         conditions:
         - !type:ReagentThreshold
           min: 2
-        amount: -1500
+        amount: -15000
       # Enhanced confusion from concentrated Artifexium corruption
       - !type:GenericStatusEffect
         conditions:
@@ -360,20 +363,16 @@
         time: 15
         type: Add
       # Catastrophic effects (5u+)
-      - !type:ChemVomit
-        conditions:
-        - !type:ReagentThreshold
-          min: 5
-        probability: 0.8
       - !type:HealthChange
         conditions:
         - !type:ReagentThreshold
           min: 5
         damage:
           types:
-            Poison: 25
-            Caustic: 15
-            Asphyxiation: 10
+            Poison: 15
+            Caustic: 10
+            Asphyxiation: 5
+            Cold: 20
       # Complete system failure - paralysis from corrupted synthesis
       - !type:Paralyze
         conditions:
@@ -466,7 +465,7 @@
         damage:
           types:
             Asphyxiation: 0.5
-            Poison: 0.25
+            Cold: 1.0
 
 # Specialized Widow Treatment Chemical
 - type: reagent
@@ -485,7 +484,11 @@
       # Accelerated WidowsCurse removal
       - !type:AdjustReagent
         reagent: WidowsCurse
-        amount: -0.3
+        amount: -0.5
+      # Remove existing Widow from system - extremely dangerous purging process
+      - !type:AdjustReagent
+        reagent: Widow
+        amount: -0.5
       # Blood purification - restore to original blood type
       - !type:RestoreBloodReagent
         conditions:
@@ -519,14 +522,52 @@
           min: 1
         damage:
           types:
-            Heat: 4.0
-            Poison: 2.0
+            Heat: 3.0
+            Poison: 1.5
+      # Widow purging trauma - extreme temperature spike and severe damage
+      - !type:HealthChange
+        conditions:
+        - !type:ReagentThreshold
+          reagent: Widow
+          min: 0.1
+        - !type:ReagentThreshold
+          min: 1
+        damage:
+          types:
+            Heat: 15.0
+            Poison: 8.0
+            Caustic: 5.0
+      # Extreme temperature spike from widow purging process
+      - !type:AdjustTemperature
+        conditions:
+        - !type:ReagentThreshold
+          reagent: Widow
+          min: 0.1
+        - !type:ReagentThreshold
+          min: 1
+        amount: 3600
       # Temperature spike from purification process
       - !type:AdjustTemperature
         conditions:
         - !type:ReagentThreshold
           min: 1
         amount: 3600
+      # Widow purging messages - extreme pain from burning out the corruption
+      - !type:PopupMessage
+        conditions:
+        - !type:ReagentThreshold
+          reagent: Widow
+          min: 0.1
+        - !type:ReagentThreshold
+          min: 1
+        type: Local
+        visualType: LargeCaution
+        messages:
+          - "abyssal-cleansing-widow-burning"
+          - "abyssal-cleansing-widow-agony" 
+          - "abyssal-cleansing-widow-searing"
+          - "abyssal-cleansing-widow-purging"
+        probability: 0.8
       # Treatment progress messages
       - !type:PopupMessage
         type: Local
@@ -543,3 +584,4 @@
           min: 1
         probability: 1.0
         paralyzeTime: 2
+

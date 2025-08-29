@@ -98,9 +98,16 @@ abyssal-cleansing-effect-purifying = Fire burns through your veins as corruption
 abyssal-cleansing-effect-clearing = Your vision clears as the darkness is burned out.
 abyssal-cleansing-effect-stabilizing = The serum scorches away the last traces of corruption.
 
+### Widow Purging Effects (Extreme Pain)
+abyssal-cleansing-widow-burning = Searing fire burns the abyss from your blood as your body convulses.
+abyssal-cleansing-widow-agony = Agony tears through you as the darkness burns away.
+abyssal-cleansing-widow-searing = Fire scorches through your veins as corruption is violently purged.
+abyssal-cleansing-widow-purging = The serum burns away abyssal corruption with excruciating intensity.
+
 ## Black Blood
 reagent-name-black-blood = black blood
 reagent-desc-black-blood = Corrupted blood, blackened by unknown chemicals. An ominous sign.
 
 reagent-effect-guidebook-change-blood-reagent = Changes blood reagent to {$reagent}
 reagent-effect-guidebook-restore-blood-reagent = Restores blood to its original type
+

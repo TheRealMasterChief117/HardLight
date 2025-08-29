@@ -2,7 +2,6 @@
   id: NT
   tags:
   - Nanotrasen
-  - NanotrasenLanceCorporal
   - NanotrasenGunny
   - NanotrasenLieutenant
   - NanotrasenSeniorOfficer
@@ -49,13 +48,13 @@
   - type: Sprite
     sprite: Objects/Misc/id_cards.rsi
     layers:
-    - idnanotrasenoperative
+    - state: idnanotrasenoperative
   - type: Access
     groups:
     - NT
     tags:
     - Nanotrasen
-    - NanotrasenLanceCorporal
+    - NanotrasenOperative
 
 - type: entity
   parent: BaseNanotrasenIDCard
@@ -66,7 +65,7 @@
   - type: Sprite
     sprite: Objects/Misc/id_cards.rsi
     layers:
-    - idgunny
+    - state: idgunny
   - type: Access
     groups:
     - NT
@@ -83,7 +82,7 @@
   - type: Sprite
     sprite: Objects/Misc/id_cards.rsi
     layers:
-    - idntlieu
+    - state: idntlieu
   - type: Access
     groups:
     - NT
@@ -101,7 +100,7 @@
   - type: Sprite
     sprite: Objects/Misc/id_cards.rsi
     layers:
-    - idntso
+    - state: idntso
   - type: Access
     groups:
     - NT
@@ -120,7 +119,7 @@
   - type: Sprite 
     sprite: Objects/Misc/id_cards.rsi
     layers:
-    - ntidad 
+    - state: ntidad 
   - type: Access
     groups: 
     - NT

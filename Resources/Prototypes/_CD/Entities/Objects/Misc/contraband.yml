@@ -249,7 +249,7 @@
   - type: Sprite
     sprite: _CD/Objects/Misc/Contraband/drug_packets.rsi
     state: brown_icon
-    color: "#1a0a1a" # Dark black-purple tint
+    color: "#8A7A8A" # Subtle dark purple tint
   - type: Butcherable
     butcheringType: Knife
     spawned:
@@ -267,7 +267,7 @@
   - type: Sprite
     sprite: _CD/Objects/Misc/Contraband/drug_packets.rsi
     state: brown_icon
-    color: "#140814" # Dark black-purple + damage tint combined
+    color: "#7A6A7A" # Subtle dark purple + damage tint combined
   - type: SolutionContainerManager
     solutions:
       drink:

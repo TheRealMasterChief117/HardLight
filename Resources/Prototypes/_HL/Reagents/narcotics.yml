@@ -390,7 +390,7 @@
   recognizable: false
   metabolisms:
     Poison:
-      metabolismRate: 0.05
+      metabolismRate: 0.025
       effects:
       # Blood corruption effect - addiction keeps blood black
       - !type:ChangeBloodReagent

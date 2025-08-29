@@ -25,13 +25,19 @@ using Robust.Shared.Utility;
 using Content.Server.Shuttles.Save;
 using Robust.Shared.GameObjects;
 using Robust.Shared.IoC;
+using Robust.Shared.Map.Events;
 using Robust.Shared.Network;
 using Robust.Shared.Player;
 using System;
 using Robust.Shared.Log;
 using Robust.Shared.ContentPack;
-using Robust.Shared.EntitySerialization;
 using Content.Shared.Shuttles.Save; // For RequestLoadShipMessage, ShipConvertedToSecureFormatMessage
+using Robust.Shared.Serialization.Markdown; // For MappingDataNode
+using Robust.Shared.Serialization.Markdown.Mapping; // For MappingDataNode
+using Robust.Shared.Serialization.Manager; // For DataNodeParser
+using System.Collections.Generic; // For HashSet
+using Robust.Shared.Maths; // For Angle and Matrix3Helpers
+using System.Numerics; // For Matrix3x2
 using Content.Shared.Access.Components; // For IdCardComponent
 using Robust.Shared.Map.Components; // For MapGridComponent
 using Content.Server._NF.StationEvents.Components; // For LinkedLifecycleGridParentComponent
@@ -65,6 +71,7 @@ public sealed partial class ShipyardSystem : SharedShipyardSystem
     [Dependency] private readonly IServerNetManager _netManager = default!; // Ensure this is present
     [Dependency] private readonly ITaskManager _taskManager = default!;
     [Dependency] private readonly IResourceManager _resources = default!;
+    [Dependency] private readonly IDependencyCollection _dependency = default!; // For EntityDeserializer
 
     public MapId? ShipyardMap { get; private set; }
     private float _shuttleIndex;
@@ -252,80 +259,260 @@ public sealed partial class ShipyardSystem : SharedShipyardSystem
 
         try
         {
-            // Write YAML to a temporary file (exactly like loadgrid command)
-            var tempPath = new ResPath($"/Ships/temp_ship_{Guid.NewGuid()}.yml");
-            _resources.UserData.WriteAllText(tempPath, yamlData);
-
             // Setup shipyard
             SetupShipyardIfNeeded();
             if (ShipyardMap == null)
                 return false;
 
-            var loaded = false;
-            Entity<MapGridComponent>? loadedGrid = null;
-
-            // Use the exact same method as the loadgrid command
-            try
+            // Load ship directly from YAML data (bypassing file system)
+            if (!TryLoadGridFromYamlData(yamlData, ShipyardMap.Value, new Vector2(500f + _shuttleIndex, 1f), out var grid))
             {
-                // Use the exact same DeserializationOptions as the loadgrid command
-                var deserializationOptions = DeserializationOptions.Default;
-
-                // Calculate position in shipyard
-                var position = new Vector2(500f + _shuttleIndex, 1f);
-
-                // Load using MapLoaderSystem.TryLoadGrid (same as loadgrid command)
-                loaded = _mapLoader.TryLoadGrid(
-                    ShipyardMap.Value,
-                    tempPath,
-                    out loadedGrid,
-                    deserializationOptions,
-                    position
-                );
-
-                if (loaded && loadedGrid.HasValue)
-                {
-                    var shuttleGrid = loadedGrid.Value.Owner;
-
-                    if (!TryComp<ShuttleComponent>(shuttleGrid, out var shuttleComponent))
-                    {
-                        _sawmill.Error("Loaded entity is not a shuttle");
-                        return false;
-                    }
-
-                    // Update shuttle index for spacing
-                    _shuttleIndex += TryComp<MapGridComponent>(shuttleGrid, out var mapGrid)
-                        ? mapGrid.LocalAABB.Width + ShuttleSpawnBuffer
-                        : ShuttleSpawnBuffer;
-
-                    _sawmill.Info($"Ship loaded from YAML data at {ToPrettyString(consoleUid)}");
-                    _shuttle.TryFTLDock(shuttleGrid, shuttleComponent, targetGrid);
-                    shuttleEntityUid = shuttleGrid;
-                    return true;
-                }
-                else
-                {
-                    _sawmill.Error("Failed to load ship grid");
-                    return false;
-                }
+                _sawmill.Error($"Unable to load ship from YAML data");
+                return false;
             }
-            finally
+
+            var shuttleGrid = grid.Value.Owner;
+
+            if (!TryComp<ShuttleComponent>(shuttleGrid, out var shuttleComponent))
             {
-                // Clean up temporary file
-                try
-                {
-                    if (_resources.UserData.Exists(tempPath))
-                        _resources.UserData.Delete(tempPath);
-                }
-                catch (Exception ex)
-                {
-                    _sawmill.Warning($"Failed to delete temp file: {ex}");
-                }
+                _sawmill.Error("Loaded entity is not a shuttle");
+                return false;
             }
+
+            // Update shuttle index for spacing
+            _shuttleIndex += grid.Value.Comp.LocalAABB.Width + ShuttleSpawnBuffer;
+
+            _sawmill.Info($"Ship loaded from YAML data at {ToPrettyString(consoleUid)}");
+            _shuttle.TryFTLDock(shuttleGrid, shuttleComponent, targetGrid);
+            shuttleEntityUid = shuttleGrid;
+            return true;
         }
         catch (Exception ex)
         {
             _sawmill.Error($"Exception while loading ship from YAML: {ex}");
             return false;
+        }
+    }
+
+    /// <summary>
+    /// Loads a grid directly from YAML string data, similar to MapLoaderSystem.TryLoadGrid but without file system dependency
+    /// </summary>
+    private bool TryLoadGridFromYamlData(string yamlData, MapId map, Vector2 offset, [NotNullWhen(true)] out Entity<MapGridComponent>? grid)
+    {
+        grid = null;
+
+        try
+        {
+            // Parse YAML data directly (same approach as MapLoaderSystem.TryReadFile)
+            using var textReader = new StringReader(yamlData);
+            var documents = DataNodeParser.ParseYamlStream(textReader).ToArray();
+
+            switch (documents.Length)
+            {
+                case < 1:
+                    _sawmill.Error("YAML data has no documents.");
+                    return false;
+                case > 1:
+                    _sawmill.Error("YAML data has too many documents. Ship files should contain exactly one.");
+                    return false;
+            }
+
+            var data = (MappingDataNode)documents[0].Root;
+
+            // Create load options (same as MapLoaderSystem.TryLoadGrid)
+            var opts = new MapLoadOptions
+            {
+                MergeMap = map,
+                Offset = offset,
+                Rotation = Angle.Zero,
+                DeserializationOptions = DeserializationOptions.Default,
+                ExpectedCategory = FileCategory.Grid
+            };
+
+            // Process data with EntityDeserializer (same as MapLoaderSystem.TryLoadGeneric)
+            var ev = new BeforeEntityReadEvent();
+            RaiseLocalEvent(ev);
+
+            opts.DeserializationOptions.AssignMapids = opts.ForceMapId == null;
+
+            if (opts.MergeMap is { } targetId && !_map.MapExists(targetId))
+                throw new Exception($"Target map {targetId} does not exist");
+
+            var deserializer = new EntityDeserializer(
+                _dependency,
+                data,
+                opts.DeserializationOptions,
+                ev.RenamedPrototypes,
+                ev.DeletedPrototypes);
+
+            if (!deserializer.TryProcessData())
+            {
+                _sawmill.Error("Failed to process YAML entity data");
+                return false;
+            }
+
+            deserializer.CreateEntities();
+
+            if (opts.ExpectedCategory is { } exp && exp != deserializer.Result.Category)
+            {
+                _sawmill.Error($"YAML data does not contain the expected data. Expected {exp} but got {deserializer.Result.Category}");
+                _mapLoader.Delete(deserializer.Result);
+                return false;
+            }
+
+            // Apply transformations and start entities (same as MapLoaderSystem)
+            var merged = new HashSet<EntityUid>();
+            MergeMaps(deserializer, opts, merged);
+
+            if (!SetMapId(deserializer, opts))
+            {
+                _mapLoader.Delete(deserializer.Result);
+                return false;
+            }
+
+            ApplyTransform(deserializer, opts);
+            deserializer.StartEntities();
+
+            if (opts.MergeMap is { } mergeMap)
+                MapInitalizeMerged(merged, mergeMap);
+
+            // Check for exactly one grid (same as MapLoaderSystem.TryLoadGrid)
+            if (deserializer.Result.Grids.Count == 1)
+            {
+                grid = deserializer.Result.Grids.Single();
+                return true;
+            }
+
+            _mapLoader.Delete(deserializer.Result);
+            return false;
+        }
+        catch (Exception ex)
+        {
+            _sawmill.Error($"Exception while loading grid from YAML data: {ex}");
+            return false;
+        }
+    }
+
+    /// <summary>
+    /// Helper methods for our custom YAML loading - based on MapLoaderSystem implementation
+    /// </summary>
+    private void MergeMaps(EntityDeserializer deserializer, MapLoadOptions opts, HashSet<EntityUid> merged)
+    {
+        if (opts.MergeMap is not {} targetId)
+            return;
+
+        if (!_map.TryGetMap(targetId, out var targetUid))
+            throw new Exception($"Target map {targetId} does not exist");
+
+        deserializer.Result.Category = FileCategory.Unknown;
+        var rotation = opts.Rotation;
+        var matrix = Matrix3Helpers.CreateTransform(opts.Offset, rotation);
+        var target = new Entity<TransformComponent>(targetUid.Value, Transform(targetUid.Value));
+
+        // Apply transforms to all loaded entities that should be merged
+        foreach (var uid in deserializer.Result.Entities)
+        {
+            if (TryComp<TransformComponent>(uid, out var xform))
+            {
+                if (xform.MapUid == null || HasComp<MapComponent>(uid))
+                {
+                    Merge(merged, uid, target, matrix, rotation);
+                }
+            }
+        }
+    }
+
+    private void Merge(
+        HashSet<EntityUid> merged,
+        EntityUid uid,
+        Entity<TransformComponent> target,
+        in Matrix3x2 matrix,
+        Angle rotation)
+    {
+        merged.Add(uid);
+        var xform = Transform(uid);
+
+        // Apply transform matrix
+        var pos = System.Numerics.Vector2.Transform(xform.LocalPosition, matrix);
+        _transform.SetCoordinates(uid, xform, new EntityCoordinates(target, pos));
+        _transform.SetLocalRotation(uid, xform.LocalRotation + rotation);
+
+        // Delete any map entities since we're merging
+        if (HasComp<MapComponent>(uid))
+        {
+            QueueDel(uid);
+        }
+    }
+
+    private bool SetMapId(EntityDeserializer deserializer, MapLoadOptions opts)
+    {
+        // Check for any entities with MapComponents that might need MapId assignment
+        foreach (var uid in deserializer.Result.Entities)
+        {
+            if (TryComp<MapComponent>(uid, out var mapComp))
+            {
+                if (opts.ForceMapId != null)
+                {
+                    // Should not happen in our shipyard use case
+                    _sawmill.Error("Unexpected ForceMapId when merging maps");
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
+
+    private void ApplyTransform(EntityDeserializer deserializer, MapLoadOptions opts)
+    {
+        if (opts.Rotation == Angle.Zero && opts.Offset == Vector2.Zero)
+            return;
+
+        // If merging onto a single map, the transformation was already applied by MergeMaps
+        if (opts.MergeMap != null)
+            return;
+
+        var matrix = Matrix3Helpers.CreateTransform(opts.Offset, opts.Rotation);
+
+        // Apply transforms to all children of loaded maps
+        foreach (var uid in deserializer.Result.Entities)
+        {
+            if (TryComp<TransformComponent>(uid, out var xform))
+            {
+                // Check if this entity is attached to a map
+                if (xform.MapUid != null && HasComp<MapComponent>(xform.MapUid.Value))
+                {
+                    var pos = System.Numerics.Vector2.Transform(xform.LocalPosition, matrix);
+                    _transform.SetLocalPosition(uid, pos);
+                    _transform.SetLocalRotation(uid, xform.LocalRotation + opts.Rotation);
+                }
+            }
+        }
+    }
+
+    private void MapInitalizeMerged(HashSet<EntityUid> merged, MapId targetId)
+    {
+        // Initialize merged entities according to the target map's state
+        if (!_map.TryGetMap(targetId, out var targetUid))
+            throw new Exception($"Target map {targetId} does not exist");
+
+        if (_map.IsInitialized(targetUid.Value))
+        {
+            foreach (var uid in merged)
+            {
+                if (TryComp<MetaDataComponent>(uid, out var metadata))
+                {
+                    EntityManager.RunMapInit(uid, metadata);
+                }
+            }
+        }
+
+        var paused = _map.IsPaused(targetUid.Value);
+        foreach (var uid in merged)
+        {
+            if (TryComp<MetaDataComponent>(uid, out var metadata))
+            {
+                _metaData.SetEntityPaused(uid, paused, metadata);
+            }
         }
     }
 

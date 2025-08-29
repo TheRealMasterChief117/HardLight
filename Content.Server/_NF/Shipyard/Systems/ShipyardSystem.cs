@@ -20,6 +20,7 @@ using Content.Shared.Mobs.Components;
 using Robust.Shared.Containers;
 using Content.Server._NF.Station.Components;
 using Robust.Shared.EntitySerialization.Systems;
+using Robust.Shared.EntitySerialization;
 using Robust.Shared.Utility;
 using Content.Server.Shuttles.Save;
 using Robust.Shared.GameObjects;
@@ -28,6 +29,8 @@ using Robust.Shared.Network;
 using Robust.Shared.Player;
 using System;
 using Robust.Shared.Log;
+using Robust.Shared.ContentPack;
+using Robust.Shared.EntitySerialization;
 using Content.Shared.Shuttles.Save; // For RequestLoadShipMessage, ShipConvertedToSecureFormatMessage
 using Content.Shared.Access.Components; // For IdCardComponent
 using Robust.Shared.Map.Components; // For MapGridComponent
@@ -61,6 +64,7 @@ public sealed partial class ShipyardSystem : SharedShipyardSystem
     [Dependency] private readonly IEntitySystemManager _entitySystemManager = default!;
     [Dependency] private readonly IServerNetManager _netManager = default!; // Ensure this is present
     [Dependency] private readonly ITaskManager _taskManager = default!;
+    [Dependency] private readonly IResourceManager _resources = default!;
 
     public MapId? ShipyardMap { get; private set; }
     private float _shuttleIndex;
@@ -248,72 +252,75 @@ public sealed partial class ShipyardSystem : SharedShipyardSystem
 
         try
         {
-            // Parse YAML data directly without creating a file
-            using var stringReader = new StringReader(yamlData);
-            var documents = Robust.Shared.Serialization.Markdown.DataNodeParser.ParseYamlStream(stringReader).ToArray();
+            // Write YAML to a temporary file (exactly like loadgrid command)
+            var tempPath = new ResPath($"/Ships/temp_ship_{Guid.NewGuid()}.yml");
+            _resources.UserData.WriteAllText(tempPath, yamlData);
 
-            if (documents.Length == 0)
-            {
-                _sawmill.Error("No YAML documents found in ship data");
-                return false;
-            }
-
-            if (documents.Length > 1)
-            {
-                _sawmill.Warning("Multiple YAML documents found in ship data, using first document");
-            }
-
-            var data = documents[0].Root as Robust.Shared.Serialization.Markdown.Mapping.MappingDataNode;
-            if (data == null)
-            {
-                _sawmill.Error("Invalid YAML structure - expected mapping at root");
-                return false;
-            }
-
-            // Use MapLoaderSystem to load directly from the parsed data
+            // Setup shipyard
             SetupShipyardIfNeeded();
             if (ShipyardMap == null)
                 return false;
 
-            var loadOptions = new Robust.Shared.Map.MapLoadOptions
-            {
-                LoadMap = false,
-            };
+            var loaded = false;
+            Entity<MapGridComponent>? loadedGrid = null;
 
-            if (!_mapLoader.TryLoadGeneric(ShipyardMap.Value, data, out var results, loadOptions))
+            // Use the exact same method as the loadgrid command
+            try
             {
-                _sawmill.Error("Failed to load ship from parsed YAML data");
-                return false;
+                // Use the exact same DeserializationOptions as the loadgrid command
+                var deserializationOptions = DeserializationOptions.Default;
+
+                // Calculate position in shipyard
+                var position = new Vector2(500f + _shuttleIndex, 1f);
+
+                // Load using MapLoaderSystem.TryLoadGrid (same as loadgrid command)
+                loaded = _mapLoader.TryLoadGrid(
+                    ShipyardMap.Value,
+                    tempPath,
+                    out loadedGrid,
+                    deserializationOptions,
+                    position
+                );
+
+                if (loaded && loadedGrid.HasValue)
+                {
+                    var shuttleGrid = loadedGrid.Value.Owner;
+
+                    if (!TryComp<ShuttleComponent>(shuttleGrid, out var shuttleComponent))
+                    {
+                        _sawmill.Error("Loaded entity is not a shuttle");
+                        return false;
+                    }
+
+                    // Update shuttle index for spacing
+                    _shuttleIndex += TryComp<MapGridComponent>(shuttleGrid, out var mapGrid)
+                        ? mapGrid.LocalAABB.Width + ShuttleSpawnBuffer
+                        : ShuttleSpawnBuffer;
+
+                    _sawmill.Info($"Ship loaded from YAML data at {ToPrettyString(consoleUid)}");
+                    _shuttle.TryFTLDock(shuttleGrid, shuttleComponent, targetGrid);
+                    shuttleEntityUid = shuttleGrid;
+                    return true;
+                }
+                else
+                {
+                    _sawmill.Error("Failed to load ship grid");
+                    return false;
+                }
             }
-
-            // Find the grid entity from the loaded results
-            if (results.Grids.Count == 0)
+            finally
             {
-                _sawmill.Error("No grids found in loaded ship data");
-                return false;
+                // Clean up temporary file
+                try
+                {
+                    if (_resources.UserData.Exists(tempPath))
+                        _resources.UserData.Delete(tempPath);
+                }
+                catch (Exception ex)
+                {
+                    _sawmill.Warning($"Failed to delete temp file: {ex}");
+                }
             }
-
-            var shuttleGrid = results.Grids.First().Owner;
-
-            if (!TryComp<ShuttleComponent>(shuttleGrid, out var shuttleComponent))
-            {
-                _sawmill.Error("Loaded entity is not a shuttle");
-                return false;
-            }
-
-            // Move the shuttle and dock it like ship purchases
-            var shuttleXform = Transform(shuttleGrid);
-            var shipyardMapEnt = _map.GetMapEntityId(ShipyardMap.Value);
-            _transformSystem.SetCoordinates(shuttleGrid, new EntityCoordinates(shipyardMapEnt, new Vector2(500f + _shuttleIndex, 1f)));
-
-            _shuttleIndex += TryComp<MapGridComponent>(shuttleGrid, out var mapGrid) 
-                ? mapGrid.LocalAABB.Width + ShuttleSpawnBuffer 
-                : ShuttleSpawnBuffer;
-
-            _sawmill.Info($"Ship loaded from YAML data at {ToPrettyString(consoleUid)}");
-            _shuttle.TryFTLDock(shuttleGrid, shuttleComponent, targetGrid);
-            shuttleEntityUid = shuttleGrid;
-            return true;
         }
         catch (Exception ex)
         {

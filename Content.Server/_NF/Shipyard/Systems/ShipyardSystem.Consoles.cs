@@ -1,6 +1,7 @@
 using Content.Server.Access.Systems;
 using Content.Server.Popups;
 using Content.Server.Radio.EntitySystems;
+using Content.Server.Shuttles.Save;
 using Content.Server.Shuttles.Systems;
 using Content.Server._NF.Bank;
 using Content.Server._NF.Shipyard.Components;
@@ -19,6 +20,8 @@ using Robust.Server.GameObjects;
 using Robust.Shared.Containers;
 using Robust.Shared.Prototypes;
 using Robust.Shared.Utility;
+using Robust.Shared.IoC;
+using Robust.Shared.ContentPack;
 using Content.Server.Maps;
 using Content.Server.Mind;
 using Content.Shared.Mind;
@@ -430,29 +433,28 @@ public sealed partial class ShipyardSystem : SharedShipyardSystem
             return;
         }
 
-        // Use ShipSerializationSystem to load the ship from YAML data directly
-        var shipSerializationSystem = EntityManager.System<ShipSerializationSystem>();
-
-        _ = Task.Run(async () =>
+        // Load directly from YAML data using MapLoaderSystem without temporary files
+        _taskManager.RunOnMainThread(() =>
         {
             try
             {
-                // Deserialize the ship data from YAML string
-                var shipGridData = shipSerializationSystem.DeserializeShipGridDataFromYaml(args.YamlData, playerSession.UserId);
-                
-                // Get the target location where the ship should spawn
-                var targetTransform = Transform(targetId);
-                var targetMapId = targetTransform.MapID;
-                var targetPosition = targetTransform.WorldPosition;
+                if (!TryLoadShipFromYaml(targetId, args.YamlData, out var shuttleUid))
+                {
+                    _sawmill.Error($"Failed to load ship from YAML data for player {playerSession.UserId}");
+                    ConsolePopup(player, "Failed to load ship from YAML data");
+                    PlayDenySound(player, uid, component);
+                    return;
+                }
 
-                // Reconstruct the ship on the target map at the target position
-                var loadedGridUid = shipSerializationSystem.ReconstructShipOnMap(shipGridData, targetMapId, targetPosition);
-
-                _sawmill.Info($"Ship loaded successfully for player {playerSession.UserId} at {targetPosition}");
+                _sawmill.Info($"Ship loaded successfully for player {playerSession.UserId} - grid: {shuttleUid}");
+                ConsolePopup(player, "Ship loaded successfully!");
+                PlayConfirmSound(player, uid, component);
             }
             catch (Exception ex)
             {
                 _sawmill.Error($"Failed to load ship from YAML data for player {playerSession.UserId}: {ex}");
+                ConsolePopup(player, "Failed to load ship - internal error");
+                PlayDenySound(player, uid, component);
             }
         });
     }

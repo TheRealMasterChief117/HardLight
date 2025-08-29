@@ -10,7 +10,9 @@ using Robust.Server.GameObjects;
 using Robust.Shared.Map;
 using Content.Shared._NF.CCVar;
 using Robust.Shared.Configuration;
+using Robust.Shared.Asynchronous;
 using System.Diagnostics.CodeAnalysis;
+using System.IO;
 using System.Linq;
 using System.Numerics;
 using Content.Shared._NF.Shipyard.Events;
@@ -58,6 +60,7 @@ public sealed partial class ShipyardSystem : SharedShipyardSystem
     [Dependency] private readonly IEntityManager _entityManager = default!;
     [Dependency] private readonly IEntitySystemManager _entitySystemManager = default!;
     [Dependency] private readonly IServerNetManager _netManager = default!; // Ensure this is present
+    [Dependency] private readonly ITaskManager _taskManager = default!;
 
     public MapId? ShipyardMap { get; private set; }
     private float _shuttleIndex;
@@ -175,6 +178,33 @@ public sealed partial class ShipyardSystem : SharedShipyardSystem
     }
 
     /// <summary>
+    /// Loads a shuttle from a file and docks it to the grid the console is on, like ship purchases.
+    /// This is used for loading saved ships.
+    /// </summary>
+    /// <param name="consoleUid">The entity of the shipyard console to dock to its grid</param>
+    /// <param name="shuttlePath">The path to the shuttle file to load. Must be a grid file!</param>
+    /// <param name="shuttleEntityUid">The EntityUid of the shuttle that was loaded</param>
+    public bool TryPurchaseShuttleFromFile(EntityUid consoleUid, ResPath shuttlePath, [NotNullWhen(true)] out EntityUid? shuttleEntityUid)
+    {
+        // Get the grid the console is on
+        if (!TryComp<TransformComponent>(consoleUid, out var consoleXform)
+            || consoleXform.GridUid == null
+            || !TryAddShuttle(shuttlePath, out var shuttleGrid)
+            || !TryComp<ShuttleComponent>(shuttleGrid, out var shuttleComponent))
+        {
+            shuttleEntityUid = null;
+            return false;
+        }
+
+        var targetGrid = consoleXform.GridUid.Value;
+
+        _sawmill.Info($"Shuttle loaded from file {shuttlePath} at {ToPrettyString(consoleUid)}");
+        _shuttle.TryFTLDock(shuttleGrid.Value, shuttleComponent, targetGrid);
+        shuttleEntityUid = shuttleGrid;
+        return true;
+    }
+
+    /// <summary>
     /// Loads a shuttle into the ShipyardMap from a file path
     /// </summary>
     /// <param name="shuttlePath">The path to the grid file to load. Must be a grid file!</param>
@@ -196,6 +226,100 @@ public sealed partial class ShipyardSystem : SharedShipyardSystem
 
         shuttleGrid = grid.Value.Owner;
         return true;
+    }
+
+    /// <summary>
+    /// Loads a ship directly from YAML data, following the same pattern as ship purchases
+    /// </summary>
+    /// <param name="consoleUid">The entity of the shipyard console to dock to its grid</param>
+    /// <param name="yamlData">The YAML data of the ship to load</param>
+    /// <param name="shuttleEntityUid">The EntityUid of the shuttle that was loaded</param>
+    public bool TryLoadShipFromYaml(EntityUid consoleUid, string yamlData, [NotNullWhen(true)] out EntityUid? shuttleEntityUid)
+    {
+        shuttleEntityUid = null;
+
+        // Get the grid the console is on
+        if (!TryComp<TransformComponent>(consoleUid, out var consoleXform) || consoleXform.GridUid == null)
+        {
+            return false;
+        }
+
+        var targetGrid = consoleXform.GridUid.Value;
+
+        try
+        {
+            // Parse YAML data directly without creating a file
+            using var stringReader = new StringReader(yamlData);
+            var documents = Robust.Shared.Serialization.Markdown.DataNodeParser.ParseYamlStream(stringReader).ToArray();
+
+            if (documents.Length == 0)
+            {
+                _sawmill.Error("No YAML documents found in ship data");
+                return false;
+            }
+
+            if (documents.Length > 1)
+            {
+                _sawmill.Warning("Multiple YAML documents found in ship data, using first document");
+            }
+
+            var data = documents[0].Root as Robust.Shared.Serialization.Markdown.Mapping.MappingDataNode;
+            if (data == null)
+            {
+                _sawmill.Error("Invalid YAML structure - expected mapping at root");
+                return false;
+            }
+
+            // Use MapLoaderSystem to load directly from the parsed data
+            SetupShipyardIfNeeded();
+            if (ShipyardMap == null)
+                return false;
+
+            var loadOptions = new Robust.Shared.Map.MapLoadOptions
+            {
+                LoadMap = false,
+            };
+
+            if (!_mapLoader.TryLoadGeneric(ShipyardMap.Value, data, out var results, loadOptions))
+            {
+                _sawmill.Error("Failed to load ship from parsed YAML data");
+                return false;
+            }
+
+            // Find the grid entity from the loaded results
+            if (results.Grids.Count == 0)
+            {
+                _sawmill.Error("No grids found in loaded ship data");
+                return false;
+            }
+
+            var shuttleGrid = results.Grids.First().Owner;
+
+            if (!TryComp<ShuttleComponent>(shuttleGrid, out var shuttleComponent))
+            {
+                _sawmill.Error("Loaded entity is not a shuttle");
+                return false;
+            }
+
+            // Move the shuttle and dock it like ship purchases
+            var shuttleXform = Transform(shuttleGrid);
+            var shipyardMapEnt = _map.GetMapEntityId(ShipyardMap.Value);
+            _transformSystem.SetCoordinates(shuttleGrid, new EntityCoordinates(shipyardMapEnt, new Vector2(500f + _shuttleIndex, 1f)));
+
+            _shuttleIndex += TryComp<MapGridComponent>(shuttleGrid, out var mapGrid) 
+                ? mapGrid.LocalAABB.Width + ShuttleSpawnBuffer 
+                : ShuttleSpawnBuffer;
+
+            _sawmill.Info($"Ship loaded from YAML data at {ToPrettyString(consoleUid)}");
+            _shuttle.TryFTLDock(shuttleGrid, shuttleComponent, targetGrid);
+            shuttleEntityUid = shuttleGrid;
+            return true;
+        }
+        catch (Exception ex)
+        {
+            _sawmill.Error($"Exception while loading ship from YAML: {ex}");
+            return false;
+        }
     }
 
     /// <summary>

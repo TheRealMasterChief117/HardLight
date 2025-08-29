@@ -43,8 +43,3 @@
   id: NFBlueprintsService
   recipes:
   - ImpCoffeeMachineCircuitboard #imp
-
-- type: latheRecipePack
-  id: NFServiceBoards
-  recipes:
-  - ImpCoffeeMachineCircuitboard # Frontier

@@ -191,6 +191,36 @@
   description: A willing crystal entity pulled through the space aether by magic. They can temporarily exist on this plane, but will return home before long.
   suffix: wizard
   components:
+  - type: AccessReader
+    access: [["StationAi"], ["Security"]]
+  - type: TurretTargetSettings
+    exemptAccessLevels:
+    - Security
+    - Borg
+    - BasicSilicon
+  - type: Machine
+    board: WeaponEnergyTurretSecurityMachineCircuitboard
+  - type: DeviceNetwork
+    receiveFrequencyId: TurretControl
+    transmitFrequencyId: Turret
+
+- type: entity
+  parent: WeaponEnergyTurretStationBase
+  id: WeaponEnergyTurretCommand
+  suffix: Command
+  components:
+  - type: AccessReader
+    access: [["StationAi"], ["Command"]]
+  - type: TurretTargetSettings
+    exemptAccessLevels:
+    - Command
+    - Borg
+    - BasicSilicon
+  - type: Machine
+    board: WeaponEnergyTurretCommandMachineCircuitboard
+  - type: DeviceNetwork
+    receiveFrequencyId: TurretControl
+    transmitFrequencyId: Turret
     - type: NpcFactionMember
       factions:
         - NanoTrasen

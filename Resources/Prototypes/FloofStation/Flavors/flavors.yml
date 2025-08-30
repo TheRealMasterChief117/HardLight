@@ -321,11 +321,6 @@
   description: flavor-complex-blooddrop
 
 - type: flavor
-  id: strawberry
-  flavorType: Complex
-  description: flavor-complex-strawberry
-
-- type: flavor
   id: whitechocolatechip
   flavorType: Complex
   description: flavor-complex-whitechocolatechip

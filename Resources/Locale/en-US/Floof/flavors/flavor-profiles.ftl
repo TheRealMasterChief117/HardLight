@@ -78,4 +78,3 @@ flavor-complex-hallelujah = a moment of peace
 flavor-complex-walnut = like walnuts
 flavor-complex-despair = despair
 flavor-complex-blooddrop = crimson lust
-flavor-complex-strawberry = strawberry

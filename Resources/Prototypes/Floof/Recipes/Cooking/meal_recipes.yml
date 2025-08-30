@@ -9,6 +9,8 @@
     JuiceBerry: 5
   solids:
     IceCreamBowl: 1
+  recipeType:
+  - Assembler
 
 - type: microwaveMealRecipe
   id: RecipeIceCreamCaramel
@@ -22,6 +24,8 @@
   solids:
     IceCreamBowl: 1
     FoodCoffeeBeansRoastedLight: 1
+  recipeType:
+  - Assembler
 
 - type: microwaveMealRecipe
   id: RecipeIceCreamCoffee
@@ -33,6 +37,8 @@
     Coffee: 20
   solids:
     IceCreamBowl: 1
+  recipeType:
+  - Assembler
 
 - type: microwaveMealRecipe
   id: RecipeIceCreamGreenTea
@@ -44,6 +50,8 @@
     GreenTea: 15
   solids:
     IceCreamBowl: 1
+  recipeType:
+  - Assembler
 
 - type: microwaveMealRecipe
   id: RecipeIceCreamLemon
@@ -54,6 +62,8 @@
     JuiceLemon: 15
   solids:
     IceCreamBowl: 1
+  recipeType:
+  - Assembler
 
 - type: microwaveMealRecipe
   id: RecipeIceCreamOrange
@@ -65,6 +75,8 @@
     JuiceOrange: 15
   solids:
     IceCreamBowl: 1
+  recipeType:
+  - Assembler
 
 - type: microwaveMealRecipe
   id: RecipeIceCreamRainbow
@@ -78,6 +90,8 @@
     JuiceOrange: 5
   solids:
     IceCreamBowl: 1
+  recipeType:
+  - Assembler
 
 - type: microwaveMealRecipe
   id: RecipeIceCreamSaltedCaramel
@@ -90,6 +104,8 @@
     TableSalt: 5
   solids:
     IceCreamBowl: 1
+  recipeType:
+  - Assembler
 
 - type: microwaveMealRecipe
   id: RecipeIceCreamSpaghetti
@@ -102,6 +118,8 @@
     JuiceBerry: 5
   solids:
     IceCreamBowl: 1
+  recipeType:
+  - Assembler
 
 - type: microwaveMealRecipe
   id: RecipeIceCreamStrawberry
@@ -114,6 +132,8 @@
   solids:
     IceCreamBowl: 1
     FoodBerries: 1
+  recipeType:
+  - Assembler
 
 - type: microwaveMealRecipe
   id: RecipeIceCreamBananaSplit
@@ -126,6 +146,8 @@
   solids:
     IceCreamBowl: 1
     FoodCherry: 1
+  recipeType:
+  - Assembler
 
 - type: microwaveMealRecipe
   id: RecipeIceCreamBananaSplit
@@ -140,6 +162,8 @@
     IceCreamBowl: 1
     FoodBanana: 1
     FoodCherry: 1
+  recipeType:
+  - Assembler
 
 - type: microwaveMealRecipe
   id: RecipeIceCreamChoco
@@ -152,6 +176,8 @@
   solids:
     IceCreamBowl: 1
     FoodSnackChocolateBar: 1
+  recipeType:
+  - Assembler
 
 - type: microwaveMealRecipe
   id: RecipeIceCreamCoconut
@@ -163,6 +189,8 @@
     CoconutWater: 20
   solids:
     IceCreamBowl: 1
+  recipeType:
+  - Assembler
 
 - type: microwaveMealRecipe
   id: RecipeIceCreamCosmos
@@ -175,6 +203,8 @@
     JuiceBerry: 15
   solids:
     IceCreamBowl: 1
+  recipeType:
+  - Assembler
 
 - type: microwaveMealRecipe
   id: RecipeIceCreamGilded
@@ -186,6 +216,8 @@
     Gold: 20
   solids:
     IceCreamBowl: 1
+  recipeType:
+  - Assembler
 
 - type: microwaveMealRecipe
   id: RecipeIceCreamLoversDelight
@@ -197,6 +229,8 @@
     JuicePomegranate: 20
   solids:
     IceCreamBowl: 1
+  recipeType:
+  - Assembler
 
 - type: microwaveMealRecipe
   id: RecipeIceCreamMintChoco
@@ -209,6 +243,8 @@
     CocoaPowder: 5
   solids:
     IceCreamBowl: 1
+  recipeType:
+  - Assembler
 
 - type: microwaveMealRecipe
   id: RecipeIceCreamSolar
@@ -221,6 +257,8 @@
     Hydrogen: 10
   solids:
     IceCreamBowl: 1
+  recipeType:
+  - Assembler
 
 - type: microwaveMealRecipe
   id: RecipeIceCreamNebula
@@ -233,6 +271,8 @@
     Hydrogen: 10
   solids:
     IceCreamBowl: 1
+  recipeType:
+  - Assembler
 
 - type: microwaveMealRecipe
   id: RecipeIceCreamNeapolitan
@@ -245,6 +285,8 @@
     CocoaPowder: 5
   solids:
     IceCreamBowl: 1
+  recipeType:
+  - Assembler
 
 - type: microwaveMealRecipe
   id: RecipeIceCreamWatermelon
@@ -256,6 +298,8 @@
     JuiceWatermelon: 20
   solids:
     IceCreamBowl: 1
+  recipeType:
+  - Assembler
 
 - type: microwaveMealRecipe
   id: RecipeIceCreamVanilla
@@ -267,6 +311,8 @@
     Cream: 5
   solids:
     IceCreamBowl: 1
+  recipeType:
+  - Assembler
 
 - type: microwaveMealRecipe
   id: RecipeRicePudding2
@@ -278,3 +324,5 @@
     Cream: 15
   solids:
     FoodBowlBig: 1
+  recipeType:
+  - Assembler

@@ -55,6 +55,14 @@ using Content.Shared.Database; // For LogType
 
 namespace Content.Server._NF.Shipyard.Systems;
 
+/// <summary>
+/// Temporary component to mark entities that should be anchored after grid loading is complete
+/// </summary>
+[RegisterComponent]
+public sealed partial class PendingAnchorComponent : Component
+{
+}
+
 public sealed partial class ShipyardSystem : SharedShipyardSystem
 {
     [Dependency] private readonly IConfigurationManager _configManager = default!;
@@ -376,6 +384,9 @@ public sealed partial class ShipyardSystem : SharedShipyardSystem
             if (opts.MergeMap is { } mergeMap)
                 MapInitalizeMerged(merged, mergeMap);
 
+            // Process deferred anchoring after all entities are started and physics is stable
+            ProcessPendingAnchors(merged);
+
             // Check for exactly one grid (same as MapLoaderSystem.TryLoadGrid)
             if (deserializer.Result.Grids.Count == 1)
             {
@@ -432,10 +443,21 @@ public sealed partial class ShipyardSystem : SharedShipyardSystem
         merged.Add(uid);
         var xform = Transform(uid);
 
-        // Apply transform matrix
+        // Store whether the entity was anchored before transformation
+        // We'll use this information later to re-anchor entities after startup
+        var wasAnchored = xform.Anchored;
+
+        // Apply transform matrix (same as RobustToolbox MapLoaderSystem)
+        var angle = xform.LocalRotation + rotation;
         var pos = System.Numerics.Vector2.Transform(xform.LocalPosition, matrix);
-        _transform.SetCoordinates(uid, xform, new EntityCoordinates(target, pos));
-        _transform.SetLocalRotation(uid, xform.LocalRotation + rotation);
+        var coords = new EntityCoordinates(target.Owner, pos);
+        _transform.SetCoordinates((uid, xform, MetaData(uid)), coords, rotation: angle, newParent: target.Comp);
+
+        // Store anchoring information for later processing
+        if (wasAnchored)
+        {
+            EnsureComp<PendingAnchorComponent>(uid);
+        }
 
         // Delete any map entities since we're merging
         if (HasComp<MapComponent>(uid))
@@ -512,6 +534,33 @@ public sealed partial class ShipyardSystem : SharedShipyardSystem
             if (TryComp<MetaDataComponent>(uid, out var metadata))
             {
                 _metaData.SetEntityPaused(uid, paused, metadata);
+            }
+        }
+    }
+
+    private void ProcessPendingAnchors(HashSet<EntityUid> merged)
+    {
+        // Process entities that need to be anchored after grid loading
+        foreach (var uid in merged)
+        {
+            if (!TryComp<PendingAnchorComponent>(uid, out _))
+                continue;
+
+            // Remove the temporary component
+            RemComp<PendingAnchorComponent>(uid);
+
+            // Try to anchor the entity if it's on a valid grid
+            if (TryComp<TransformComponent>(uid, out var xform) && xform.GridUid != null)
+            {
+                try
+                {
+                    _transform.AnchorEntity(uid, xform);
+                }
+                catch (Exception ex)
+                {
+                    // Log but don't fail - some entities might not be anchorable
+                    _sawmill.Warning($"Failed to anchor entity {uid}: {ex.Message}");
+                }
             }
         }
     }

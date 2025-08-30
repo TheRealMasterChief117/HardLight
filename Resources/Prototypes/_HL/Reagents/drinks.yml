@@ -22,9 +22,20 @@
       - !type:AdjustReagent
         reagent: Ethanol
         amount: 0.06
-      - !type:AdjustReagent
-        reagent: Amnestizine
-        amount: 0.5
+      - !type:PopupMessage
+        visualType: MediumCaution
+        type: Local
+        messages: # Flavor text, you're supposed to forget what's happening.
+        - amnestizine-effect-listen
+        conditions:
+        - !type:ReagentThreshold
+          min: 1
+        probability: 0.35
+      - !type:Jitter
+        conditions:
+        - !type:ReagentThreshold
+          min: 5
+        probability: 0.35
 
 - type: entity
   parent: DrinkCanBaseFull

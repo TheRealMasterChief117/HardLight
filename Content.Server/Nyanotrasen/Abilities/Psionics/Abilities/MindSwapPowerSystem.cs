@@ -14,6 +14,7 @@ using Robust.Shared.Prototypes;
 using Robust.Shared.Timing;
 using Content.Shared.Mind;
 using Content.Shared.Actions.Events;
+using Content.Server.Ghost;
 
 namespace Content.Server.Abilities.Psionics
 {

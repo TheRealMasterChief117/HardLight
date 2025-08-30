@@ -6,6 +6,7 @@ using Content.Server.Psionics;
 using Content.Shared.Abilities.Psionics;
 using Content.Shared.Mobs.Systems;
 using Content.Shared.Psionics.Glimmer;
+using Content.Shared.GameTicking.Components;
 
 namespace Content.Server.StationEvents.Events;
 

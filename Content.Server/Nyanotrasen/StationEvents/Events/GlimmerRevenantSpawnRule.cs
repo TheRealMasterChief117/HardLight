@@ -2,6 +2,7 @@ using Robust.Shared.Random;
 using Content.Server.GameTicking.Rules.Components;
 using Content.Server.Psionics.Glimmer;
 using Content.Server.StationEvents.Components;
+using Content.Shared.GameTicking.Components;
 
 namespace Content.Server.StationEvents.Events;
 

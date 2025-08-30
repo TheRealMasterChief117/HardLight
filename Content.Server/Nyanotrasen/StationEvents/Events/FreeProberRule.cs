@@ -7,6 +7,7 @@ using Content.Server.StationEvents.Components;
 using Content.Server.Psionics.Glimmer;
 using Content.Shared.Construction.EntitySystems;
 using Content.Shared.Psionics.Glimmer;
+using Content.Shared.GameTicking.Components;
 
 namespace Content.Server.StationEvents.Events;
 

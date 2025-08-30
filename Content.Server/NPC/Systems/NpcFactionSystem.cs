@@ -1,6 +1,9 @@
-using Content.Server.NPC.Components;
+//using Content.Server.NPC.Components;
 using Robust.Shared.Prototypes;
 using System.Linq;
+using Content.Shared.NPC.Systems;
+using Content.Shared.NPC.Prototypes;
+using Content.Shared.NPC.Components;
 
 namespace Content.Server.NPC.Systems;
 
@@ -10,7 +13,7 @@ namespace Content.Server.NPC.Systems;
 /// </summary>
 public sealed partial class NpcFactionSystem : EntitySystem
 {
-    [Dependency] private readonly FactionExceptionSystem _factionException = default!;
+    [Dependency] private readonly FactionExceptionComponent _factionException = default!;
     [Dependency] private readonly EntityLookupSystem _lookup = default!;
     [Dependency] private readonly IPrototypeManager _protoManager = default!;
 
@@ -52,7 +55,7 @@ public sealed partial class NpcFactionSystem : EntitySystem
     /// <summary>
     /// Refreshes the cached factions for this component.
     /// </summary>
-    private void RefreshFactions(NpcFactionMemberComponent memberComponent)
+    public void RefreshFactions(NpcFactionMemberComponent memberComponent)
     {
         memberComponent.FriendlyFactions.Clear();
         memberComponent.HostileFactions.Clear();

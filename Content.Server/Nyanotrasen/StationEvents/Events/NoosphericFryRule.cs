@@ -16,6 +16,8 @@ using Content.Shared.Inventory;
 using Content.Shared.Mobs.Components;
 using Content.Shared.Mobs.Systems;
 using Content.Shared.Psionics.Glimmer;
+using Content.Shared.GameTicking.Components;
+using Robust.Shared.Audio.Systems;
 
 namespace Content.Server.StationEvents.Events;
 

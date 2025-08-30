@@ -3,6 +3,7 @@ using Content.Server.Chemistry.Components;
 using Content.Server.Popups;
 using Content.Shared.Chemistry.Reagent;
 using Content.Shared.Verbs;
+using Content.Server.Chemistry.Containers.EntitySystems;
 
 namespace Content.Server.Chemistry.EntitySystems
 {

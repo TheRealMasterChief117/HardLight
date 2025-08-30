@@ -21,6 +21,8 @@ using Robust.Shared.Map;
 using Robust.Shared.Random;
 using Robust.Shared.Physics.Components;
 using Robust.Shared.Utility;
+using Content.Shared.Power;
+using Robust.Shared.Audio.Systems;
 
 namespace Content.Server.Psionics.Glimmer
 {

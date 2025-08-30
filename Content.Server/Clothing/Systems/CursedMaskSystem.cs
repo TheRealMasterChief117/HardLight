@@ -9,11 +9,12 @@ using Content.Shared.Clothing;
 using Content.Shared.Clothing.Components;
 using Content.Shared.Database;
 using Content.Shared.NPC.Components;
-using Content.Shared.NPC.Systems;
+//using Content.Shared.NPC.Systems;
 using Content.Shared.Players;
 using Content.Shared.Popups;
 using Robust.Shared.Player;
 using Robust.Shared.Prototypes;
+using Content.Shared.GameTicking.Components;
 
 namespace Content.Server.Clothing.Systems;
 

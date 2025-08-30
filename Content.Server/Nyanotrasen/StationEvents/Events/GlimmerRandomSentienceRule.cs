@@ -5,6 +5,7 @@ using Content.Server.Psionics;
 using Content.Server.Speech.Components;
 using Content.Server.StationEvents.Components;
 using Content.Shared.Mobs.Systems;
+using Content.Shared.GameTicking.Components;
 
 namespace Content.Server.StationEvents.Events;
 

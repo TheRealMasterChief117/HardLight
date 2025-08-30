@@ -1,5 +1,5 @@
 using Content.Shared.Abilities.Psionics;
-using Content.Shared.Vehicle.Components;
+//using Content.Shared.Vehicle.Components;
 using Content.Server.Abilities.Psionics;
 using Content.Shared.Eye;
 using Content.Server.NPC.Systems;
@@ -104,13 +104,13 @@ namespace Content.Server.Psionics
                 SetCanSeePsionicInvisiblity(uid, false);
         }
 
-        private void OnEyeInit(EntityUid uid, EyeComponent component, ComponentInit args)
+        /* private void OnEyeInit(EntityUid uid, EyeComponent component, ComponentInit args)
         {
             if (HasComp<PotentialPsionicComponent>(uid) || HasComp<VehicleComponent>(uid))
                 return;
 
             //SetCanSeePsionicInvisiblity(uid, true); //JJ Comment - Not allowed to modifies .yml on spawn any longer. See UninitializedSaveTest.
-        }
+        } */
         private void OnEntInserted(EntityUid uid, PsionicallyInvisibleComponent component, EntInsertedIntoContainerMessage args)
         {
             DirtyEntity(args.Entity);

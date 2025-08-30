@@ -298,11 +298,10 @@ public sealed class ShipyardGridSaveSystem : EntitySystem
     /// <summary>
     /// Removes problematic components from a grid before saving.
     /// This includes session-specific data, vending machines, runtime state, etc.
-    /// Also removes ALL unanchored/unattached entities and empties all containers.
     /// </summary>
     public void CleanGridForSaving(EntityUid gridUid)
     {
-        _sawmill.Info($"Starting comprehensive grid cleanup for {gridUid}");
+        _sawmill.Info($"Starting grid cleanup for {gridUid}");
 
         var allEntities = new HashSet<EntityUid>();
 
@@ -322,39 +321,7 @@ public sealed class ShipyardGridSaveSystem : EntitySystem
 
         var entitiesRemoved = 0;
         var componentsRemoved = 0;
-        var containersEmptied = 0;
 
-        // First pass: Empty all containers to prevent saving contained entities
-        foreach (var entity in allEntities.ToList())
-        {
-            try
-            {
-                if (!_entityManager.EntityExists(entity))
-                    continue;
-
-                // Empty all containers
-                if (_entityManager.TryGetComponent<ContainerManagerComponent>(entity, out var containerManager))
-                {
-                    foreach (var container in containerManager.Containers.Values)
-                    {
-                        var containedEntities = container.ContainedEntities.ToList();
-                        foreach (var containedEntity in containedEntities)
-                        {
-                            _sawmill.Info($"Removing contained entity {containedEntity} from container in {entity}");
-                            _entityManager.DeleteEntity(containedEntity);
-                            entitiesRemoved++;
-                        }
-                        containersEmptied++;
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                _sawmill.Warning($"Error emptying containers for entity {entity}: {ex}");
-            }
-        }
-
-        // Second pass: Remove all unanchored/unattached entities
         foreach (var entity in allEntities.ToList())
         {
             try
@@ -366,35 +333,32 @@ public sealed class ShipyardGridSaveSystem : EntitySystem
                     continue;
                 }
 
-                // Skip the grid itself and other fundamental map components
-                if (_entityManager.HasComponent<MapGridComponent>(entity) || 
-                    _entityManager.HasComponent<MapComponent>(entity))
+                // Delete all vending machines to avoid lag and complexity
+                if (_entityManager.HasComponent<VendingMachineComponent>(entity))
                 {
-                    continue;
-                }
-
-                // Get transform component to check anchoring
-                if (_entityManager.TryGetComponent<TransformComponent>(entity, out var transform))
-                {
-                    // Delete ALL entities that are not anchored to the grid
-                    if (!transform.Anchored)
-                    {
-                        _sawmill.Info($"Removing unanchored entity {entity} during comprehensive cleanup");
-                        _entityManager.DeleteEntity(entity);
-                        entitiesRemoved++;
-                        continue; // Skip to next entity since this one was deleted
-                    }
-                }
-                else
-                {
-                    // If no transform component, it's probably not needed for ship structure
-                    _sawmill.Info($"Removing entity {entity} with no transform component");
+                    _sawmill.Info($"Removing vending machine entity {entity} during ship cleanup");
                     _entityManager.DeleteEntity(entity);
                     entitiesRemoved++;
-                    continue;
+                    continue; // Skip to next entity since this one was deleted
                 }
 
-                // For anchored entities, clean their components but keep the entity
+                // Delete loose items (not anchored and not in containers)
+                if (_entityManager.TryGetComponent<TransformComponent>(entity, out var transform))
+                {
+                    // Check if item is loose (not anchored and not in a container)
+                    if (!transform.Anchored && !_containerSystem.IsEntityInContainer(entity))
+                    {
+                        // Skip important structural entities like the grid itself
+                        if (!_entityManager.HasComponent<MapGridComponent>(entity))
+                        {
+                            _sawmill.Info($"Removing loose item entity {entity} during ship cleanup");
+                            _entityManager.DeleteEntity(entity);
+                            entitiesRemoved++;
+                            continue; // Skip to next entity since this one was deleted
+                        }
+                    }
+                }
+
                 // Remove session-specific components that shouldn't be saved
                 if (_entityManager.RemoveComponent<ActorComponent>(entity))
                     componentsRemoved++;
@@ -428,7 +392,7 @@ public sealed class ShipyardGridSaveSystem : EntitySystem
             }
         }
 
-        _sawmill.Info($"Comprehensive grid cleanup complete: removed {entitiesRemoved} entities, emptied {containersEmptied} containers, removed {componentsRemoved} components from remaining entities");
+        _sawmill.Info($"Grid cleanup complete: removed {componentsRemoved} components from {allEntities.Count} entities");
     }
 
     /// <summary>

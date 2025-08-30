@@ -12,7 +12,7 @@
   id: Nest
   parent: BaseVessel
   name: AVL Nest
-  description: A small Avalonian vessel designed to serve as a home for a small pack of two to three Avali. Comes complete with an efficient thermo-electric generator, cooktop, and a spacious bedroom.
+  description: A small Avalonian vessel designed by Illuminate to serve as a home for a small pack of two to three Avali. Comes complete with an efficient thermo-electric generator, cooktop, and a spacious bedroom.
   price: 14000 # 5% markup
   category: Small
   group: Shipyard

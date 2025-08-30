@@ -113,7 +113,7 @@
 - type: entity
   parent: BodysuitBase
   id: BodysuitSUNS
-  name: suns bodysuit
+  name: SUNS bodysuit
   description: A bodysuit featuring the SUNS organization's colors and design specifications.
   components:
   - type: Sprite

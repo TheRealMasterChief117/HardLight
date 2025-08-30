@@ -57,11 +57,7 @@ public sealed partial class SalvageExpeditionConsoleComponent : Component
     public bool Debug = false;
     // End Frontier:
 
-    /// <summary>
-    /// HARDLIGHT: Local expedition data to make consoles self-sufficient
-    /// </summary>
-    [DataField]
-    public SalvageExpeditionDataComponent? LocalExpeditionData;
+
 
     /// <summary>
     /// HARDLIGHT: Reference to the console that initiated the current mission for FTL completion tracking

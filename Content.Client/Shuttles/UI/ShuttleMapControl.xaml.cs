@@ -58,11 +58,17 @@ public sealed partial class ShuttleMapControl : BaseShuttleControl
     public event Action<MapCoordinates, Angle>? RequestFTL;
 
     public event Action<NetEntity, Angle>? RequestBeaconFTL;
+    public event Action<NetEntity, Angle>? RequestStationFTL;
 
     /// <summary>
     /// Set every draw to determine the beacons that are clickable for mouse events
     /// </summary>
     private List<IMapObject> _beacons = new();
+
+    /// <summary>
+    /// Set every draw to determine the stations that are clickable for mouse events
+    /// </summary>
+    private List<IMapObject> _stations = new();
 
     // Per frame data to avoid re-allocating
     private readonly List<IMapObject> _mapObjects = new();
@@ -120,6 +126,10 @@ public sealed partial class ShuttleMapControl : BaseShuttleControl
                 if (beaconsOnly && TryGetBeacon(_beacons, mapTransform, args.RelativePixelPosition, PixelRect, out var foundBeacon, out _))
                 {
                     RequestBeaconFTL?.Invoke(foundBeacon.Entity, _ftlAngle);
+                }
+                else if (TryGetStation(_stations, mapTransform, args.RelativePixelPosition, PixelRect, out var foundStation, out _))
+                {
+                    RequestStationFTL?.Invoke(foundStation.Entity, _ftlAngle);
                 }
                 else
                 {
@@ -313,6 +323,7 @@ public sealed partial class ShuttleMapControl : BaseShuttleControl
         var beaconsOnly = _shuttles.IsBeaconMap(viewedMapUid);
         var controlLocalBounds = PixelRect;
         _beacons.Clear();
+        _stations.Clear();
 
         if (ShowBeacons)
         {
@@ -333,6 +344,29 @@ public sealed partial class ShuttleMapControl : BaseShuttleControl
 
                 var existingStrings = _strings.GetOrNew(beaconColor);
                 existingStrings.Add((beaconUiPos, beaconName));
+            }
+        }
+
+        // Add stations
+        if (ShowBeacons) // Reuse the same setting for now
+        {
+            var stationColor = Color.LightBlue;
+
+            foreach (var (stationName, coords, mapO) in GetStations(viewportObjects, matty, controlLocalBounds))
+            {
+                var localPos = Vector2.Transform(coords.Position, matty);
+                localPos = localPos with { Y = -localPos.Y };
+                var stationUiPos = ScalePosition(localPos);
+                var mapObject = GetMapObject(localPos, Angle.Zero, scale: 0.75f, scalePosition: true);
+
+                var existingVerts = _verts.GetOrNew(stationColor);
+                var existingEdges = _edges.GetOrNew(stationColor);
+
+                AddMapObject(existingEdges, existingVerts, mapObject);
+                _stations.Add(mapO);
+
+                var existingStrings = _strings.GetOrNew(stationColor);
+                existingStrings.Add((stationUiPos, stationName));
             }
         }
 
@@ -532,6 +566,28 @@ public sealed partial class ShuttleMapControl : BaseShuttleControl
         }
     }
 
+    /// <summary>
+    /// Returns the stations that intersect the viewport.
+    /// </summary>
+    private IEnumerable<(string Station, MapCoordinates Coordinates, IMapObject MapObject)> GetStations(List<IMapObject> mapObjs, Matrix3x2 mapTransform, UIBox2i area)
+    {
+        foreach (var mapO in mapObjs)
+        {
+            if (mapO is not ShuttleStationObject station)
+                continue;
+
+            var stationCoords = _xformSystem.ToMapCoordinates(EntManager.GetCoordinates(station.Coordinates));
+            var position = Vector2.Transform(stationCoords.Position, mapTransform);
+            var localPos = ScalePosition(position with {Y = -position.Y});
+
+            // If station not on screen then ignore it.
+            if (!area.Contains(localPos.Floored()))
+                continue;
+
+            yield return (station.Name, stationCoords, mapO);
+        }
+    }
+
     private float GetMapObjectRadius(float scale = 1f) => WorldRange / 40f * scale;
 
     private ValueList<Vector2> GetMapObject(Vector2 localPos, Angle angle, float scale = 1f, bool scalePosition = false)
@@ -601,6 +657,47 @@ public sealed partial class ShuttleMapControl : BaseShuttleControl
         }
 
         return foundBeacon != default;
+    }
+
+    private bool TryGetStation(IEnumerable<IMapObject> mapObjects, Matrix3x2 mapTransform, Vector2 mousePos, UIBox2i area, out ShuttleStationObject foundStation, out Vector2 foundLocalPos)
+    {
+        // In pixels
+        const float StationSnapRange = 32f;
+        float nearestValue = float.MaxValue;
+        foundLocalPos = Vector2.Zero;
+        foundStation = default;
+
+        foreach (var mapObj in mapObjects)
+        {
+            if (mapObj is not ShuttleStationObject stationObj)
+                continue;
+
+            var stationCoords = _xformSystem.ToMapCoordinates(EntManager.GetCoordinates(stationObj.Coordinates));
+
+            if (stationCoords.MapId != ViewingMap)
+                continue;
+
+            var position = Vector2.Transform(stationCoords.Position, mapTransform);
+            var localPos = ScalePosition(position with {Y = -position.Y});
+
+            // If station not on screen then ignore it.
+            if (!area.Contains(localPos.Floored()))
+                continue;
+
+            var distance = (localPos - mousePos).Length();
+
+            if (distance > StationSnapRange * UIScale ||
+                distance > nearestValue)
+            {
+                continue;
+            }
+
+            foundLocalPos = localPos;
+            nearestValue = distance;
+            foundStation = stationObj;
+        }
+
+        return foundStation != default;
     }
 
     /// <summary>

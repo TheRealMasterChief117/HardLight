@@ -4,6 +4,8 @@
   name: security turret
   description: A high-tech autonomous weapons system designed to keep unauthorized personnel out of sensitive areas.
   components:
+
+  # Physics
   - type: Fixtures
     fixtures:
       body:
@@ -23,6 +25,8 @@
         layer:
           - MachineLayer
         hard: false
+
+  # Sprites and appearance
   - type: Sprite
     sprite: Objects/Weapons/Guns/Turrets/sentry_turret.rsi
     drawdepth: HighFloorObjects
@@ -66,14 +70,20 @@
         enum.WiresVisualLayers.MaintenancePanel:
           True: { visible: false }
           False: { visible: true }
+
+  # HTN
   - type: HTN
     enabled: false
+
+  # Faction / control
   - type: StationAiWhitelist
   - type: NpcFactionMember
     factions:
     - AllHostile
   - type: AccessReader
     access: [["Security"]]
+
+  # Weapon systems
   - type: ProjectileBatteryAmmoProvider
     proto: BulletEnergyTurretDisabler
     fireCost: 100
@@ -88,6 +98,8 @@
     - Security
     - Borg
     - BasicSilicon
+
+  # Defenses / destruction
   - type: DeployableTurret
     retractedDamageModifierSetId: Metallic
     deployedDamageModifierSetId: FlimsyMetallic
@@ -118,6 +130,8 @@
         node: machineFrame
       - !type:DoActsBehavior
         acts: ["Destruction"]
+
+  # Device network
   - type: DeviceNetwork
     deviceNetId: Wired
     receiveFrequencyId: TurretControl
@@ -127,6 +141,8 @@
     examinableAddress: true
   - type: DeviceNetworkRequiresPower
   - type: WiredNetworkConnection
+
+  # Wires
   - type: UserInterface
     interfaces:
       enum.WiresUiKey.Key:
@@ -140,6 +156,8 @@
     locked: true
     unlockOnClick: false
   - type: LockedWiresPanel
+
+  # General properties
   - type: Machine
     board: WeaponEnergyTurretStationMachineCircuitboard
   - type: UseDelay
@@ -163,3 +181,89 @@
     receiveFrequencyId: TurretControlAI
     transmitFrequencyId: TurretAI
 
+# Magic spawned turret
+- type: entity
+  parent:
+  - BaseC3WizardContraband
+  - BaseWeaponTurretNF
+  id: MagicSummonTurret
+  name: crystalline sentry
+  description: A willing crystal entity pulled through the space aether by magic. They can temporarily exist on this plane, but will return home before long.
+  suffix: wizard
+  components:
+    - type: NpcFactionMember
+      factions:
+        - NanoTrasen
+    - type: Sprite
+      sprite: Structures/Decoration/crystal.rsi
+      color: "#32a8a0"
+      noRot: true
+      drawdepth: Mobs
+      layers:
+        - state: crystal_grey
+    - type: InteractionPopup
+      interactDelay: 0.2
+      successChance: 0.8
+      interactSuccessString: petting-success-generic
+      interactFailureString: petting-failure-generic
+      interactSuccessSound:
+        path: /Audio/_NF/Effects/bloodcult/ghost-scream.ogg
+    - type: Gun
+      showExamineText: false
+      fireRate: 6
+      minAngle: 10
+      maxAngle: 20
+      angleIncrease: 2
+      angleDecay: 3
+      selectedMode: FullAuto
+      availableModes:
+        - FullAuto
+      soundGunshot:
+        collection: RadiationPulse
+    - type: BasicEntityAmmoProvider
+      proto: ProjectileCrystal
+      capacity: 300
+      count: 300
+    - type: HTN
+      rootTask:
+        task: TurretCompound
+      blackboard:
+        RotateSpeed: !type:Single
+          6
+        SoundTargetInLOS: !type:SoundPathSpecifier
+          path: /Audio/_NF/Effects/bloodcult/ghost-scream.ogg
+    - type: PointLight
+      radius: 1.4
+      energy: 1.2
+      color: "#ff0000"
+      castShadows: true
+    - type: AmbientSound
+      volume: -2
+      range: 5
+      sound:
+        path: /Audio/Effects/shuttle_thruster.ogg
+    - type: Destructible
+      thresholds:
+        - trigger:
+            !type:DamageTrigger
+            damage: 540
+          behaviors:
+            - !type:DoActsBehavior
+              acts: [ "Destruction" ]
+        - trigger:
+            !type:DamageTrigger
+            damage: 300
+          behaviors:
+            - !type:DoActsBehavior
+              acts: [ "Destruction" ]
+            - !type:PlaySoundBehavior
+              sound:
+                collection: MetalGlassBreak
+            - !type:SpawnEntitiesBehavior
+              spawn:
+                ShardCrystalCyan:
+                  min: 1
+                  max: 3
+    - type: TimedDespawn
+      lifetime: 300
+    - type: AmmoCounter

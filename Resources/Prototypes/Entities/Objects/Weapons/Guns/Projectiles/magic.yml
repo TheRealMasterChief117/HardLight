@@ -153,6 +153,33 @@
     fireStacks: 0.1
 
 - type: entity
+  id: ProjectileCrystal
+  name: crystal shot
+  description: Cold to the touch
+  parent: BaseBullet
+  categories: [ HideSpawnMenu ]
+  components:
+  - type: PointLight
+    color: "#E25822"
+    radius: 0.5
+    energy: 1.25
+  - type: Projectile
+    damage:
+      types:
+        Cold: 7.5
+        Piercing: 10
+  - type: Sprite
+    sprite: Objects/Weapons/Guns/Projectiles/magic.rsi
+    layers:
+    - state: cryoshot
+      shader: unshaded
+  - type: IgnitionSource
+    temperature: -60
+    ignited: true
+  - type: IgniteOnCollide
+    fireStacks: 0
+
+- type: entity
   id: ProjectileLightningBolt
   name: lightning bolt
   description: Lightning bolt, LIGHTNING BOLT.

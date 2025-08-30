@@ -12,7 +12,7 @@
     - SubdermalImplant
     - HideContextMenu
 
-
+#MARK: Implanted actions
 
 # Empty implant template, add the spells actual action, e.g ActionFireball under implantAction, then an id, name and description as normal.
 # Refer to the ID of this when doing the 'implanter' segment below. The description of this is what shows as the green text below the implanter description.
@@ -88,6 +88,26 @@
 
 - type: entity
   parent: BaseMagicAdder
+  id: iceimplant
+  name: cold magic
+  description: It smells like the inside of a freezer.
+  categories: [ HideSpawnMenu ]
+  components:
+    - type: SubdermalImplant
+      implantAction: ActionSpawnIceSpell
+
+- type: entity
+  parent: BaseMagicAdder
+  id: turretimplant
+  name: crystal magic
+  description: It smells like nothing.
+  categories: [ HideSpawnMenu ]
+  components:
+    - type: SubdermalImplant
+      implantAction: ActionSpawnTurretSpell
+
+- type: entity
+  parent: BaseMagicAdder
   id: instrumentimplant
   name: melodic magic
   description: It smells like faded tragedies.
@@ -96,6 +116,7 @@
     - type: SubdermalImplant
       implantAction: ActionSummonInstrument
 
+#MARK: Base implanter
 # Slightly pared down implanter.
 - type: entity
   id: BaseMagicPage
@@ -145,7 +166,7 @@
             True: {state: ashed}
             False: {state: spell_default}
 
-
+#MARK: Implanters
 
 # Empty implanter template, add the ID of the implant spell under implant, remove hidespawnmenu then proceed as normal.
 - type: entity
@@ -220,3 +241,30 @@
   components:
     - type: Implanter
       implant: instrumentimplant
+
+- type: entity
+  id: icepage
+  name: torn page
+  description: A torn page from a spell book. It looks brittle.
+  parent: BaseMagicPage
+  components:
+    - type: Implanter
+      implant: iceimplant
+
+- type: entity
+  id: turretpage
+  name: torn page
+  description: A torn page from a spell book. It looks brittle.
+  parent: BaseMagicPage
+  components:
+    - type: Implanter
+      implant: turretimplant
+
+- type: entity
+  id: chaptestplant
+  name: torn page
+  description: A torn page from a spell book. It looks brittle.
+  parent: BaseMagicPage
+  components:
+    - type: Implanter
+      implant: chaptest

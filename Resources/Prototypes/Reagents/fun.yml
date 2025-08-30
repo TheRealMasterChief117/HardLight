@@ -398,9 +398,9 @@
   name: reagent-name-fresium
   group: Toxins
   desc: reagent-desc-fresium
-  physicalDesc: reagent-physical-desc-frosty
+  physicalDesc: reagent-physical-desc-inky
   flavor: cold
-  color: "#b3f1ff"
+  color: "#1e0036"
   boilingPoint: 1.0
   meltingPoint: 1.0
   evaporationSpeed: 20

@@ -160,8 +160,8 @@
 
 - type: listing
   id: SpellbookStars
-  name: spellbook-restore-name
-  description: spellbook-nightmarem-description
+  name: spellbook-stars-name
+  description: spellbook-stars-description
   productAction: ActionChapStars
   cost:
     MinorBlessing: 2

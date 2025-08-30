@@ -354,8 +354,8 @@
 
 - type: entity
   id: ActionChapStars
-  name: Living Night
-  description: Summons hallu.
+  name: Fracture
+  description: Summons minor tears and breaks in reality. Nothing to worry about, right?
   components:
   - type: WorldTargetAction
     useDelay: 120

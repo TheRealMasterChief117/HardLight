@@ -29,7 +29,7 @@
 - type: entity
   parent: DrinkCanBaseFull
   id: DrinkNtlight
-  name: beer can
+  name: NanoLight can
   description: Small joy, big taste, no worries!
   components:
   - type: SolutionContainerManager

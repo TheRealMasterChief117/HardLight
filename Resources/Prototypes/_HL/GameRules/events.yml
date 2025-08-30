@@ -1052,6 +1052,8 @@
           preventArtifactTriggers: true
         - type: PreventPilot
         - type: ForceAnchor # Added post-FTL, so anchoring is fine.
+        - type: WorldLoader
+          radius: 64
         paths:
         - /Maps/_NF/Bluespace/cache.yml
     rewardAccounts:
@@ -1092,6 +1094,8 @@
           preventArtifactTriggers: true
         - type: PreventPilot
         - type: ForceAnchor
+        - type: WorldLoader
+          radius: 64
         paths:
         - /Maps/_NF/Bluespace/vault.yml
     rewardAccounts:
@@ -1133,6 +1137,8 @@
           preventArtifactTriggers: true
         - type: PreventPilot
         - type: ForceAnchor
+        - type: WorldLoader
+          radius: 64
         paths:
         - /Maps/_NF/Bluespace/vaultsmall.yml
     rewardAccounts:
@@ -1172,6 +1178,8 @@
           preventArtifactTriggers: true
         - type: PreventPilot
         - type: ForceAnchor
+        - type: WorldLoader
+          radius: 64
         paths:
         - /Maps/_NF/Bluespace/syndieftlintercept.yml
 
@@ -1209,6 +1217,8 @@
           preventArtifactTriggers: true
         - type: PreventPilot
         - type: ForceAnchor
+        - type: WorldLoader
+          radius: 64
         paths:
         - /Maps/_NF/Bluespace/wizardprobealt.yml
 
@@ -1246,6 +1256,8 @@
           preventArtifactTriggers: true
         - type: PreventPilot
         - type: ForceAnchor
+        - type: WorldLoader
+          radius: 64
         paths:
         - /Maps/_NF/Bluespace/bloodmoon.yml
 
@@ -1281,6 +1293,8 @@
           preventArtifactTriggers: true
         - type: PreventPilot
         - type: ForceAnchor
+        - type: WorldLoader
+          radius: 64
         paths:
         - /Maps/_NF/Bluespace/cave.yml
 
@@ -1315,6 +1329,8 @@
         - type: ProtectedGrid
           preventArtifactTriggers: true
         - type: PreventPilot
+        - type: WorldLoader
+          radius: 64
         paths:
         - /Maps/_NF/Bluespace/mcevent.yml
 
@@ -1359,6 +1375,8 @@
         - type: ProtectedGrid
           preventArtifactTriggers: true
         - type: PreventPilot
+        - type: WorldLoader
+          radius: 64
         # FIXME: the dungeon dosen't pass FTL events even though it should FTL in
         #        and we don't get a MapInitEvent, so this just forces static physics
         - type: Physics

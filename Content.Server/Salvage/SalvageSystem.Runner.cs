@@ -17,6 +17,7 @@ using Content.Server.GameTicking; // Frontier
 using Content.Server._NF.Salvage.Expeditions.Structure; // Frontier
 using Content.Server._NF.Salvage.Expeditions;
 using Content.Shared.Salvage; // Frontier
+using Robust.Shared.GameObjects; // HARDLIGHT: For SpawnTimer extension method
 
 namespace Content.Server.Salvage;
 
@@ -108,13 +109,21 @@ public sealed partial class SalvageSystem
         if (component.Stage != ExpeditionStage.Added)
             return;
 
-        // Frontier: early finish
-        if (TryComp<SalvageExpeditionDataComponent>(component.Station, out var data))
+        // HARDLIGHT: Update the station's expedition data via the console
+        if (component.Console != null && TryComp<SalvageExpeditionConsoleComponent>(component.Console.Value, out var consoleComp))
         {
-            data.CanFinish = true;
-            UpdateConsoles((component.Station, data));
+            var data = GetStationExpeditionData(component.Console.Value);
+            if (data != null)
+            {
+                data.CanFinish = true;
+                UpdateConsole((component.Console.Value, consoleComp));
+                Log.Info($"FTL completed - enabled finishing for console {ToPrettyString(component.Console.Value)}");
+            }
         }
-        // End Frontier: early finish
+        else
+        {
+            Log.Warning($"FTL completed but no valid console reference found for expedition on {args.MapUid}");
+        }
 
         Announce(args.MapUid, Loc.GetString("salvage-expedition-announcement-countdown-minutes", ("duration", (component.EndTime - _timing.CurTime).Minutes)));
 
@@ -163,13 +172,20 @@ public sealed partial class SalvageSystem
 
     private void OnFTLStarted(ref FTLStartedEvent ev)
     {
-        if (!TryComp<SalvageExpeditionComponent>(ev.FromMapUid, out var expedition) ||
-            !TryComp<SalvageExpeditionDataComponent>(expedition.Station, out var station))
-        {
+        if (!TryComp<SalvageExpeditionComponent>(ev.FromMapUid, out var expedition))
             return;
-        }
 
-        station.CanFinish = false; // Frontier
+        // HARDLIGHT: Update the station's expedition data via the console
+        if (expedition.Console != null && TryComp<SalvageExpeditionConsoleComponent>(expedition.Console.Value, out var consoleComp))
+        {
+            var data = GetStationExpeditionData(expedition.Console.Value);
+            if (data != null)
+            {
+                data.CanFinish = false;
+                UpdateConsole((expedition.Console.Value, consoleComp));
+                Log.Info($"FTL started - disabled finishing for console {ToPrettyString(expedition.Console.Value)}");
+            }
+        }
 
         // Check if any shuttles remain.
         var query = EntityQueryEnumerator<ShuttleComponent, TransformComponent>();
@@ -181,7 +197,12 @@ public sealed partial class SalvageSystem
         }
 
         // Last shuttle has left so finish the mission.
-        QueueDel(ev.FromMapUid.Value);
+        if (ev.FromMapUid.HasValue && Exists(ev.FromMapUid.Value))
+        {
+            // HARDLIGHT: Clean up console state before deleting expedition
+            CleanupExpeditionConsoleState(ev.FromMapUid.Value);
+            QueueDel(ev.FromMapUid.Value);
+        }
     }
 
     // Runs the expedition
@@ -232,70 +253,66 @@ public sealed partial class SalvageSystem
                 ftlTime = MathF.Min(ftlTime, _shuttle.DefaultStartupTime);
                 var shuttleQuery = AllEntityQuery<ShuttleComponent, TransformComponent>();
 
-                if (TryComp<StationDataComponent>(comp.Station, out var data))
+                // HARDLIGHT: FTL all shuttles on the expedition map, regardless of station component
+                // This ensures shuttles get sent home even with the new console system
+                while (shuttleQuery.MoveNext(out var shuttleUid, out var shuttle, out var shuttleXform))
                 {
-                    foreach (var member in data.Grids)
+                    if (shuttleXform.MapUid != uid || HasComp<FTLComponent>(shuttleUid))
+                        continue;
+
+                    // Frontier: try to find a potential destination for ship that doesn't collide with other grids.
+                    var mapId = _gameTicker.DefaultMap;
+                    if (!_mapSystem.TryGetMap(mapId, out var mapUid))
                     {
-                        while (shuttleQuery.MoveNext(out var shuttleUid, out var shuttle, out var shuttleXform))
+                        Log.Error($"Could not get DefaultMap EntityUID, shuttle {shuttleUid} may be stuck on expedition.");
+                        continue;
+                    }
+
+                    // Destination generator parameters (move to CVAR?)
+                    int numRetries = 20; // Maximum number of retries
+                    float minDistance = 200f; // Minimum distance from another object, in meters
+                    float minRange = 750f; // Minimum distance from sector centre, in meters
+                    float maxRange = 3500f; // Maximum distance from sector centre, in meters
+
+                    // Get a list of all grid positions on the destination map
+                    List<Vector2> gridCoords = new();
+                    var gridQuery = EntityManager.AllEntityQueryEnumerator<MapGridComponent, TransformComponent>();
+                    while (gridQuery.MoveNext(out var _, out _, out var xform))
+                    {
+                        if (xform.MapID == mapId)
+                            gridCoords.Add(_transform.GetWorldPosition(xform));
+                    }
+
+                    Vector2 dropLocation = _random.NextVector2(minRange, maxRange);
+                    for (int i = 0; i < numRetries; i++)
+                    {
+                        bool positionIsValid = true;
+                        foreach (var station in gridCoords)
                         {
-                            if (shuttleXform.MapUid != uid || HasComp<FTLComponent>(shuttleUid))
-                                continue;
-
-                            // Frontier: try to find a potential destination for ship that doesn't collide with other grids.
-                            var mapId = _gameTicker.DefaultMap;
-                            if (!_mapSystem.TryGetMap(mapId, out var mapUid))
+                            if (Vector2.Distance(station, dropLocation) < minDistance)
                             {
-                                Log.Error($"Could not get DefaultMap EntityUID, shuttle {shuttleUid} may be stuck on expedition.");
-                                continue;
+                                positionIsValid = false;
+                                break;
                             }
-
-                            // Destination generator parameters (move to CVAR?)
-                            int numRetries = 20; // Maximum number of retries
-                            float minDistance = 200f; // Minimum distance from another object, in meters
-                            float minRange = 750f; // Minimum distance from sector centre, in meters
-                            float maxRange = 3500f; // Maximum distance from sector centre, in meters
-
-                            // Get a list of all grid positions on the destination map
-                            List<Vector2> gridCoords = new();
-                            var gridQuery = EntityManager.AllEntityQueryEnumerator<MapGridComponent, TransformComponent>();
-                            while (gridQuery.MoveNext(out var _, out _, out var xform))
-                            {
-                                if (xform.MapID == mapId)
-                                    gridCoords.Add(_transform.GetWorldPosition(xform));
-                            }
-
-                            Vector2 dropLocation = _random.NextVector2(minRange, maxRange);
-                            for (int i = 0; i < numRetries; i++)
-                            {
-                                bool positionIsValid = true;
-                                foreach (var station in gridCoords)
-                                {
-                                    if (Vector2.Distance(station, dropLocation) < minDistance)
-                                    {
-                                        positionIsValid = false;
-                                        break;
-                                    }
-                                }
-
-                                if (positionIsValid)
-                                    break;
-
-                                // No good position yet, pick another random position.
-                                dropLocation = _random.NextVector2(minRange, maxRange);
-                            }
-
-                            _shuttle.FTLToCoordinates(shuttleUid, shuttle, new EntityCoordinates(mapUid.Value, dropLocation), 0f, ftlTime, TravelTime);
-                            // End Frontier:  try to find a potential destination for ship that doesn't collide with other grids.
-                            //_shuttle.FTLToDock(shuttleUid, shuttle, member, ftlTime); // Frontier: use above instead
                         }
 
-                        break;
+                        if (positionIsValid)
+                            break;
+
+                        // No good position yet, pick another random position.
+                        dropLocation = _random.NextVector2(minRange, maxRange);
                     }
+
+                    _shuttle.FTLToCoordinates(shuttleUid, shuttle, new EntityCoordinates(mapUid.Value, dropLocation), 0f, ftlTime, TravelTime);
+                    Log.Info($"Normal timeout: FTLing shuttle {shuttleUid} home from expedition {uid}");
+                    // End Frontier:  try to find a potential destination for ship that doesn't collide with other grids.
                 }
             }
 
             if (remaining < TimeSpan.Zero)
             {
+                // HARDLIGHT: Clean up console state before deleting expedition
+                CleanupExpeditionConsoleState(uid);
                 QueueDel(uid);
             }
         }
@@ -362,5 +379,52 @@ public sealed partial class SalvageSystem
             }
         }
         // End Frontier: mission-specific logic
+    }
+
+    // HARDLIGHT: Clean up console state when expedition ends
+    private void CleanupExpeditionConsoleState(EntityUid expeditionUid)
+    {
+        if (!TryComp<SalvageExpeditionComponent>(expeditionUid, out var component))
+            return;
+
+        // Reset the console's station expedition data
+        if (component.Console != null && TryComp<SalvageExpeditionConsoleComponent>(component.Console.Value, out var consoleComp))
+        {
+            var data = GetStationExpeditionData(component.Console.Value);
+            if (data != null)
+            {
+                Log.Info($"Cleaning up expedition state for console {ToPrettyString(component.Console.Value)}");
+
+                // Reset station expedition state immediately
+                data.ActiveMission = 0;
+                data.CanFinish = false;
+                data.Cooldown = false;
+
+                // Update console to show cleared state
+                UpdateConsole((component.Console.Value, consoleComp));
+
+                // Generate new missions after a delay to prevent visual glitches
+                var consoleUid = component.Console.Value;
+                consoleUid.SpawnTimer(TimeSpan.FromSeconds(2), () =>
+                {
+                    if (Exists(consoleUid) && TryComp<SalvageExpeditionConsoleComponent>(consoleUid, out var comp))
+                    {
+                        var stationData = GetStationExpeditionData(consoleUid);
+                        if (stationData != null)
+                        {
+                            GenerateMissions(stationData);
+                            UpdateConsole((consoleUid, comp));
+                            Log.Info($"Console {ToPrettyString(consoleUid)} missions regenerated after expedition cleanup");
+                        }
+                    }
+                });
+
+                Log.Info($"Console {ToPrettyString(component.Console.Value)} state reset successfully");
+            }
+        }
+        else
+        {
+            Log.Warning($"Failed to cleanup console state for expedition {expeditionUid} - console reference missing or invalid");
+        }
     }
 }

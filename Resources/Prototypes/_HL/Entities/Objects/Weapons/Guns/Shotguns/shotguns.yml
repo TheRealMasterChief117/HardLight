@@ -1,0 +1,17 @@
+- type: entity
+  name: sawn-off triple-barrel shotgun (12 gauge)
+  parent: BaseWeaponShotgun
+  id: WeaponShotgunTripleSawn
+  description: A doubly modified civilian grade shotgun with a third barrel welded to the top of the mechanism. More is better, right?
+  components:
+  - type: Sprite
+    sprite: _DV/Objects/Weapons/Guns/Shotguns/sawn.rsi
+  - type: Clothing
+    sprite: _DV/Objects/Weapons/Guns/Shotguns/sawn.rsi
+  - type: Item
+    size: Small
+    sprite: _DV/Objects/Weapons/Guns/Shotguns/sawn.rsi
+  - type: Gun
+    fireRate: 3
+  - type: BallisticAmmoProvider
+    capacity: 3

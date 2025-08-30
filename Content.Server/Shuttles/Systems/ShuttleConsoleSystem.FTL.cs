@@ -7,6 +7,8 @@ using Content.Shared.Shuttles.UI.MapObjects;
 using Robust.Shared.Map;
 using Robust.Shared.Map.Components;
 using Robust.Shared.Physics.Components;
+using Content.Server.Station.Components;
+using System.Linq;
 
 namespace Content.Server.Shuttles.Systems;
 
@@ -76,6 +78,37 @@ public sealed partial class ShuttleConsoleSystem
         ConsoleFTL(entity, targetCoordinates, angle, args.Coordinates.MapId);
     }
 
+    private void OnStationDockFTLMessage(Entity<ShuttleConsoleComponent> ent, ref ShuttleConsoleFTLStationDockMessage args)
+    {
+        var stationEnt = GetEntity(args.Station);
+        if (!Exists(stationEnt))
+        {
+            return;
+        }
+
+        // Get the console's shuttle
+        var consoleUid = GetDroneConsole(ent.Owner);
+        if (consoleUid == null)
+            return;
+
+        if (!_xformQuery.TryGetComponent(consoleUid.Value, out var shuttleXform) ||
+            !TryComp<ShuttleComponent>(shuttleXform.GridUid, out var shuttleComp))
+        {
+            return;
+        }
+
+        // Get the station's grids for docking
+        if (!TryComp<StationDataComponent>(stationEnt, out var stationData) || stationData.Grids.Count == 0)
+        {
+            return;
+        }
+
+        var targetGrid = stationData.Grids.First(); // Use the first/main grid as the docking target
+
+        // Use TryFTLDock for proper station docking - same mechanism as shipyard
+        _shuttle.TryFTLDock(shuttleXform.GridUid!.Value, shuttleComp, targetGrid);
+    }
+
     private void GetBeacons(ref List<ShuttleBeaconObject>? beacons)
     {
         var beaconQuery = AllEntityQuery<FTLBeaconComponent>();
@@ -106,6 +139,24 @@ public sealed partial class ShuttleConsoleSystem
 
             exclusions ??= new List<ShuttleExclusionObject>();
             exclusions.Add(new ShuttleExclusionObject(GetNetCoordinates(xform.Coordinates), comp.Range, Loc.GetString("shuttle-console-exclusion")));
+        }
+    }
+
+    private void GetStations(ref List<ShuttleStationObject>? stations)
+    {
+        var stationQuery = AllEntityQuery<StationDataComponent, TransformComponent>();
+
+        while (stationQuery.MoveNext(out var stationUid, out var stationData, out var xform))
+        {
+            var meta = _metaQuery.GetComponent(stationUid);
+            var name = meta.EntityName;
+
+            if (string.IsNullOrEmpty(name))
+                name = Loc.GetString("shuttle-console-unknown");
+
+            // Add station as FTL dock target
+            stations ??= new List<ShuttleStationObject>();
+            stations.Add(new ShuttleStationObject(GetNetEntity(stationUid), GetNetCoordinates(xform.Coordinates), $"🏭 {name}"));
         }
     }
 

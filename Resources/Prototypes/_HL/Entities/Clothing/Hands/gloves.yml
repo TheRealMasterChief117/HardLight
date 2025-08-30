@@ -1,0 +1,56 @@
+- type: entity
+  parent: ClothingHandsBase
+  id: ClothingHandsGlovesPuncherPoc
+  name: improvised punching gloves
+  description: Simple and grisly insulated gloves with small metal plates sewn on. Lends your fists some serious potential for harm.
+  components:
+  - type: Sprite
+    sprite: _HL/Clothing/Gloves/punchgloves.rsi
+  - type: Clothing
+    sprite: _HL/Clothing/Gloves/punchgloves.rsi
+  - type: StaminaDamageOnHit
+    damage: 14
+  - type: MeleeWeapon
+    autoAttack: True
+    attackRate: 1.5
+    damage:
+      types:
+        Blunt: 12
+    soundHit:
+      collection: MetalThud
+    animation: WeaponArcFist
+    mustBeEquippedToUse: true
+  - type: Fiber
+    fiberMaterial: fibers-leather
+    fiberColor: fibers-red
+  - type: FingerprintMask
+  - type: Insulated
+
+- type: entity
+  parent: ClothingHandsBase
+  id: ClothingHandsGlovesPuncherPocSharp
+  name: improvised sharp punching gloves
+  description: The plastic knuckle guards on these insulated combat gloves have had decidedly more lethal industrial screws pushed through them.
+  components:
+  - type: Sprite
+    sprite: _HL/Clothing/Gloves/nailgloves.rsi
+  - type: Clothing
+    sprite: _HL/Clothing/Gloves/nailgloves.rsi
+  - type: StaminaDamageOnHit
+    damage: 4
+  - type: MeleeWeapon
+    autoAttack: True
+    attackRate: 1.5
+    damage:
+      types:
+        Blunt: 8
+        Piercing: 6
+    soundHit:
+      collection: MetalThud
+    animation: WeaponArcFist
+    mustBeEquippedToUse: true
+  - type: Fiber
+    fiberMaterial: fibers-leather
+    fiberColor: fibers-red
+  - type: FingerprintMask
+  - type: Insulated

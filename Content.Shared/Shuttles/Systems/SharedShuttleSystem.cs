@@ -121,6 +121,22 @@ public abstract partial class SharedShuttleSystem : EntitySystem
         }
     }
 
+    /// <summary>
+    /// Gets stations on the same map.
+    /// </summary>
+    public IEnumerable<(ShuttleStationObject Station, MapCoordinates Coordinates)> GetStations(MapId mapId, List<ShuttleStationObject> stations)
+    {
+        foreach (var station in stations)
+        {
+            var stationCoords = XformSystem.ToMapCoordinates(GetCoordinates(station.Coordinates));
+
+            if (stationCoords.MapId != mapId)
+                continue;
+
+            yield return (station, stationCoords);
+        }
+    }
+
     public bool CanDraw(EntityUid gridUid, PhysicsComponent? physics = null, IFFComponent? iffComp = null)
     {
         if (!Resolve(gridUid, ref physics))

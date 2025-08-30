@@ -99,6 +99,7 @@
   - SynthRightArm
   - SynthLeftHand
   - SynthRightHand
+  - SynthHeadEmpty # Hardlight change
 
 # Shitmed
 - type: latheRecipePack

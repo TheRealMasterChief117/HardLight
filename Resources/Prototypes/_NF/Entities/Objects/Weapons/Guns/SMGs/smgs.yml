@@ -92,7 +92,7 @@
 #region DeltaV
 - type: entity
   id: NFWeaponSubMachineGunTypewriter
-  parent: [ BaseSMG, NFBaseWeaponFrameSubMachineGunFrontierGunsmith ]
+  parent: [ BaseWeaponSubMachineGun, NFBaseWeaponFrameSubMachineGunFrontierGunsmith ]
   name: Typewriter
   description: |-
     A modern take on the classic design used by mobsters throughout space and time.

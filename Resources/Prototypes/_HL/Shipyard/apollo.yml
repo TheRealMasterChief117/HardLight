@@ -24,7 +24,7 @@
 
 - type: gameMap
   id: Apollo
-  mapName: 'Apollo'
+  mapName: 'ID Apollo'
   mapPath: /Maps/_HL/Shuttles/apollo.yml
   minPlayers: 0
   stations:

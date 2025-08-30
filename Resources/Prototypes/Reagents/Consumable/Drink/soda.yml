@@ -114,6 +114,27 @@
   metamorphicFillBaseName: fill-
   metamorphicChangeColor: true
   fizziness: 0
+  # Floof region
+  metabolisms:
+    Drink:
+      effects:
+      - !type:SatiateThirst
+        factor: 1.5
+      - !type:HealthChange
+        scaleByQuantity: true
+        ignoreResistances: false
+        damage:
+          types:
+            Cold: 0.1
+        conditions:
+        - !type:ReagentThreshold
+          min: 20
+      - !type:AdjustTemperature
+        conditions:
+        - !type:Temperature
+          min: 298.15 # Floof
+        amount: -1000
+  # Floof region end
 
 - type: reagent
   id: LemonLime
@@ -261,7 +282,7 @@
     state: icon_empty
   metamorphicMaxFillLevels: 5
   metamorphicFillBaseName: fill-
-  metamorphicChangeColor: false  
+  metamorphicChangeColor: false
   metabolisms:
     Drink:
       effects:

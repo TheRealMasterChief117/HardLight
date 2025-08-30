@@ -186,9 +186,3 @@
     Biomass: 5
 # Shitmed Change End
 
-- type: latheRecipe
-  id: SynthHeadEmpty
-  result: BioSynthHeadEmpty
-  completetime: 10
-  materials:
-    Biomass: 5

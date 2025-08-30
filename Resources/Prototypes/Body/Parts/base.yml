@@ -27,20 +27,20 @@
     thresholds:
     - trigger:
         !type:DamageTypeTrigger
-        damageType: Blunt
-        damage: 250
+        damageType: Blunt   #Hardlight change Start from 250 to 300
+        damage: 300
       behaviors:
       - !type:GibPartBehavior { }
     - trigger:
         !type:DamageTypeTrigger
         damageType: Slash
-        damage: 250
+        damage: 300
       behaviors:
       - !type:GibPartBehavior { }
     - trigger:
         !type:DamageTypeTrigger
         damageType: Heat
-        damage: 250
+        damage: 300      # Hard Light change Stop from 250 to 300
       behaviors:
       - !type:SpawnEntitiesBehavior
         spawnInContainer: true

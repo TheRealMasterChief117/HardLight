@@ -7,7 +7,7 @@
     Scream:
       path: /Audio/_Starlight/Effects/avali_scream.ogg
     Laugh:
-      collection: MaleLaugh
+      collection: ResomiLaugh
     Sneeze:
       collection: MaleSneezes
     Cough:
@@ -18,16 +18,36 @@
       collection: Snores
     Sigh:
       collection: MaleSigh
-    Crying:
-      collection: MaleCry
-    Whistle:
-      collection: Whistles
     Weh:
       collection: Weh
+    Hew:
+      collection: Hew
     Gasp:
       collection: MaleGasp
     DefaultDeathgasp:
       collection: MaleDeathGasp
+    Hisses:
+      collection: FelionoidHisses
+    Purr:
+      collection: FelionoidPurrs
+    Growl:
+      collection: FelionoidGrowls
+    Trill:
+      collection: FelionoidTrills
+    Scree:
+      collection: ResomiScrees
+    Call:
+      collection: ResomiCalls
+    Squawk:
+      collection: ResomiSquawk
+    Crying:
+      collection: MaleCry
+    Honk:
+      collection: BikeHorn
+    Whistle:
+      path: /Audio/Voice/Resomi/resomi_whistle.ogg
+    Chirp:
+      collection: ResomiChirp
 
 - type: emoteSounds
   id: FemaleAvali
@@ -37,7 +57,7 @@
     Scream:
       path: /Audio/_Starlight/Effects/avali_scream.ogg
     Laugh:
-      collection: FemaleLaugh
+      collection: ResomiLaugh
     Sneeze:
       collection: FemaleSneezes
     Cough:
@@ -48,12 +68,10 @@
       collection: Snores
     Sigh:
       collection: FemaleSigh
-    Crying:
-      collection: FemaleCry
-    Whistle:
-      collection: Whistles
     Weh:
       collection: Weh
+    Hew:
+      collection: Hew
     Gasp:
       collection: FemaleGasp
     DefaultDeathgasp:

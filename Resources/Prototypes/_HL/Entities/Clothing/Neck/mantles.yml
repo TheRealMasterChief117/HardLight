@@ -90,7 +90,7 @@
 - type: entity
   parent: ClothingNeckBase
   id: ClothingNeckMantleSUNS
-  name: suns mantle
+  name: SUNS mantle
   description: A mantle featuring the SUNS organization's colors and design specifications.
   components:
   - type: Sprite

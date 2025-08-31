@@ -479,10 +479,6 @@
       path: /Audio/Items/bikehorn.ogg
     Ping:
       path: /Audio/Effects/Cargo/ping.ogg
-    Laugh:
-      collection: ResomiLaugh
-    Honk:
-      collection: BikeHorn
     Whistle:
       path: /Audio/Voice/Resomi/resomi_whistle.ogg
     Chirp:

@@ -399,7 +399,7 @@
   chatMessages: ["chat-emote-msg-hew"]
 
 - type: emote
-  id: Chirp
+  id: NymphChirp
   name: chat-emote-name-chirp
   category: Vocal
   available: false

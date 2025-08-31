@@ -1,65 +1,20 @@
-# Avali Sounds
-- type: emoteSounds
-  id: MaleAvali
-  params:
-    variation: 0.125
-  sounds:
-    Scream:
-      path: /Audio/_Starlight/Effects/avali_scream.ogg
-    Laugh:
-      collection: ResomiLaugh
-    Sneeze:
-      collection: MaleSneezes
-    Cough:
-      collection: MaleCoughs
-    Yawn:
-      collection: MaleYawn
-    Snore:
-      collection: Snores
-    Sigh:
-      collection: MaleSigh
-    Weh:
-      collection: Weh
-    Hew:
-      collection: Hew
-    Gasp:
-      collection: MaleGasp
-    DefaultDeathgasp:
-      collection: MaleDeathGasp
+# species
 
 - type: emoteSounds
-  id: FemaleVulpkanin
+  id: UnisexResomi
   params:
     variation: 0.125
   sounds:
     Scream:
-      collection: FemaleScreams
+      path: /Audio/Voice/Resomi/resomi_scream.ogg
     Laugh:
-      collection: FemaleLaugh
-    Growl:
-      collection: Growl
-    Howl:
-      path: /Audio/_Starlight/Effects/howl.ogg
-    Bark:
-      collection: Bark
-    Yip:
-      path: /Audio/_Starlight/Effects/yip.ogg
-    Whine:
-      collection: Whine
-    Sneeze:
-      collection: FemaleSneezes
-    Cough:
-      collection: FemaleCoughs
-    Yawn:
-      collection: FemaleYawn
-    Snore:
-      collection: Snores
-    Sigh:
-      collection: FemaleSigh
-    Crying:
-      collection: FemaleCry
+      collection: ResomiLaugh
+    Honk:
+      collection: BikeHorn
     Whistle:
-      collection: Whistles
+      path: /Audio/Voice/Resomi/resomi_whistle.ogg
+    Chirp:
+      collection: ResomiChirp
     Weh:
       collection: Weh
     Hew:
@@ -67,7 +22,29 @@
     Gasp:
       collection: FemaleGasp
     DefaultDeathgasp:
-      collection: FemaleDeathGasp
+      collection: DeathGasp
+    Sigh:
+      collection: FemaleSigh
+    Crying:
+      collection: ResomiCry
+    Cough:
+      collection: FemaleCoughs
+    Yawn:
+      collection: FemaleYawn
+    Hisses:
+      collection: FelionoidHisses
+    Purr:
+      collection: FelionoidPurrs
+    Growl:
+      collection: FelionoidGrowls
+    Trill:
+      collection: FelionoidTrills
+    Scree:
+      collection: ResomiScrees
+    Call:
+      collection: ResomiCalls
+    Squawk:
+      collection: ResomiSquawk
 
 - type: emoteSounds
   id: MaleFelionoid
@@ -78,12 +55,14 @@
       collection: FelionoidScreams
     Laugh:
       collection: MaleLaugh
+    Yip:
+      path: /Audio/_Starlight/Effects/yip.ogg
     Sneeze:
       collection: MaleSneezes
     Cough:
       collection: MaleCoughs
     Crying:
-      collection: MaleCry
+      collection: ResomiCry
     Whistle:
       collection: Whistles
     Sigh:
@@ -96,6 +75,8 @@
       collection: FelionoidMews
     Hisses:
       collection: FelionoidHisses
+    Meow:
+      collection: FelionoidMeows
     Purr:
       collection: FelionoidPurrs
     Growl:
@@ -120,12 +101,14 @@
       collection: FelionoidScreams
     Laugh:
       collection: FemaleLaugh
+    Yip:
+      path: /Audio/_Starlight/Effects/yip.ogg
     Sneeze:
       collection: FemaleSneezes
     Cough:
       collection: FemaleCoughs
     Crying:
-      collection: FemaleCry
+      collection: ResomiCry
     Sigh:
       collection: FemaleSigh
     Yawn:
@@ -313,6 +296,8 @@
       collection: ShadekinMaleScreams
     Laugh:
       collection: MaleLaugh
+    Yip:
+      path: /Audio/_Starlight/Effects/yip.ogg
     Sneeze:
       collection: MaleSneezes
     Cough:
@@ -324,7 +309,7 @@
     Sigh:
       collection: MaleSigh
     Crying:
-      collection: MaleCry
+      collection: ResomiCry
     Whistle:
       collection: Whistles
     Weh:
@@ -355,6 +340,8 @@
       collection: ShadekinFemaleScreams
     Laugh:
       collection: FemaleLaugh
+    Yip:
+      path: /Audio/_Starlight/Effects/yip.ogg
     Sneeze:
       collection: FemaleSneezes
     Cough:
@@ -366,7 +353,7 @@
     Sigh:
       collection: FemaleSigh
     Crying:
-      collection: FemaleCry
+      collection: ResomiCry
     Whistle:
       collection: Whistles
     Weh:

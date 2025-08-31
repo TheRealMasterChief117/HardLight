@@ -24,7 +24,7 @@
     - hissed.
 
 - type: emote
-  id: Meow
+  id: FelinidMeow
   category: Vocal
   name: Meow
   icon: Interface/Actions/scream.png
@@ -66,7 +66,7 @@
     - mraows~
 
 - type: emote
-  id: Mew
+  id: FelinidMew
   category: Vocal
   name: Mew
   icon: Interface/Actions/scream.png
@@ -85,7 +85,7 @@
     - mewed
 
 - type: emote
-  id: Growl
+  id: FelinidGrowl
   category: Vocal
   name: Growl
   icon: Interface/Actions/scream.png
@@ -104,7 +104,7 @@
     - growled
 
 - type: emote
-  id: Purr
+  id: FelinidPurr
   category: Vocal
   name: Purr
   icon: Interface/Actions/scream.png

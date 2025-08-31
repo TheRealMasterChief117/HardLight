@@ -165,8 +165,8 @@ public sealed class TraitorRuleSystem : GameRuleSystem<TraitorRuleComponent>
 
         // Change the faction
         Log.Debug($"MakeTraitor {ToPrettyString(traitor)} - Change faction");
-        _npcFaction.RemoveFaction(traitor, component.NanoTrasenFaction, false);
-        _npcFaction.AddFaction(traitor, component.SyndicateFaction);
+        _npcFaction.RemoveFaction(traitor, component.NanoTrasenFaction.Id, false);
+        _npcFaction.AddFaction(traitor, component.SyndicateFaction.Id);
 
         Log.Debug($"MakeTraitor {ToPrettyString(traitor)} - Finished");
         return true;

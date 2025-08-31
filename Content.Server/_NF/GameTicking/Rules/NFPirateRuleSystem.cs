@@ -34,8 +34,8 @@ public sealed class NFPirateRuleSystem : GameRuleSystem<NFPirateRuleComponent>
         if (TryComp(ent, out AutoPirateCaptainComponent? captain) && !captain.ApplyFaction)
             return;
 
-        _npcFaction.RemoveFaction(ent, mindId.Comp.NanoTrasenFaction, false);
-        _npcFaction.AddFaction(ent, mindId.Comp.PirateFaction);
+        _npcFaction.RemoveFaction(ent, mindId.Comp.NanoTrasenFaction.Id, false);
+        _npcFaction.AddFaction(ent, mindId.Comp.PirateFaction.Id);
     }
 
     // Character screen briefing

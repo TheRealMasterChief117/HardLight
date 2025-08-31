@@ -27,15 +27,17 @@
   - External
   - ChiefEngineer
   - Atmospherics
-  - Brig
-  - Cryogenics
-  - Frontier
+  # - Brig
+  # - Cryogenics
+  # - Frontier
   special:
   - !type:AddImplantSpecial
     implants: [ MindShieldImplant ]
   - !type:AddComponentSpecial
     components:
-      - type: CommandStaff
+    - type: CommandStaff
+    - type: PsionicBonusChance #Nyano - Summary: makes it more likely to become psionic.
+      flatBonus: 0.025
   ## End Frontier: commented everything above out
   accessGroups: # Frontier
   - GeneralAccess # Frontier

@@ -28,16 +28,15 @@
     implants: [ MindShieldImplant ]
   - !type:AddComponentSpecial
     components:
-      - type: CommandStaff
-  - !type:AddComponentSpecial
-    components:
     - type: SurgerySpeedModifier
       SpeedModifier: 2.5
+    - type: CommandStaff
+    - type: PsionicBonusChance #Nyano - Summary: makes it more likely to become psionic.
+      flatBonus: 0.025
   ## Frontier: commented everything above out
   accessGroups: # Frontier
   - GeneralAccess # Frontier
   # Shitmed Change
-
 
 - type: startingGear
   id: CMOGear

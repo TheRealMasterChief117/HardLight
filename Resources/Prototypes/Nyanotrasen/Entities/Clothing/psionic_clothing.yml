@@ -37,8 +37,9 @@
     sprite: Clothing/Hands/Gloves/leather.rsi
   - type: Clothing
     sprite: Clothing/Hands/Gloves/leather.rsi
-  - type: GloveHeatResistance
-    heatResistance: 1400
+  - type: TemperatureProtection
+    heatingCoefficient: 0.1
+    coolingCoefficient: 0.1
   - type: Fiber
     fiberMaterial: fibers-leather
     fiberColor: fibers-brown

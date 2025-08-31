@@ -26,7 +26,7 @@ public sealed class CursedMaskSystem : SharedCursedMaskSystem
     [Dependency] private readonly HTNSystem _htn = default!;
     [Dependency] private readonly MindSystem _mind = default!;
     [Dependency] private readonly NPCSystem _npc = default!;
-    [Dependency] private readonly NpcFactionSystem _npcFaction = default!;
+    //[Dependency] private readonly NpcFactionSystem _npcFaction = default!;
     [Dependency] private readonly PopupSystem _popup = default!;
 
     // We can't store this info on the component easily
@@ -51,11 +51,11 @@ public sealed class CursedMaskSystem : SharedCursedMaskSystem
                 $"{ToPrettyString(wearer):player} had their body taken over and turned into an enemy through the cursed mask {ToPrettyString(ent):entity}");
         }
 
-        var npcFaction = EnsureComp<NpcFactionMemberComponent>(wearer);
+        /* var npcFaction = EnsureComp<NpcFactionMemberComponent>(wearer);
         ent.Comp.OldFactions.Clear();
         ent.Comp.OldFactions.UnionWith(npcFaction.Factions);
         _npcFaction.ClearFactions(wearer, false);
-        _npcFaction.AddFaction(wearer, ent.Comp.CursedMaskFaction);
+        _npcFaction.AddFaction(wearer, ent.Comp.CursedMaskFaction); */
 
         ent.Comp.HasNpc = !EnsureComp<HTNComponent>(wearer, out var htn);
         htn.RootTask = new HTNCompoundTask { Task = TakeoverRootTask };
@@ -69,7 +69,7 @@ public sealed class CursedMaskSystem : SharedCursedMaskSystem
         // If we are taking off the cursed mask
         if (ent.Comp.CurrentState == CursedMaskExpression.Anger)
         {
-            if (ent.Comp.HasNpc)
+            /* if (ent.Comp.HasNpc)
                 RemComp<HTNComponent>(args.Wearer);
 
             var npcFaction = EnsureComp<NpcFactionMemberComponent>(args.Wearer);
@@ -78,7 +78,7 @@ public sealed class CursedMaskSystem : SharedCursedMaskSystem
                 _npcFaction.AddFaction(args.Wearer, faction);
 
             ent.Comp.HasNpc = false;
-            ent.Comp.OldFactions.Clear();
+            ent.Comp.OldFactions.Clear(); */
 
             if (Exists(ent.Comp.StolenMind))
             {

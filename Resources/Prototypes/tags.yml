@@ -432,6 +432,9 @@
   id: CottonBoll
 
 - type: Tag
+  id: CottonBurger
+
+- type: Tag
   id: Cow
 
 - type: Tag
@@ -809,6 +812,9 @@
 
 - type: Tag
   id: Ice
+
+- type: Tag
+  id: IceCream
 
 - type: Tag
   id: Igniter

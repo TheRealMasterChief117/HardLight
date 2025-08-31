@@ -55,7 +55,15 @@ public sealed partial class SalvageExpeditionConsoleComponent : Component
     /// </summary>
     [DataField]
     public bool Debug = false;
-    // End Frontier: 
+    // End Frontier:
+
+
+
+    /// <summary>
+    /// HARDLIGHT: Reference to the console that initiated the current mission for FTL completion tracking
+    /// </summary>
+    [DataField]
+    public EntityUid? ActiveConsole;
 }
 
 [Serializable, NetSerializable]

@@ -158,6 +158,7 @@ public sealed class PacketSealingSystem : EntitySystem
             "Rust" => "WrappedRustPackage", 
             "Grit" => "WrappedGritPackage",
             "Breakout" => "WrappedBreakoutPackage",
+            "Widow" => "WrappedWidowPackage",
             _ => null
         };
     }

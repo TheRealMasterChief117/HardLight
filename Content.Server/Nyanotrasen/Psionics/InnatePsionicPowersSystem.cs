@@ -21,7 +21,7 @@ namespace Content.Server.Nyanotrasen.Psionics
             {
                 // Convert power name to component name (e.g., "TelepathyPower" becomes "TelepathyPowerComponent")
                 var componentName = powerName.EndsWith("Component") ? powerName : powerName + "Component";
-                
+
                 try
                 {
                     var powerComponent = _componentFactory.GetComponent(componentName);
@@ -33,7 +33,7 @@ namespace Content.Server.Nyanotrasen.Psionics
                     Logger.Error($"Failed to add innate psionic power {powerName} to entity {uid}: {ex.Message}");
                 }
             }
-            
+
             // Remove this component after adding powers to prevent re-adding on respawn
             RemComp<InnatePsionicPowersComponent>(uid);
         }

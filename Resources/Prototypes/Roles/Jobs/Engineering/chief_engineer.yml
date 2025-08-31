@@ -27,15 +27,15 @@
   - External
   - ChiefEngineer
   - Atmospherics
-  - Brig
-  - Cryogenics
-  - Frontier
-  special:
-  - !type:AddImplantSpecial
-    implants: [ MindShieldImplant ]
-  - !type:AddComponentSpecial
-    components:
-      - type: CommandStaff
+  # - Brig
+  # - Cryogenics
+  # - Frontier
+  # special:
+  # - !type:AddImplantSpecial
+  #   implants: [ MindShieldImplant ]
+  # - !type:AddComponentSpecial
+  #   components:
+  #     - type: CommandStaff
   ## End Frontier: commented everything above out
   accessGroups: # Frontier
   - GeneralAccess # Frontier

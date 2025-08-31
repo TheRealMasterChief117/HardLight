@@ -85,3 +85,47 @@
         Blunt: 0.75
         Slash: 0.75
         Piercing: 0.75
+
+- type: entity
+  parent: ClothingUniformBase
+  id: ClothingUniformJumpsuitOperativeCrop
+  name: operative sleeveless crop jumpsuit
+  description: Uniform for elite syndicate operatives performing tactical operations in deep space.
+  components:
+  - type: Sprite
+    sprite: _HL/Clothing/Uniforms/opcrop.rsi
+  - type: Clothing
+    sprite: _HL/Clothing/Uniforms/opcrop.rsi
+
+- type: entity
+  parent: ClothingUniformBase
+  id: ClothingUniformJumpskirtOperativeCrop
+  name: operative sleeveless crop jumpskirt
+  description: Uniform for elite syndicate operatives performing tactical operations in deep space.
+  components:
+  - type: Sprite
+    sprite: _HL/Clothing/Uniforms/opcropskirt.rsi
+  - type: Clothing
+    sprite: _HL/Clothing/Uniforms/opcropskirt.rsi
+
+- type: entity
+  parent: ClothingUniformBase
+  id: ClothingUniformJumpsuitOperativeCropSleeves
+  name: operative crop jumpsuit
+  description: Uniform for elite syndicate operatives performing tactical operations in deep space.
+  components:
+  - type: Sprite
+    sprite: _HL/Clothing/Uniforms/opcropsleeves.rsi
+  - type: Clothing
+    sprite: _HL/Clothing/Uniforms/opcropsleeves.rsi
+
+- type: entity
+  parent: ClothingUniformBase
+  id: ClothingUniformJumpskirtOperativeCropSleeves
+  name: operative crop jumpskirt
+  description: Uniform for elite syndicate operatives performing tactical operations in deep space.
+  components:
+  - type: Sprite
+    sprite: _HL/Clothing/Uniforms/opcropskirtsleeves.rsi
+  - type: Clothing
+    sprite: _HL/Clothing/Uniforms/opcropskirtsleeves.rsi

@@ -31,3 +31,5 @@
     back:
     - Bible
     - RubberStampChaplain
+  inhand:
+    - STextImplanter

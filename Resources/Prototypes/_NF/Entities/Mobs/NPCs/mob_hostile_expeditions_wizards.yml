@@ -385,7 +385,7 @@
   - type: SolutionContainerManager
     solutions:
       tank:
-        maxVol: 1000
+        maxVol: 300
         reagents:
         - ReagentId: BlueCuracao
-          Quantity: 1000
+          Quantity: 300

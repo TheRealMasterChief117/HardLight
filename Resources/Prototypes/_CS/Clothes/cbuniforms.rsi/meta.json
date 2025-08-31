@@ -769,6 +769,9 @@
     {
       "name": "explorerstripper",
       "directions": 4
+    },
+    {
+      "name": "blank"
     }
   ]
 }

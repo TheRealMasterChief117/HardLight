@@ -295,6 +295,8 @@
         damage:
           types:
             Radiation: 3
+      - !type:ChemRerollPsionic
+        bonusMultiplier: 5
 
 - type: reagent
   id: HeartbreakerToxin

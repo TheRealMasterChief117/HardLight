@@ -443,12 +443,8 @@ public sealed class ShipyardGridSaveSystem : EntitySystem
                     _sawmill.Debug($"Removed EyeComponent from {entity}");
                 }
 
-                // Remove physics components that can cause issues
-                if (_entityManager.RemoveComponent<PhysicsComponent>(entity))
-                {
-                    componentsRemoved++;
-                    _sawmill.Debug($"Removed PhysicsComponent from {entity}");
-                }
+                // Note: Removed PhysicsComponent deletion that was causing collision issues in loaded ships
+                // PhysicsComponent and FixturesComponent are needed for proper collision detection
 
                 // Remove atmospheric components that hold runtime state
                 if (_entityManager.RemoveComponent<AtmosDeviceComponent>(entity))
@@ -746,9 +742,8 @@ public sealed class ShipyardGridSaveSystem : EntitySystem
                 if (_entityManager.RemoveComponent<EyeComponent>(entity))
                     componentsRemoved++;
 
-                // Remove problematic runtime state components
-                if (_entityManager.RemoveComponent<PhysicsComponent>(entity))
-                    componentsRemoved++;
+                // Note: Removed PhysicsComponent deletion that was causing collision issues in loaded ships
+                // PhysicsComponent and FixturesComponent are needed for proper collision detection
 
                 // Reset power components to clean state through the proper system
                 if (_entityManager.TryGetComponent<BatteryComponent>(entity, out var battery))

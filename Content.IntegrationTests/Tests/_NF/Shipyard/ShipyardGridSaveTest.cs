@@ -9,6 +9,7 @@ using Robust.Shared.Map;
 using Robust.Shared.Map.Components;
 using Robust.Shared.GameObjects;
 using Robust.Shared.Utility;
+using Robust.Shared.Physics.Components;
 using System.Threading.Tasks;
 using System.Linq;
 
@@ -59,6 +60,76 @@ namespace Content.IntegrationTests.Tests._NF.Shipyard
                 }
 
                 Assert.That(foundVendingMachine, Is.False, "No vending machines should remain in cleaned grid");
+
+                // Clean up
+                mapManager.DeleteMap(mapId);
+            });
+
+            await pair.CleanReturnAsync();
+        }
+
+        [Test]
+        public async Task TestPhysicsComponentsPreservedAfterCleaning()
+        {
+            await using var pair = await PoolManager.GetServerClient();
+            var server = pair.Server;
+
+            var entityManager = server.ResolveDependency<IEntityManager>();
+            var mapManager = server.ResolveDependency<IMapManager>();
+            var mapLoader = server.ResolveDependency<IEntitySystemManager>().GetEntitySystem<MapLoaderSystem>();
+            var shipyardGridSaveSystem = server.ResolveDependency<IEntitySystemManager>().GetEntitySystem<ShipyardGridSaveSystem>();
+
+            await server.WaitPost(() =>
+            {
+                // Create a test map
+                var mapId = mapManager.CreateMap();
+                var mapUid = mapManager.GetMapEntityId(mapId);
+
+                // Load the ambition ship
+                var mapLoaded = mapLoader.TryLoadGrid(mapId, new ResPath("/Maps/_NF/Shuttles/Expedition/ambition.yml"), out var gridUid);
+
+                Assert.That(mapLoaded, Is.True, "Should successfully load the ambition ship");
+                Assert.That(gridUid, Is.Not.Null, "Should get a valid grid UID");
+
+                if (gridUid != null)
+                {
+                    // Count entities with physics components before cleaning
+                    var physicsQuery = entityManager.EntityQueryEnumerator<PhysicsComponent>();
+                    var physicsEntitiesBeforeCleaning = 0;
+
+                    while (physicsQuery.MoveNext(out var physicsUid, out var physicsComp))
+                    {
+                        var transform = entityManager.GetComponent<TransformComponent>(physicsUid);
+                        if (transform.GridUid == gridUid.Value)
+                        {
+                            physicsEntitiesBeforeCleaning++;
+                        }
+                    }
+
+                    // Clean the grid for saving (this was removing physics components before the fix)
+                    shipyardGridSaveSystem.CleanGridForSaving(gridUid.Value);
+
+                    // Count entities with physics components after cleaning
+                    var physicsQueryAfter = entityManager.EntityQueryEnumerator<PhysicsComponent>();
+                    var physicsEntitiesAfterCleaning = 0;
+
+                    while (physicsQueryAfter.MoveNext(out var physicsUidAfter, out var physicsCompAfter))
+                    {
+                        var transformAfter = entityManager.GetComponent<TransformComponent>(physicsUidAfter);
+                        if (transformAfter.GridUid == gridUid.Value)
+                        {
+                            physicsEntitiesAfterCleaning++;
+                        }
+                    }
+
+                    // Physics components should be preserved after cleaning
+                    Assert.That(physicsEntitiesAfterCleaning, Is.EqualTo(physicsEntitiesBeforeCleaning),
+                        $"Physics components should be preserved after cleaning. Before: {physicsEntitiesBeforeCleaning}, After: {physicsEntitiesAfterCleaning}");
+
+                    // Ensure we actually had some physics entities to test with
+                    Assert.That(physicsEntitiesBeforeCleaning, Is.GreaterThan(0),
+                        "Test ship should have entities with physics components to validate the test");
+                }
 
                 // Clean up
                 mapManager.DeleteMap(mapId);

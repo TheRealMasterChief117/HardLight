@@ -36,17 +36,15 @@
   special:
   - !type:AddImplantSpecial
     implants: [ MindShieldImplant ]
-  #- !type:AddComponentSpecial
-  #  components:
-   #   - type: CommandStaff
+  - !type:AddComponentSpecial
+    components:
+    - type: CommandStaff
+    - type: PsionicBonusChance #Nyano - Summary: makes it more likely to become psionic.
+      flatBonus: 0.025
   ## Frontier: commented out stuff above
   setPreference: true
   accessGroups: # Frontier
   - GeneralAccess # Frontier
-  - !type:AddComponentSpecial
-    components:
-    - type: PsionicBonusChance #Nyano - Summary: makes it more likely to become psionic.
-      flatBonus: 0.025
 
 - type: startingGear
   id: HoSGear

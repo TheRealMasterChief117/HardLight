@@ -1,8 +1,5 @@
-//using Content.Server.NPC.Systems;
+using Content.Server.NPC.Systems;
 using Robust.Shared.Serialization.TypeSerializers.Implementations.Custom.Prototype.Set;
-using Content.Shared.NPC.Systems;
-using Content.Shared.NPC.Components;
-using Content.Shared.NPC.Prototypes;
 
 namespace Content.Server.NPC.Components
 {

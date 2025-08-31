@@ -264,26 +264,26 @@
 
 #MARK: Tattoo stuff / DNU
 
-- type: entity
-  id: TattooBoxChaplain
-  name: undetermined tattoo repertoire
-  description: This is the culmination of your current magical tattoo knowledge. Try to remember which types you can imbue.
-  categories: HideSpawnMenu
-  parent: BaseItem
-  components:
-  - type: Sprite
-    sprite: Objects/Tools/Toolboxes/toolbox_thief.rsi
-    state: icon
-  - type: ThiefUndeterminedBackpack
-    possibleSets:
-    - TestSet
-    - CommunicatorSet
-  - type: ActivatableUI
-    key: enum.ThiefBackpackUIKey.Key
-  - type: UserInterface
-    interfaces:
-      enum.ThiefBackpackUIKey.Key:
-        type: ThiefBackpackBoundUserInterface
+#- type: entity
+#  id: TattooBoxChaplain
+#  name: undetermined tattoo repertoire
+#  description: This is the culmination of your current magical tattoo knowledge. Try to remember which types you can imbue.
+#  categories: HideSpawnMenu
+#  parent: BaseItem
+#  components:
+#  - type: Sprite
+#    sprite: Objects/Tools/Toolboxes/toolbox_thief.rsi
+#    state: icon
+#  - type: ThiefUndeterminedBackpack
+#    possibleSets:
+#    - TestSet
+#    - CommunicatorSet
+#  - type: ActivatableUI
+#    key: enum.ThiefBackpackUIKey.Key
+#  - type: UserInterface
+#    interfaces:
+#      enum.ThiefBackpackUIKey.Key:
+#        type: ThiefBackpackBoundUserInterface
 
 - type: thiefBackpackSet
   id: TestSet

@@ -328,15 +328,7 @@ public sealed class EventManagerSystem : EntitySystem
         {
             return false;
         }
-        // Nyano - Summary: - Begin modified code block: check for glimmer events.
-        // This could not be cleanly done anywhere else.
-        if (_configurationManager.GetCVar(CCVars.GlimmerEnabled) &&
-            prototype.TryGetComponent<GlimmerEventComponent>(out var glimmerEvent) &&
-            (_glimmerSystem.Glimmer < glimmerEvent.MinimumGlimmer ||
-            _glimmerSystem.Glimmer > glimmerEvent.MaximumGlimmer))
-        {
-            return false;
-        }
-        // Nyano - End modified code block.
+
+        return true;
     }
 }

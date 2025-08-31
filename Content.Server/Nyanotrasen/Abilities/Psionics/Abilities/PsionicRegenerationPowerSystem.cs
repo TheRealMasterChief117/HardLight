@@ -38,6 +38,7 @@ namespace Content.Server.Abilities.Psionics
         [Dependency] private readonly SharedPsionicAbilitiesSystem _psionics = default!;
         [Dependency] private readonly IGameTiming _gameTiming = default!;
         [Dependency] private readonly MindSystem _mindSystem = default!;
+        [Dependency] private readonly ExamineSystemShared _examineSystem = default!;
 
 
         public override void Initialize()
@@ -73,7 +74,7 @@ namespace Content.Server.Abilities.Psionics
             _popupSystem.PopupEntity(Loc.GetString("psionic-regeneration-begin", ("entity", uid)),
                 uid,
                 // TODO: Use LoS-based Filter when one is available.
-                Filter.Pvs(uid).RemoveWhereAttachedEntity(entity => !ExamineSystemShared.InRangeUnOccluded(uid, entity, ExamineRange, null)),
+                Filter.Pvs(uid).RemoveWhereAttachedEntity(entity => !_examineSystem.InRangeUnOccluded(uid, entity, ExamineRange, null)),
                 true,
                 PopupType.Medium);
 

@@ -1,4 +1,5 @@
 using Robust.Shared.Map;
+using Robust.Shared.Map.Components;
 using Robust.Shared.Random;
 using Content.Server.GameTicking.Rules.Components;
 using Content.Server.Power.Components;
@@ -59,7 +60,7 @@ internal sealed class FreeProberRule : StationEventSystem<FreeProberRuleComponen
 
                 var coordinates = xform.Coordinates;
                 var gridUid = xform.GridUid;
-                if (!_mapManager.TryGetGrid(gridUid, out var grid))
+                if (!TryComp<MapGridComponent>(gridUid, out var grid))
                     continue;
 
                 var tileIndices = grid.TileIndicesFor(coordinates);

@@ -54,8 +54,8 @@ public sealed class CursedMaskSystem : SharedCursedMaskSystem
         var npcFaction = EnsureComp<NpcFactionMemberComponent>(wearer);
         ent.Comp.OldFactions.Clear();
         ent.Comp.OldFactions.UnionWith(npcFaction.Factions);
-        _npcFaction.ClearFactions((wearer, npcFaction), false);
-        _npcFaction.AddFaction((wearer, npcFaction), ent.Comp.CursedMaskFaction);
+        _npcFaction.ClearFactions(wearer, false);
+        _npcFaction.AddFaction(wearer, ent.Comp.CursedMaskFaction);
 
         ent.Comp.HasNpc = !EnsureComp<HTNComponent>(wearer, out var htn);
         htn.RootTask = new HTNCompoundTask { Task = TakeoverRootTask };
@@ -73,8 +73,9 @@ public sealed class CursedMaskSystem : SharedCursedMaskSystem
                 RemComp<HTNComponent>(args.Wearer);
 
             var npcFaction = EnsureComp<NpcFactionMemberComponent>(args.Wearer);
-            _npcFaction.RemoveFaction((args.Wearer, npcFaction), ent.Comp.CursedMaskFaction, false);
-            _npcFaction.AddFactions((args.Wearer, npcFaction), ent.Comp.OldFactions);
+            _npcFaction.RemoveFaction(args.Wearer, ent.Comp.CursedMaskFaction, false);
+            foreach (var faction in ent.Comp.OldFactions)
+                _npcFaction.AddFaction(args.Wearer, faction);
 
             ent.Comp.HasNpc = false;
             ent.Comp.OldFactions.Clear();

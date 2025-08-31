@@ -36,6 +36,7 @@ using Robust.Shared.GameObjects.Components.Localization;
 using Robust.Shared.Input.Binding;
 using Robust.Shared.Map;
 using Robust.Shared.Network;
+using Robust.Shared.Player;
 using Robust.Shared.Prototypes;
 using Robust.Shared.Replays;
 using Robust.Shared.Timing;
@@ -432,6 +433,11 @@ public sealed class ChatUIController : UIController
     }
 
     private void OnAttachedChanged(EntityUid uid)
+    {
+        UpdateChannelPermissions();
+    }
+
+    private void OnLocalSessionChanged((ICommonSession? Old, ICommonSession? New) _)
     {
         UpdateChannelPermissions();
     }

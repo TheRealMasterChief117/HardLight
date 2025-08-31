@@ -7,7 +7,7 @@ using Content.Shared.NPC.Prototypes;
 namespace Content.Server.NPC.Components
 {
     [RegisterComponent]
-    [Access(typeof(NpcFactionSystem))]
+    [Access(typeof(NpcFactionSystem), Other = AccessPermissions.ReadWriteExecute)]
     public sealed partial class NpcFactionMemberComponent : Component
     {
         /// <summary>

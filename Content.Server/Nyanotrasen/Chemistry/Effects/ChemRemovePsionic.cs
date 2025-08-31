@@ -17,12 +17,12 @@ namespace Content.Server.Chemistry.ReagentEffects
 
         public override void Effect(EntityEffectBaseArgs args)
         {
-            if (args.Scale != 1f)
+            if (args is EntityEffectReagentArgs reagentArgs && reagentArgs.Scale.Float() != 1f)
                 return;
 
             var psySys = args.EntityManager.EntitySysManager.GetEntitySystem<PsionicAbilitiesSystem>();
 
-            psySys.RemovePsionics(args.SolutionEntity);
+            psySys.RemovePsionics(args.TargetEntity);
         }
     }
 }

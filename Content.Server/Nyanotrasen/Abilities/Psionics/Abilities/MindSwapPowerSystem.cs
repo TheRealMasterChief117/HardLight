@@ -13,6 +13,7 @@ using Content.Server.GameTicking;
 using Robust.Shared.Prototypes;
 using Robust.Shared.Timing;
 using Content.Shared.Mind;
+using Robust.Shared.GameObjects;
 using Content.Shared.Actions.Events;
 using Content.Server.Ghost;
 
@@ -27,6 +28,7 @@ namespace Content.Server.Abilities.Psionics
         [Dependency] private readonly SharedPsionicAbilitiesSystem _psionics = default!;
         [Dependency] private readonly PopupSystem _popupSystem = default!;
         [Dependency] private readonly MindSystem _mindSystem = default!;
+        [Dependency] private readonly MetaDataSystem _metaData = default!;
 
         public override void Initialize()
         {
@@ -205,8 +207,8 @@ namespace Content.Server.Abilities.Psionics
                 RemComp<StealthComponent>(uid);
                 EnsureComp<SpeechComponent>(uid);
                 EnsureComp<DispellableComponent>(uid);
-                MetaData(uid).EntityName = Loc.GetString("telegnostic-trapped-entity-name");
-                MetaData(uid).EntityDescription = Loc.GetString("telegnostic-trapped-entity-desc");
+                _metaData.SetEntityName(uid, Loc.GetString("telegnostic-trapped-entity-name"));
+                _metaData.SetEntityDescription(uid, Loc.GetString("telegnostic-trapped-entity-desc"));
             }
         }
     }

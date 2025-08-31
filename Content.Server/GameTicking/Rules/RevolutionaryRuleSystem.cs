@@ -144,7 +144,7 @@ public sealed class RevolutionaryRuleSystem : GameRuleSystem<RevolutionaryRuleCo
             return;
         }
 
-        _npcFaction.AddFaction(ev.Target, RevolutionaryNpcFaction);
+        _npcFaction.AddFaction(ev.Target, RevolutionaryNpcFaction.Id);
         var revComp = EnsureComp<RevolutionaryComponent>(ev.Target);
 
         if (ev.User != null)

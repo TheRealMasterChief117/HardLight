@@ -25,7 +25,7 @@ namespace Content.Server.Chemistry.ReagentEffects
         {
             var psySys = args.EntityManager.EntitySysManager.GetEntitySystem<PsionicsSystem>();
 
-            psySys.RerollPsionics(args.SolutionEntity, bonusMuliplier: BonusMuliplier);
+            psySys.RerollPsionics(args.TargetEntity, bonusMuliplier: BonusMuliplier);
         }
     }
 }

@@ -389,7 +389,7 @@ public sealed class ArtifactAnalyzerSystem : EntitySystem
         if (TryComp<ArtifactAnalyzerComponent>(component.AnalyzerEntity.Value, out var analyzer) &&
             analyzer != null)
         {
-            _glimmerSystem.Glimmer += (int)((int)pointValue / analyzer.ExtractRatio);
+            _glimmerSystem.Glimmer += (int) pointValue / analyzer.ExtractRatio;
         }
         // Nyano - End modified code block.
 
@@ -489,6 +489,7 @@ public sealed class ArtifactAnalyzerSystem : EntitySystem
     {
         if (!Resolve(uid, ref component, ref active) || !active.AnalysisPaused)
             return;
+
         active.StartTime = _timing.CurTime;
         active.AnalysisPaused = false;
 

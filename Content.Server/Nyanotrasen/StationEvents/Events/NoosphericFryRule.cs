@@ -1,4 +1,5 @@
 using Robust.Shared.Map;
+using Robust.Shared.Map.Components;
 using Robust.Shared.Physics.Components;
 using Robust.Shared.Player;
 using Content.Server.Atmos.Components;
@@ -67,11 +68,11 @@ internal sealed class NoosphericFryRule : StationEventSystem<NoosphericFryRuleCo
                 QueueDel(pair.worn.Owner);
                 Spawn("Ash", Transform(pair.wearer).Coordinates);
                 _popupSystem.PopupEntity(Loc.GetString("psionic-burns-up", ("item", pair.worn.Owner)), pair.wearer, Filter.Pvs(pair.worn.Owner), true, Shared.Popups.PopupType.MediumCaution);
-                _audioSystem.Play("/Audio/Effects/lightburn.ogg", Filter.Pvs(pair.worn.Owner), pair.worn.Owner, true);
+                _audioSystem.PlayPvs("/Audio/Effects/lightburn.ogg", pair.worn.Owner);
             } else
             {
                 _popupSystem.PopupEntity(Loc.GetString("psionic-burn-resist", ("item", pair.worn.Owner)), pair.wearer, Filter.Pvs(pair.worn.Owner), true, Shared.Popups.PopupType.SmallCaution);
-                _audioSystem.Play("/Audio/Effects/lightburn.ogg", Filter.Pvs(pair.worn.Owner), pair.worn.Owner, true);
+                _audioSystem.PlayPvs("/Audio/Effects/lightburn.ogg", pair.worn.Owner);
             }
 
             DamageSpecifier damage = new();
@@ -111,7 +112,7 @@ internal sealed class NoosphericFryRule : StationEventSystem<NoosphericFryRuleCo
             {
                 var coordinates = xform.Coordinates;
                 var gridUid = xform.GridUid;
-                if (!_mapManager.TryGetGrid(gridUid, out var grid))
+                if (!TryComp<MapGridComponent>(gridUid, out var grid))
                     continue;
 
                 var tileIndices = grid.TileIndicesFor(coordinates);
@@ -125,7 +126,7 @@ internal sealed class NoosphericFryRule : StationEventSystem<NoosphericFryRuleCo
 
             // If it's been turned off, turn it back on.
             if (power.PowerDisabled)
-                _powerReceiverSystem.TogglePower(reactive, false);
+                _powerReceiverSystem.TryTogglePower(reactive, false);
         }
     }
 }

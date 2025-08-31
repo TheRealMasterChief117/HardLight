@@ -57,7 +57,7 @@ namespace Content.Server.Chemistry.EntitySystems
             else
                 component.CurrentIndex++;
 
-            if (!_solutionSystem.TryGetSolution(uid, solutionRegenerationComponent.Solution, out var solution))
+            if (!_solutionSystem.TryGetSolution(uid, solutionRegenerationComponent.SolutionName, out var solution))
             {
                 _sawmill.Error($"Can't get SolutionRegeneration.Solution for {ToPrettyString(uid)}");
                 return;
@@ -84,13 +84,16 @@ namespace Content.Server.Chemistry.EntitySystems
             else return;
 
             // Empty out the current solution.
-            if (!component.KeepSolution)
-                solution.RemoveAllSolution();
+            if (!component.KeepSolution && solution != null)
+                _solutionSystem.RemoveAllSolution(solution.Value);
 
             // Replace the generating solution with the newly selected solution.
             var generated = solutionRegenerationComponent.Generated;
             generated.RemoveAllSolution();
-            _solutionSystem.TryAddSolution(uid, generated, newSolution);
+            
+            // Get the solution entity and add the new solution
+            if (_solutionSystem.TryGetSolution(uid, solutionRegenerationComponent.SolutionName, out var solutionEnt))
+                _solutionSystem.TryAddSolution(solutionEnt.Value, newSolution);
 
             _popups.PopupEntity(Loc.GetString("autoregen-switched", ("reagent", proto.LocalizedName)), user, user);
         }

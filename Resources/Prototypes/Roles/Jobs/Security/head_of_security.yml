@@ -36,9 +36,9 @@
   special:
   - !type:AddImplantSpecial
     implants: [ MindShieldImplant ]
-  - !type:AddComponentSpecial
-    components:
-      - type: CommandStaff
+  #- !type:AddComponentSpecial
+  #  components:
+   #   - type: CommandStaff
   ## Frontier: commented out stuff above
   setPreference: true
   accessGroups: # Frontier

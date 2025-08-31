@@ -12,7 +12,7 @@ namespace Content.Server.Psionics
     {
         [Dependency] private readonly VisibilitySystem _visibilitySystem = default!;
         [Dependency] private readonly PsionicInvisibilityPowerSystem _invisSystem = default!;
-        [Dependency] private readonly NpcFactionSystem _npcFactonSystem = default!;
+        //[Dependency] private readonly NpcFactionSystem _npcFactonSystem = default!;
         [Dependency] private readonly SharedEyeSystem _eye = default!;
         public override void Initialize()
         {
@@ -45,17 +45,17 @@ namespace Content.Server.Psionics
             if (HasComp<PsionicInvisibilityUsedComponent>(uid))
                 _invisSystem.ToggleInvisibility(uid);
 
-            if (_npcFactonSystem.ContainsFaction(uid, "PsionicInterloper"))
+            /* if (_npcFactonSystem.ContainsFaction(uid, "PsionicInterloper"))
             {
                 component.SuppressedFactions.Add("PsionicInterloper");
                 _npcFactonSystem.RemoveFaction(uid, "PsionicInterloper");
-            }
+            } */
 
-            if (_npcFactonSystem.ContainsFaction(uid, "GlimmerMonster"))
+            /* if (_npcFactonSystem.ContainsFaction(uid, "GlimmerMonster"))
             {
                 component.SuppressedFactions.Add("GlimmerMonster");
                 _npcFactonSystem.RemoveFaction(uid, "GlimmerMonster");
-            }
+            } */
 
             SetCanSeePsionicInvisiblity(uid, true);
         }
@@ -67,7 +67,7 @@ namespace Content.Server.Psionics
 
             SetCanSeePsionicInvisiblity(uid, false);
 
-            if (!HasComp<PsionicComponent>(uid))
+            /* if (!HasComp<PsionicComponent>(uid))
             {
                 component.SuppressedFactions.Clear();
                 return;
@@ -77,7 +77,7 @@ namespace Content.Server.Psionics
             {
                 _npcFactonSystem.AddFaction(uid, faction);
             }
-            component.SuppressedFactions.Clear();
+            component.SuppressedFactions.Clear(); */
         }
 
         private void OnInvisInit(EntityUid uid, PsionicallyInvisibleComponent component, ComponentInit args)

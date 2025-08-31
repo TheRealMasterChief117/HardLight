@@ -28,7 +28,7 @@ namespace Content.Server.Psionics
         [Dependency] private readonly MindSwapPowerSystem _mindSwapPowerSystem = default!;
         [Dependency] private readonly GlimmerSystem _glimmerSystem = default!;
         [Dependency] private readonly ChatSystem _chat = default!;
-        [Dependency] private readonly NpcFactionSystem _npcFactonSystem = default!;
+        //[Dependency] private readonly NpcFactionSystem _npcFactonSystem = default!;
         [Dependency] private readonly IConfigurationManager _cfg = default!;
         [Dependency] private readonly SharedAudioSystem _audioSystem = default!;
 
@@ -55,8 +55,8 @@ namespace Content.Server.Psionics
 
             SubscribeLocalEvent<PotentialPsionicComponent, MobStateChangedEvent>(OnDeathGasp);
 
-            SubscribeLocalEvent<PsionicComponent, ComponentInit>(OnInit);
-            SubscribeLocalEvent<PsionicComponent, ComponentRemove>(OnRemove);
+            //SubscribeLocalEvent<PsionicComponent, ComponentInit>(OnInit);
+            //SubscribeLocalEvent<PsionicComponent, ComponentRemove>(OnRemove);
         }
 
         private void OnStartup(EntityUid uid, PotentialPsionicComponent component, MapInitEvent args)
@@ -113,7 +113,7 @@ namespace Content.Server.Psionics
             _chat.TrySendInGameICMessage(uid, message, InGameICChatType.Emote, false, ignoreActionBlocker:true);
         }
 
-        private void OnInit(EntityUid uid, PsionicComponent component, ComponentInit args)
+        /* private void OnInit(EntityUid uid, PsionicComponent component, ComponentInit args)
         {
             if (!component.Removable)
                 return;
@@ -133,7 +133,7 @@ namespace Content.Server.Psionics
                 return;
 
             _npcFactonSystem.RemoveFaction(uid, "PsionicInterloper");
-        }
+        } */
 
         private void OnStamHit(EntityUid uid, AntiPsionicWeaponComponent component, StaminaMeleeHitEvent args)
         {

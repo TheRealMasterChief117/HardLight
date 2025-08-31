@@ -12,6 +12,8 @@ using Robust.Shared.Audio;
 using Robust.Shared.Timing;
 using Content.Server.Mind;
 using Content.Shared.Actions.Events;
+using Robust.Shared.Audio.Systems;
+using Robust.Server.Audio;
 
 namespace Content.Server.Abilities.Psionics
 {

@@ -109,9 +109,9 @@
   - type: NpcFactionMember
     factions:
     - Syndicate
-    - type: PsionicBonusChance #Nyano - Summary: makes more likely to be psionic.
-      multiplier: 7
-      warn: false
+  - type: PsionicBonusChance #Nyano - Summary: makes more likely to be psionic.
+    multiplier: 7
+    warn: false
 
 # Wizard
 - type: entity

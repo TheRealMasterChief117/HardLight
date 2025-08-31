@@ -15,10 +15,9 @@ public sealed partial class NpcFactionSystem : EntitySystem
 {
     [Dependency] private readonly EntityLookupSystem _lookup = default!;
     [Dependency] private readonly IPrototypeManager _proto = default!;
-
-    private ISawmill _sawmill = default!;
-
-    /// <summary>
+    [Dependency] private readonly Content.Shared.NPC.Systems.NpcFactionSystem _sharedFactionSystem = default!;
+    
+    private ISawmill _sawmill = default!;    /// <summary>
     /// To avoid prototype mutability we store an intermediary data class that gets used instead.
     /// </summary>
     private Dictionary<string, FactionData> _factions = new();
@@ -158,7 +157,7 @@ public sealed partial class NpcFactionSystem : EntitySystem
         if (TryComp<FactionExceptionComponent>(entity, out var factionException))
         {
             // ignore anything from enemy faction that we are explicitly friendly towards
-            return hostiles.Where(target => !IsIgnored((entity, factionException), target));
+            return hostiles.Where(target => !_sharedFactionSystem.IsIgnored((entity, factionException), target));
         }
 
         return hostiles;
@@ -274,17 +273,6 @@ public sealed partial class NpcFactionSystem : EntitySystem
         sourceFaction.Friendly.Remove(target);
         sourceFaction.Hostile.Add(target);
         RefreshFactions();
-    }
-
-    /// <summary>
-    /// Returns whether the entity from an enemy faction won't be attacked
-    /// </summary>
-    public bool IsIgnored(Entity<FactionExceptionComponent?> ent, EntityUid target)
-    {
-        if (!Resolve(ent, ref ent.Comp, false))
-            return false;
-
-        return ent.Comp.Ignored.Contains(target);
     }
 }
 

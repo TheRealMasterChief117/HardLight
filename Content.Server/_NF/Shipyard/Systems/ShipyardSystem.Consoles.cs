@@ -433,22 +433,30 @@ public sealed partial class ShipyardSystem : SharedShipyardSystem
             return;
         }
 
-        // Load directly from YAML data using MapLoaderSystem without temporary files
-        _taskManager.RunOnMainThread(() =>
+        // Load ship using the comprehensive 5-step process
+        _taskManager.RunOnMainThread(async () =>
         {
             try
             {
-                if (!TryLoadShipFromYaml(targetId, args.YamlData, out var shuttleUid))
+                // Extract ship name from YAML if possible, or use a default
+                string shipName = ExtractShipNameFromYaml(args.YamlData) ?? $"LoadedShip_{DateTime.Now:yyyyMMdd_HHmmss}";
+                string playerUserId = playerSession.UserId.ToString();
+
+                // Use the comprehensive ship loading system
+                bool success = await TryLoadShipComprehensive(uid, targetId, args.YamlData, shipName, playerUserId, playerSession, component.ShipyardChannel);
+
+                if (success)
+                {
+                    _sawmill.Info($"Ship '{shipName}' loaded successfully for player {playerSession.UserId}");
+                    ConsolePopup(player, $"Ship '{shipName}' loaded successfully!");
+                    PlayConfirmSound(player, uid, component);
+                }
+                else
                 {
                     _sawmill.Error($"Failed to load ship from YAML data for player {playerSession.UserId}");
                     ConsolePopup(player, "Failed to load ship from YAML data");
                     PlayDenySound(player, uid, component);
-                    return;
                 }
-
-                _sawmill.Info($"Ship loaded successfully for player {playerSession.UserId} - grid: {shuttleUid}");
-                ConsolePopup(player, "Ship loaded successfully!");
-                PlayConfirmSound(player, uid, component);
             }
             catch (Exception ex)
             {

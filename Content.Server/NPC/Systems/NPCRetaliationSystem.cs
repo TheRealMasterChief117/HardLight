@@ -50,8 +50,7 @@ public sealed class NPCRetaliationSystem : EntitySystem
         if (_npcFaction.IsEntityFriendly(ent.Owner, target))
             return false;
 
-        // TODO: AggroEntity method was removed - need to implement alternative hostility system
-        // _npcFaction.AggroEntity(ent, target);
+        _npcFaction.AggroEntity(ent.Owner, target);
         if (ent.Comp.AttackMemoryLength is {} memoryLength)
             ent.Comp.AttackMemories[target] = _timing.CurTime + memoryLength;
 
@@ -71,8 +70,7 @@ public sealed class NPCRetaliationSystem : EntitySystem
                 if (!TerminatingOrDeleted(entity) && _timing.CurTime < retaliationComponent.AttackMemories[entity])
                     continue;
 
-                // TODO: DeAggroEntity method was removed - need to implement alternative hostility system
-                // _npcFaction.DeAggroEntity((uid, retaliationComponent), entity);
+                _npcFaction.DeAggroEntity((uid, factionException), entity);
                 // TODO: should probably remove the AttackMemory, thats the whole point of the ValueList right??
             }
         }

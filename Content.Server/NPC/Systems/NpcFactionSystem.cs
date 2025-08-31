@@ -9,12 +9,13 @@ namespace Content.Server.NPC.Systems;
 
 /// <summary>
 ///     Outlines faction relationships with each other.
-///     part of psionics rework was making this a partial class. Should've already been handled upstream, based on the linter.
+///     part of psionics rework was making this a partial class. Should've already been handled upstream, based on the linter. 
 /// </summary>
 public sealed partial class NpcFactionSystem : EntitySystem
 {
+    [Dependency] private readonly FactionExceptionComponent _factionException = default!;
     [Dependency] private readonly EntityLookupSystem _lookup = default!;
-    [Dependency] private readonly IPrototypeManager _proto = default!;
+    [Dependency] private readonly IPrototypeManager _protoManager = default!;
 
     private ISawmill _sawmill = default!;
 
@@ -28,14 +29,14 @@ public sealed partial class NpcFactionSystem : EntitySystem
         base.Initialize();
         _sawmill = Logger.GetSawmill("faction");
         SubscribeLocalEvent<NpcFactionMemberComponent, ComponentStartup>(OnFactionStartup);
-        _proto.PrototypesReloaded += OnProtoReload;
+        _protoManager.PrototypesReloaded += OnProtoReload;
         RefreshFactions();
     }
 
     public override void Shutdown()
     {
         base.Shutdown();
-        _proto.PrototypesReloaded -= OnProtoReload;
+        _protoManager.PrototypesReloaded -= OnProtoReload;
     }
 
     private void OnProtoReload(PrototypesReloadedEventArgs obj)
@@ -70,33 +71,12 @@ public sealed partial class NpcFactionSystem : EntitySystem
         }
     }
 
-    private void RefreshFactions()
-    {
-        _factions.Clear();
-
-        foreach (var faction in _proto.EnumeratePrototypes<NpcFactionPrototype>())
-        {
-            _factions[faction.ID] = new FactionData()
-            {
-                Friendly = faction.Friendly.ToHashSet(),
-                Hostile = faction.Hostile.ToHashSet(),
-            };
-        }
-
-        foreach (var comp in EntityQuery<NpcFactionMemberComponent>(true))
-        {
-            comp.FriendlyFactions.Clear();
-            comp.HostileFactions.Clear();
-            RefreshFactions(comp);
-        }
-    }
-
     /// <summary>
     /// Adds this entity to the particular faction.
     /// </summary>
     public void AddFaction(EntityUid uid, string faction, bool dirty = true)
     {
-        if (!_proto.HasIndex<NpcFactionPrototype>(faction))
+        if (!_protoManager.HasIndex<NpcFactionPrototype>(faction))
         {
             _sawmill.Error($"Unable to find faction {faction}");
             return;
@@ -117,7 +97,7 @@ public sealed partial class NpcFactionSystem : EntitySystem
     /// </summary>
     public void RemoveFaction(EntityUid uid, string faction, bool dirty = true)
     {
-        if (!_proto.HasIndex<NpcFactionPrototype>(faction))
+        if (!_protoManager.HasIndex<NpcFactionPrototype>(faction))
         {
             _sawmill.Error($"Unable to find faction {faction}");
             return;
@@ -158,7 +138,7 @@ public sealed partial class NpcFactionSystem : EntitySystem
         if (TryComp<FactionExceptionComponent>(entity, out var factionException))
         {
             // ignore anything from enemy faction that we are explicitly friendly towards
-            return hostiles.Where(target => !IsIgnored((entity, factionException), target));
+            return hostiles.Where(target => !_factionException.IsIgnored(factionException, target));
         }
 
         return hostiles;
@@ -172,22 +152,22 @@ public sealed partial class NpcFactionSystem : EntitySystem
         return GetNearbyFactions(entity, range, component.FriendlyFactions);
     }
 
-    private IEnumerable<EntityUid> GetNearbyFactions(EntityUid entity, float range, HashSet<ProtoId<NpcFactionPrototype>> factions)
+    private IEnumerable<EntityUid> GetNearbyFactions(EntityUid entity, float range, HashSet<string> factions)
     {
         var xformQuery = GetEntityQuery<TransformComponent>();
 
         if (!xformQuery.TryGetComponent(entity, out var entityXform))
             yield break;
 
-        foreach (var ent in _lookup.GetEntitiesInRange<NpcFactionMemberComponent>(entityXform.MapPosition, range))
+        foreach (var comp in _lookup.GetComponentsInRange<NpcFactionMemberComponent>(entityXform.MapPosition, range))
         {
-            if (ent.Owner == entity)
+            if (comp.Owner == entity)
                 continue;
 
-            if (!factions.Overlaps(ent.Comp.Factions))
+            if (!factions.Overlaps(comp.Factions))
                 continue;
 
-            yield return ent.Owner;
+            yield return comp.Owner;
         }
     }
 
@@ -254,6 +234,27 @@ public sealed partial class NpcFactionSystem : EntitySystem
         RefreshFactions();
     }
 
+    private void RefreshFactions()
+    {
+        _factions.Clear();
+
+        foreach (var faction in _protoManager.EnumeratePrototypes<NpcFactionPrototype>())
+        {
+            _factions[faction.ID] = new FactionData()
+            {
+                Friendly = faction.Friendly.ToHashSet(),
+                Hostile = faction.Hostile.ToHashSet(),
+            };
+        }
+
+        foreach (var comp in EntityQuery<NpcFactionMemberComponent>(true))
+        {
+            comp.FriendlyFactions.Clear();
+            comp.HostileFactions.Clear();
+            RefreshFactions(comp);
+        }
+    }
+
     /// <summary>
     /// Makes the source faction hostile to the target faction, 1-way.
     /// </summary>
@@ -274,17 +275,6 @@ public sealed partial class NpcFactionSystem : EntitySystem
         sourceFaction.Friendly.Remove(target);
         sourceFaction.Hostile.Add(target);
         RefreshFactions();
-    }
-
-    /// <summary>
-    /// Returns whether the entity from an enemy faction won't be attacked
-    /// </summary>
-    public bool IsIgnored(Entity<FactionExceptionComponent?> ent, EntityUid target)
-    {
-        if (!Resolve(ent, ref ent.Comp, false))
-            return false;
-
-        return ent.Comp.Ignored.Contains(target);
     }
 }
 

@@ -4,14 +4,14 @@ using Content.Server.NPC.HTN;
 using Content.Server.NPC.Systems;
 using Content.Server.Popups;
 using Content.Shared.Nyanotrasen.Abilities.Psionics.Components;
+using Content.Shared.Nyanotrasen.Abilities.Psionics;
+using Content.Shared.Nyanotrasen.Abilities.Psionics.Abilities;
 using Content.Shared.Actions.Events;
 using Content.Shared.Interaction.Events;
 using Content.Shared.Mobs;
 using Robust.Shared.Map;
 using System.Numerics;
 using Content.Shared.NPC.Components;
-using Content.Shared.Nyanotrasen.Abilities.Psionics;
-using Content.Shared.Nyanotrasen.Abilities.Psionics.Abilities;
 using NpcFactionSystem = Content.Shared.NPC.Systems.NpcFactionSystem;
 
 

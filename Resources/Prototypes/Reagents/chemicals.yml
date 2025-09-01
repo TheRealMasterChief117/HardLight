@@ -72,6 +72,8 @@
         damage:
           types:
             Caustic: 2
+      - !type:ChemRerollPsionic
+        bonusMultiplier: 2
   reactiveEffects:
     Acidic:
       methods: [ Touch ]

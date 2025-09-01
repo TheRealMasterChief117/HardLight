@@ -204,6 +204,8 @@
         type: Add
         time: 16
         refresh: false
+      - !type:ChemRerollPsionic
+        bonusMultiplier: 1.5
 
 - type: reagent
   id: Nicotine

@@ -10,6 +10,7 @@ using System;
 using System.IO;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using Robust.Shared.Log;
 
 namespace Content.Server.Shuttles.Save
@@ -42,37 +43,87 @@ namespace Content.Server.Shuttles.Save
             if (playerSession == null)
                 return;
 
-
             var deedUid = new EntityUid((int)msg.DeedUid);
-            if (!_entityManager.TryGetComponent<ShuttleDeedComponent>(deedUid, out var deedComponent))
+
+            // Get the player entity to determine current grid
+            if (playerSession.AttachedEntity == null)
             {
-                Logger.Warning($"Player {playerSession.Name} tried to save ship with invalid deed UID: {msg.DeedUid}");
+                Logger.Warning($"Player {playerSession.Name} has no attached entity, cannot save ship");
                 return;
             }
 
-            if (deedComponent.ShuttleUid == null)
+            var player = playerSession.AttachedEntity.Value;
+            var playerTransform = _entityManager.GetComponent<TransformComponent>(player);
+            var currentGrid = playerTransform.GridUid;
+
+            if (currentGrid == null)
             {
-                Logger.Warning($"Player {playerSession.Name} tried to save ship with deed {msg.DeedUid} but no valid shuttle UID found.");
+                Logger.Warning($"Player {playerSession.Name} is not on a grid, cannot save ship");
                 return;
             }
 
-            if (!_entityManager.TryGetEntity(deedComponent.ShuttleUid.Value, out var shuttleUid))
+            // Check if the ID card already has a shuttle deed
+            string shipName;
+            EntityUid gridToSave;
+
+            if (_entityManager.TryGetComponent<ShuttleDeedComponent>(deedUid, out var existingDeed))
             {
-                Logger.Warning($"Player {playerSession.Name} tried to save ship with deed {msg.DeedUid} but failed to convert NetEntity to EntityUid.");
-                return;
+                // Saving existing ship deed - use existing shuttle if valid
+                if (existingDeed.ShuttleUid != null && _entityManager.TryGetEntity(existingDeed.ShuttleUid.Value, out var existingShuttleUid))
+                {
+                    gridToSave = existingShuttleUid.Value;
+                    shipName = existingDeed.ShuttleName ?? "SavedShip_" + DateTime.Now.ToString("yyyyMMdd_HHmmss");
+                }
+                else
+                {
+                    // Deed exists but shuttle is invalid - save current grid and update deed
+                    gridToSave = currentGrid.Value;
+                    shipName = "SavedShip_" + DateTime.Now.ToString("yyyyMMdd_HHmmss");
+                    existingDeed.ShuttleUid = _entityManager.GetNetEntity(gridToSave);
+                    existingDeed.ShuttleName = shipName;
+                    existingDeed.ShuttleOwner = playerSession.Name;
+                }
             }
-            if (!_entityManager.TryGetComponent<MapGridComponent>(shuttleUid.Value, out var grid))
+            else
             {
-                Logger.Warning($"Player {playerSession.Name} tried to save ship with deed {msg.DeedUid} but no valid shuttle UID found.");
+                // No deed exists - save current grid and create new deed
+                gridToSave = currentGrid.Value;
+                shipName = "SavedShip_" + DateTime.Now.ToString("yyyyMMdd_HHmmss");
+
+                var newDeed = _entityManager.EnsureComponent<ShuttleDeedComponent>(deedUid);
+                newDeed.ShuttleUid = _entityManager.GetNetEntity(gridToSave);
+                newDeed.ShuttleName = shipName;
+                newDeed.ShuttleOwner = playerSession.Name;
+
+                Logger.Info($"Created new ShuttleDeedComponent on ID card {deedUid} for grid {gridToSave}");
+            }
+
+            // Validate that we have a valid grid to save
+            if (!_entityManager.TryGetComponent<MapGridComponent>(gridToSave, out var grid))
+            {
+                Logger.Warning($"Player {playerSession.Name} tried to save invalid grid {gridToSave}");
                 return;
             }
 
-            // ShipSerializationSystem was removed - ship saving now handled by ShipyardGridSaveSystem
-            var shipName = deedComponent.ShuttleName ?? "SavedShip_" + DateTime.Now.ToString("yyyyMMdd_HHmmss");
+            // Get the ShipyardGridSaveSystem and use it to save the ship
+            var shipyardGridSaveSystem = _entitySystemManager.GetEntitySystem<Content.Server._NF.Shipyard.Systems.ShipyardGridSaveSystem>();
 
-            // TODO: Integrate with ShipyardGridSaveSystem for ship saving functionality
-            Logger.Warning($"Ship saving temporarily disabled - ShipSerializationSystem was removed");
-            return;
+            Logger.Info($"Player {playerSession.Name} is saving ship {shipName} (grid {gridToSave}) via ShipyardGridSaveSystem");
+
+            // Save the ship using the working grid-based system
+            _ = Task.Run(async () =>
+            {
+                var success = await shipyardGridSaveSystem.TrySaveGridAsShip(gridToSave, shipName, playerSession.UserId.ToString(), playerSession);
+
+                if (success)
+                {
+                    Logger.Info($"Successfully saved ship {shipName}");
+                }
+                else
+                {
+                    Logger.Error($"Failed to save ship {shipName}");
+                }
+            });
         }
     public void RequestSaveShip(EntityUid deedUid, ICommonSession? playerSession)
         {
@@ -94,12 +145,30 @@ namespace Content.Server.Shuttles.Save
                 return;
             }
 
-            // ShipSerializationSystem was removed - ship saving now handled by ShipyardGridSaveSystem
+            // Integrate with ShipyardGridSaveSystem for ship saving functionality
             var shipName = deedComponent.ShuttleName ?? "SavedShip_" + DateTime.Now.ToString("yyyyMMdd_HHmmss");
 
-            // TODO: Integrate with ShipyardGridSaveSystem for ship saving functionality
-            Logger.Warning($"Ship saving temporarily disabled - ShipSerializationSystem was removed");
-            return;
+            // Get the ShipyardGridSaveSystem and use it to save the ship
+            var shipyardGridSaveSystem = _entitySystemManager.GetEntitySystem<Content.Server._NF.Shipyard.Systems.ShipyardGridSaveSystem>();
+
+            Logger.Info($"Player {playerSession.Name} is saving ship {shipName} via ShipyardGridSaveSystem");
+
+            // Save the ship using the working grid-based system
+            _ = Task.Run(async () =>
+            {
+                var success = await shipyardGridSaveSystem.TrySaveGridAsShip(shuttleUid.Value, shipName, playerSession.UserId.ToString(), playerSession);
+
+                if (success)
+                {
+                    // Clean up the deed after successful save
+                    _entityManager.RemoveComponent<ShuttleDeedComponent>(deedUid);
+                    Logger.Info($"Successfully saved and removed ship {shipName}");
+                }
+                else
+                {
+                    Logger.Error($"Failed to save ship {shipName}");
+                }
+            });
         }
 
         private void OnRequestLoadShip(RequestLoadShipMessage msg, EntitySessionEventArgs args)

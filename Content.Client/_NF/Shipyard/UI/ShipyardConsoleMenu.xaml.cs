@@ -285,7 +285,7 @@ public sealed partial class ShipyardConsoleMenu : FancyWindow
 
         ShipAppraisalLabel.Text = $"{BankSystemExtensions.ToSpesoString(shipPrice)} ({state.SellRate * 100.0f:F1}%)";
         SellShipButton.Disabled = state.ShipDeedTitle == null;
-        SaveShipButton.Disabled = state.ShipDeedTitle == null;  // Only enable save button when there's an existing ship deed
+        SaveShipButton.Disabled = !state.IsTargetIdPresent;  // Enable save button when ID card is present
         LoadShipButton.Disabled = !state.IsTargetIdPresent;
         LoadShipButton.ToolTip = state.IsTargetIdPresent
             ? null

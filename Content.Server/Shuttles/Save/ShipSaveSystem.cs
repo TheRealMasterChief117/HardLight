@@ -45,6 +45,23 @@ namespace Content.Server.Shuttles.Save
 
             var deedUid = new EntityUid((int)msg.DeedUid);
 
+            // Get the player entity to determine current grid
+            if (playerSession.AttachedEntity == null)
+            {
+                Logger.Warning($"Player {playerSession.Name} has no attached entity, cannot save ship");
+                return;
+            }
+
+            var player = playerSession.AttachedEntity.Value;
+            var playerTransform = _entityManager.GetComponent<TransformComponent>(player);
+            var currentGrid = playerTransform.GridUid;
+
+            if (currentGrid == null)
+            {
+                Logger.Warning($"Player {playerSession.Name} is not on a grid, cannot save ship");
+                return;
+            }
+
             // Check if the ID card already has a shuttle deed
             string shipName;
             EntityUid gridToSave;
@@ -59,21 +76,26 @@ namespace Content.Server.Shuttles.Save
                 }
                 else
                 {
-                    Logger.Warning($"Player {playerSession.Name} tried to save ship with invalid shuttle reference in deed");
-                    return;
+                    // Deed exists but shuttle is invalid - save current grid and update deed
+                    gridToSave = currentGrid.Value;
+                    shipName = "SavedShip_" + DateTime.Now.ToString("yyyyMMdd_HHmmss");
+                    existingDeed.ShuttleUid = _entityManager.GetNetEntity(gridToSave);
+                    existingDeed.ShuttleName = shipName;
+                    existingDeed.ShuttleOwner = playerSession.Name;
                 }
             }
             else
             {
-                Logger.Warning($"Player {playerSession.Name} tried to save ship without a valid ShuttleDeedComponent on ID card {deedUid}");
-                return;
-            }
+                // No deed exists - save current grid and create new deed
+                gridToSave = currentGrid.Value;
+                shipName = "SavedShip_" + DateTime.Now.ToString("yyyyMMdd_HHmmss");
 
-            // CRITICAL: Validate that we're saving a shuttle, not a station!
-            if (!_entityManager.TryGetComponent<Content.Shared.Shuttles.Components.ShuttleComponent>(gridToSave, out var shuttleComponent))
-            {
-                Logger.Warning($"Player {playerSession.Name} tried to save grid {gridToSave} which is not a shuttle (missing ShuttleComponent)");
-                return;
+                var newDeed = _entityManager.EnsureComponent<ShuttleDeedComponent>(deedUid);
+                newDeed.ShuttleUid = _entityManager.GetNetEntity(gridToSave);
+                newDeed.ShuttleName = shipName;
+                newDeed.ShuttleOwner = playerSession.Name;
+
+                Logger.Info($"Created new ShuttleDeedComponent on ID card {deedUid} for grid {gridToSave}");
             }
 
             // Validate that we have a valid grid to save

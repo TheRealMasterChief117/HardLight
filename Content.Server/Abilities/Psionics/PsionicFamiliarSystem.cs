@@ -1,7 +1,7 @@
 using Content.Shared.Abilities.Psionics;
 using Content.Shared.Nyanotrasen.Abilities.Psionics;
 using Content.Shared.Nyanotrasen.Abilities.Psionics.Abilities;
-using PsionicFamiliarComponent = Content.Shared.Nyanotrasen.Abilities.Psionics.Components.PsionicFamiliarComponent;
+using Content.Shared.Nyanotrasen.Abilities.Psionics.Components;
 using Content.Server.NPC;
 using Content.Server.NPC.Components;
 using Content.Server.NPC.HTN;
@@ -31,9 +31,9 @@ public sealed partial class PsionicFamiliarSystem : EntitySystem
         base.Initialize();
 
         SubscribeLocalEvent<PsionicComponent, SummonPsionicFamiliarActionEvent>(OnSummon);
-        SubscribeLocalEvent<PsionicFamiliarComponent, ComponentShutdown>(OnFamiliarShutdown);
-        SubscribeLocalEvent<PsionicFamiliarComponent, AttackAttemptEvent>(OnFamiliarAttack);
-        SubscribeLocalEvent<PsionicFamiliarComponent, MobStateChangedEvent>(OnFamiliarDeath);
+        SubscribeLocalEvent<Content.Shared.Nyanotrasen.Abilities.Psionics.Components.PsionicFamiliarComponent, ComponentShutdown>(OnFamiliarShutdown);
+        SubscribeLocalEvent<Content.Shared.Nyanotrasen.Abilities.Psionics.Components.PsionicFamiliarComponent, AttackAttemptEvent>(OnFamiliarAttack);
+        SubscribeLocalEvent<Content.Shared.Nyanotrasen.Abilities.Psionics.Components.PsionicFamiliarComponent, MobStateChangedEvent>(OnFamiliarDeath);
     }
 
     private void OnSummon(EntityUid uid, PsionicComponent psionicComponent, SummonPsionicFamiliarActionEvent args)
@@ -45,7 +45,7 @@ public sealed partial class PsionicFamiliarSystem : EntitySystem
 
         args.Handled = true;
         var familiar = Spawn(args.FamiliarProto, Transform(uid).Coordinates);
-        EnsureComp<PsionicFamiliarComponent>(familiar, out var familiarComponent);
+        EnsureComp<Content.Shared.Nyanotrasen.Abilities.Psionics.Components.PsionicFamiliarComponent>(familiar, out var familiarComponent);
         familiarComponent.Master = uid;
         psionicComponent.Familiars.Add(familiar);
         Dirty(familiar, familiarComponent);
@@ -56,7 +56,7 @@ public sealed partial class PsionicFamiliarSystem : EntitySystem
         DoGlimmerEffects(uid, psionicComponent, args);
     }
 
-    private void InheritFactions(EntityUid uid, EntityUid familiar, PsionicFamiliarComponent familiarComponent)
+    private void InheritFactions(EntityUid uid, EntityUid familiar, Content.Shared.Nyanotrasen.Abilities.Psionics.Components.PsionicFamiliarComponent familiarComponent)
     {
         if (!familiarComponent.InheritMasterFactions
             || !TryComp<NpcFactionMemberComponent>(uid, out var masterFactions)
@@ -97,7 +97,7 @@ public sealed partial class PsionicFamiliarSystem : EntitySystem
         _psionics.LogPowerUsed(uid, args.PowerName, minGlimmer, maxGlimmer);
     }
 
-    private void OnFamiliarShutdown(EntityUid uid, PsionicFamiliarComponent component, ComponentShutdown args)
+    private void OnFamiliarShutdown(EntityUid uid, Content.Shared.Nyanotrasen.Abilities.Psionics.Components.PsionicFamiliarComponent component, ComponentShutdown args)
     {
         if (!Exists(component.Master)
             || !TryComp<PsionicComponent>(component.Master, out var psionicComponent)
@@ -107,7 +107,7 @@ public sealed partial class PsionicFamiliarSystem : EntitySystem
         psionicComponent.Familiars.Remove(uid);
     }
 
-    private void OnFamiliarAttack(EntityUid uid, PsionicFamiliarComponent component, AttackAttemptEvent args)
+    private void OnFamiliarAttack(EntityUid uid, Content.Shared.Nyanotrasen.Abilities.Psionics.Components.PsionicFamiliarComponent component, AttackAttemptEvent args)
     {
         if (component.CanAttackMaster || args.Target is null
             || args.Target != component.Master)
@@ -120,7 +120,7 @@ public sealed partial class PsionicFamiliarSystem : EntitySystem
         _popup.PopupEntity(attackFailMessage, uid, uid, component.AttackPopupType);
     }
 
-    private void OnFamiliarDeath(EntityUid uid, PsionicFamiliarComponent component, MobStateChangedEvent args)
+    private void OnFamiliarDeath(EntityUid uid, Content.Shared.Nyanotrasen.Abilities.Psionics.Components.PsionicFamiliarComponent component, MobStateChangedEvent args)
     {
         if (!component.DespawnOnFamiliarDeath
             || args.NewMobState != MobState.Dead)
@@ -131,13 +131,13 @@ public sealed partial class PsionicFamiliarSystem : EntitySystem
 
     public void DespawnFamiliar(EntityUid uid)
     {
-        if (!TryComp<PsionicFamiliarComponent>(uid, out var familiarComponent))
+        if (!TryComp<Content.Shared.Nyanotrasen.Abilities.Psionics.Components.PsionicFamiliarComponent>(uid, out var familiarComponent))
             return;
 
         DespawnFamiliar(uid, familiarComponent);
     }
 
-    public void DespawnFamiliar(EntityUid uid, PsionicFamiliarComponent component)
+    public void DespawnFamiliar(EntityUid uid, Content.Shared.Nyanotrasen.Abilities.Psionics.Components.PsionicFamiliarComponent component)
     {
         var popupText = Loc.GetString(component.DespawnText, ("entity", MetaData(uid).EntityName));
         _popup.PopupEntity(popupText, uid, component.DespawnPopopType);

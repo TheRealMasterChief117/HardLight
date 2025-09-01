@@ -6,6 +6,7 @@ using Robust.Shared.Map;
 using Robust.Shared.Map.Components;
 using Content.Shared.Shuttles.Save;
 using Content.Shared._NF.Shipyard.Components;
+using Content.Server.Shuttles.Components;
 using System;
 using System.IO;
 using System.Collections.Generic;
@@ -70,7 +71,7 @@ namespace Content.Server.Shuttles.Save
             }
 
             // CRITICAL: Validate that we're saving a shuttle, not a station!
-            if (!_entityManager.TryGetComponent<Content.Shared.Shuttles.Components.ShuttleComponent>(gridToSave, out var shuttleComponent))
+            if (!_entityManager.TryGetComponent<ShuttleComponent>(gridToSave, out var shuttleComponent))
             {
                 Logger.Warning($"Player {playerSession.Name} tried to save grid {gridToSave} which is not a shuttle (missing ShuttleComponent)");
                 return;

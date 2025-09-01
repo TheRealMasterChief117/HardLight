@@ -5,7 +5,7 @@
   actions:
     - ActionDispel
   components:
-    - type: DispelPower
+    - DispelPower
   initializationFeedback: dispel-power-initialization-feedback
   metapsionicFeedback: dispel-power-metapsionic-feedback
   dampeningModifier: 1
@@ -17,7 +17,7 @@
   actions:
     - ActionMassSleep
   components:
-    - type: MassSleepPower
+    - MassSleepPower
   # initializationFeedback: mass-sleep-power-initialization-feedback # I apologize, I don't feel like writing a paragraph of feedback for a power that's getting replaced with a new one.
   metapsionicFeedback: mass-sleep-power-metapsionic-feedback
   amplificationModifier: 0.5
@@ -30,7 +30,7 @@
   actions:
     - ActionMindSwap
   components:
-    - type: MindSwapPower
+    - MindSwapPower
   initializationFeedback: mind-swap-power-initialization-feedback
   metapsionicFeedback: mind-swap-power-metapsionic-feedback
   amplificationModifier: 1
@@ -42,7 +42,7 @@
   actions:
     - ActionNoosphericZap
   components:
-    - type: NoosphericZapPower
+    - NoosphericZapPower
   initializationFeedback: noospheric-zap-power-initialization-feedback
   metapsionicFeedback: noospheric-zap-power-metapsionic-feedback
   amplificationModifier: 1
@@ -54,7 +54,7 @@
   actions:
   - ActionPyrokinesis
   components:
-    - type: PyrokinesisPower
+    - PyrokinesisPower
   initializationFeedback: pyrokinesis-power-initialization-feedback
   metapsionicFeedback: pyrokinesis-power-metapsionic-feedback
   amplificationModifier: 1
@@ -66,7 +66,7 @@
   actions:
   - ActionMetapsionic
   components:
-    - type: MetapsionicPower
+    - MetapsionicPower
   initializationFeedback: metapsionic-power-initialization-feedback
   metapsionicFeedback: metapsionic-power-metapsionic-feedback
   amplificationModifier: 0.5
@@ -79,7 +79,7 @@
   actions:
   - ActionPsionicRegeneration
   components:
-    - type: PsionicRegenerationPower
+    - PsionicRegenerationPower
   initializationFeedback: psionic-regeneration-power-initialization-feedback
   metapsionicFeedback: psionic-regeneration-power-metapsionic-feedback
   amplificationModifier: 0.5
@@ -92,7 +92,7 @@
   actions:
   - ActionTelegnosis
   components:
-    - type: TelegnosisPower
+    - TelegnosisPower
   initializationFeedback: telegnosis-power-initialization-feedback
   metapsionicFeedback: telegnosis-power-metapsionic-feedback
   amplificationModifier: 0.5
@@ -105,7 +105,7 @@
   actions:
   - ActionDispel
   components:
-    - type: PsionicInvisibilityPower
+    - PsionicInvisibilityPower
   initializationFeedback: psionic-invisibility-power-initialization-feedback
   metapsionicFeedback: psionic-invisibility-power-metapsionic-feedback
   amplificationModifier: 0.5
@@ -115,8 +115,7 @@
   id: XenoglossyPower
   name: Xenoglossy
   description: xenoglossy-power-description
-  components:
-    - type: UniversalLanguageSpeaker
+  components: []
   initializationFeedback: xenoglossy-power-initialization-feedback
   metapsionicFeedback: psionic-language-power-feedback # Reuse for telepathy, clairaudience, etc
   powerSlotCost: 0
@@ -125,8 +124,7 @@
   id: PsychognomyPower #i.e. reverse physiognomy
   name: Psychognomy #psycho- + -gnomy. I reccomend starting with your language's equilvalent of "physiognomy" and working backwards. i.e. психо(г)номика
   description: psychognomy-power-description
-  components:
-    - type: Psychognomist
+  components: []
   initializationFeedback: psychognomy-power-initialization-feedback
   metapsionicFeedback: psionic-language-power-feedback
   powerSlotCost: 0
@@ -135,8 +133,7 @@
   id: TelepathyPower
   name: Telepathy
   description: telepathy-power-description
-  components:
-    - type: Telepathy
+  components: []
   initializationFeedback: telepathy-power-initialization-feedback
   metapsionicFeedback: psionic-language-power-feedback # Reuse for telepathy, clairaudience, etc
   powerSlotCost: 0
@@ -233,7 +230,7 @@
   name: Ethereal Vision
   description: ethereal-vision-powers-description
   components:
-    - type: ShowEthereal
+    - Ethereal
   powerSlotCost: 0
 
 - type: psionicPower

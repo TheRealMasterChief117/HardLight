@@ -90,15 +90,15 @@ public sealed class ShipyardConsoleBoundUserInterface : BoundUserInterface
 
     private void OnSaveShipButtonPressed(BaseButton.ButtonEventArgs args)
     {
-        // Allow saving as long as owner is valid - don't require existing ship deed
-        if (Owner.Valid)
+        // Only allow saving if the player has a valid ship deed
+        if (Owner.Valid && ShipSellValue.HasValue && ShipSellValue.Value > 0)
         {
             _shipFileManagementSystem.RequestSaveShip(Owner);
             Logger.Info($"Requested to save ship for entity {Owner}");
         }
         else
         {
-            Logger.Warning("Cannot save ship - invalid owner");
+            Logger.Warning("Cannot save ship - no valid ship deed found");
         }
     }
 

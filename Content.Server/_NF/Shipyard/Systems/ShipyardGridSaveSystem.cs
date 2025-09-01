@@ -431,37 +431,13 @@ public sealed class ShipyardGridSaveSystem : EntitySystem
                 }
 
                 // Remove problematic components from remaining entities
-                if (_entityManager.RemoveComponent<ActorComponent>(entity))
-                {
-                    componentsRemoved++;
-                    _sawmill.Debug($"Removed ActorComponent from {entity}");
-                }
-
-                if (_entityManager.RemoveComponent<EyeComponent>(entity))
-                {
-                    componentsRemoved++;
-                    _sawmill.Debug($"Removed EyeComponent from {entity}");
-                }
 
                 // Note: Removed PhysicsComponent deletion that was causing collision issues in loaded ships
                 // PhysicsComponent and FixturesComponent are needed for proper collision detection
 
                 // Remove atmospheric components that hold runtime state
-                if (_entityManager.RemoveComponent<AtmosDeviceComponent>(entity))
-                {
-                    componentsRemoved++;
-                    _sawmill.Debug($"Removed AtmosDeviceComponent from {entity}");
-                }
 
                 // Reset power components to clean state
-                if (_entityManager.TryGetComponent<BatteryComponent>(entity, out var battery))
-                {
-                    if (_entitySystemManager.TryGetEntitySystem<BatterySystem>(out var batterySystem))
-                    {
-                        batterySystem.SetCharge(entity, battery.MaxCharge);
-                        _sawmill.Debug($"Reset battery charge for {entity}");
-                    }
-                }
             }
 
             _sawmill.Info($"Step 3 complete: Removed {structuresRemoved} problematic structures, cleaned {componentsRemoved} components");

@@ -4,7 +4,7 @@ meta:
   engineVersion: 255.0.0
   forkId: ""
   forkVersion: ""
-  time: 08/24/2025 05:46:48
+  time: 09/01/2025 12:02:17
   entityCount: 361
 maps: []
 grids:
@@ -1922,7 +1922,7 @@ entities:
       rot: 1.5707963267948966 rad
       pos: 3.5,-2.5
       parent: 1
-- proto: LockerWallMaterialsFuelPlasmaFilled2
+- proto: LockerWallMaterialsFuelUraniumFilled2
   entities:
   - uid: 133
     components:
@@ -2026,7 +2026,7 @@ entities:
     - type: Transform
       pos: 5.467732,-2.4397738
       parent: 1
-- proto: PortableGeneratorPacmanShuttle
+- proto: PortableGeneratorSuperPacmanShuttle
   entities:
   - uid: 129
     components:

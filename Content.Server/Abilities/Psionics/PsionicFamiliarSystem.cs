@@ -3,7 +3,6 @@ using Content.Server.NPC.Components;
 using Content.Server.NPC.HTN;
 using Content.Server.NPC.Systems;
 using Content.Server.Popups;
-using Content.Shared.Abilities.Psionics;
 using Content.Shared.Nyanotrasen.Abilities.Psionics.Components;
 using Content.Shared.Actions.Events;
 using Content.Shared.Interaction.Events;
@@ -137,7 +136,7 @@ public sealed partial class PsionicFamiliarSystem : EntitySystem
         DespawnFamiliar(uid, familiarComponent);
     }
 
-    public void DespawnFamiliar(EntityUid uid, Content.Shared.Nyanotrasen.Abilities.Psionics.Components.PsionicFamiliarComponent component)
+    public void DespawnFamiliar(EntityUid uid, PsionicFamiliarComponent component)
     {
         var popupText = Loc.GetString(component.DespawnText, ("entity", MetaData(uid).EntityName));
         _popup.PopupEntity(popupText, uid, component.DespawnPopopType);

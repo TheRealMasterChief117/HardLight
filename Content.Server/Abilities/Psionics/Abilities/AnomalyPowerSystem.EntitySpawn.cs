@@ -63,12 +63,10 @@ public sealed partial class AnomalyPowerSystem
             return;
 
         var tiles = _anomalySystem.GetSpawningPoints(uid,
-                        component.CurrentDampening,
-                        component.CurrentAmplification,
+                        0.5f, // stability - reasonable default
+                        0.5f, // severity - reasonable default
                         entry.Settings,
-                        _glimmerSystem.Glimmer / 1000,
-                        component.CurrentAmplification,
-                        component.CurrentAmplification);
+                        _glimmerSystem.Glimmer / 1000);
 
         if (tiles is null)
             return;

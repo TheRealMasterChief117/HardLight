@@ -1,42 +1,32 @@
-using Content.Shared.Actions;
 using Content.Shared.StatusEffect;
 using Content.Shared.Abilities.Psionics;
+using Content.Shared.Nyanotrasen.Abilities.Psionics;
 using Content.Shared.Damage;
 using Content.Shared.Revenant.Components;
 using Content.Server.Guardian;
 using Content.Server.Bible.Components;
 using Content.Server.Popups;
-using Robust.Shared.Prototypes;
 using Robust.Shared.Player;
 using Robust.Shared.Random;
-using Robust.Shared.Timing;
-using Content.Shared.Mind;
 using Content.Shared.Actions.Events;
 using Robust.Shared.Audio.Systems;
-using Robust.Server.Audio;
 
 namespace Content.Server.Abilities.Psionics
 {
     public sealed class DispelPowerSystem : EntitySystem
     {
-        [Dependency] private readonly IPrototypeManager _prototypeManager = default!;
         [Dependency] private readonly StatusEffectsSystem _statusEffects = default!;
-        [Dependency] private readonly SharedActionsSystem _actions = default!;
         [Dependency] private readonly DamageableSystem _damageableSystem = default!;
         [Dependency] private readonly GuardianSystem _guardianSystem = default!;
         [Dependency] private readonly IRobustRandom _random = default!;
         [Dependency] private readonly SharedPsionicAbilitiesSystem _psionics = default!;
         [Dependency] private readonly SharedAudioSystem _audioSystem = default!;
         [Dependency] private readonly PopupSystem _popupSystem = default!;
-        [Dependency] private readonly IGameTiming _gameTiming = default!;
-        [Dependency] private readonly SharedMindSystem _mindSystem = default!;
 
 
         public override void Initialize()
         {
             base.Initialize();
-            SubscribeLocalEvent<DispelPowerComponent, ComponentInit>(OnInit);
-            SubscribeLocalEvent<DispelPowerComponent, ComponentShutdown>(OnShutdown);
             SubscribeLocalEvent<DispelPowerActionEvent>(OnPowerUsed);
 
             SubscribeLocalEvent<DispellableComponent, DispelledEvent>(OnDispelled);
@@ -47,24 +37,9 @@ namespace Content.Server.Abilities.Psionics
             SubscribeLocalEvent<RevenantComponent, DispelledEvent>(OnRevenantDispelled);
         }
 
-        private void OnInit(EntityUid uid, DispelPowerComponent component, ComponentInit args)
-        {
-            _actions.AddAction(uid, ref component.DispelActionEntity, component.DispelActionId );
-            _actions.TryGetActionData( component.DispelActionEntity, out var actionData );
-            if (actionData is { UseDelay: not null })
-                _actions.StartUseDelay(component.DispelActionEntity);
-            if (TryComp<PsionicComponent>(uid, out var psionic) && psionic.PsionicAbility == null)
-                psionic.PsionicAbility = component.DispelActionEntity;
-        }
-
-        private void OnShutdown(EntityUid uid, DispelPowerComponent component, ComponentShutdown args)
-        {
-            _actions.RemoveAction(uid, component.DispelActionEntity);
-        }
-
         private void OnPowerUsed(DispelPowerActionEvent args)
         {
-            if (HasComp<PsionicInsulationComponent>(args.Target))
+            if (!_psionics.OnAttemptPowerUse(args.Performer, "dispel"))
                 return;
 
             var ev = new DispelledEvent();
@@ -82,7 +57,7 @@ namespace Content.Server.Abilities.Psionics
             QueueDel(uid);
             Spawn("Ash", Transform(uid).Coordinates);
             _popupSystem.PopupCoordinates(Loc.GetString("psionic-burns-up", ("item", uid)), Transform(uid).Coordinates, Filter.Pvs(uid), true, Shared.Popups.PopupType.MediumCaution);
-            _audioSystem.PlayPvs("/Audio/Effects/lightburn.ogg", uid);
+            _audioSystem.PlayEntity("/Audio/Effects/lightburn.ogg", Filter.Pvs(uid), uid, true);
             args.Handled = true;
         }
 
@@ -98,7 +73,7 @@ namespace Content.Server.Abilities.Psionics
 
         private void OnGuardianDispelled(EntityUid uid, GuardianComponent guardian, DispelledEvent args)
         {
-            if (guardian.Host.HasValue && TryComp<GuardianHostComponent>(guardian.Host.Value, out var host))
+            if (TryComp<GuardianHostComponent>(guardian.Host, out var host))
                 _guardianSystem.ToggleGuardian(guardian.Host.Value, host);
 
             DealDispelDamage(uid);
@@ -126,7 +101,7 @@ namespace Content.Server.Abilities.Psionics
                 return;
 
             _popupSystem.PopupCoordinates(Loc.GetString("psionic-burn-resist", ("item", uid)), Transform(uid).Coordinates, Filter.Pvs(uid), true, Shared.Popups.PopupType.SmallCaution);
-            _audioSystem.PlayPvs("/Audio/Effects/lightburn.ogg", uid);
+            _audioSystem.PlayEntity("/Audio/Effects/lightburn.ogg", Filter.Pvs(uid), uid, true);
 
             if (damage == null)
             {

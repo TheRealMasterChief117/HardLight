@@ -6,7 +6,7 @@ namespace Content.Shared.Actions.Events;
 public sealed partial class PsionicHealOtherPowerActionEvent : EntityTargetActionEvent
 {
     [DataField]
-    public DamageSpecifier HealingAmount = default!;
+    public DamageSpecifier? HealingAmount = default!;
 
     [DataField]
     public string PowerName;
@@ -19,16 +19,28 @@ public sealed partial class PsionicHealOtherPowerActionEvent : EntityTargetActio
     public string? PopupText;
 
     [DataField]
-    public float RotReduction;
+    public float? RotReduction;
 
     [DataField]
     public bool DoRevive;
+
+    [DataField]
+    public float ModifiedAmplification = 1.0f;
+
+    [DataField]
+    public float ModifiedDampening = 1.0f;
 
     [DataField]
     public bool BreakOnUserMove = true;
 
     [DataField]
     public bool BreakOnTargetMove = false;
+
+    [DataField]
+    public bool BreakOnMove = true;
+
+    [DataField]
+    public int GlimmerDoAfterVisibilityThreshold;
 
     [DataField]
     public float UseDelay = 8f;
@@ -44,6 +56,12 @@ public sealed partial class PsionicHealOtherPowerActionEvent : EntityTargetActio
 
     [DataField]
     public int GlimmerObviousPopupThreshold;
+
+    [DataField]
+    public int GlimmerPopupThreshold;
+
+    [DataField]
+    public int GlimmerSoundThreshold;
 
     [DataField]
     public PopupType PopupType = PopupType.Medium;

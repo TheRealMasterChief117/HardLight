@@ -1,5 +1,6 @@
 using Content.Server.Chat.Managers;
 using Content.Shared.Abilities.Psionics;
+using Content.Shared.Nyanotrasen.Abilities.Psionics;
 using Content.Shared.Actions.Events;
 using Content.Shared.Chat;
 using Content.Shared.DoAfter;
@@ -121,9 +122,12 @@ public sealed class AssayPowerSystem : EntitySystem
 
         foreach (var feedback in targetPsionic.AssayFeedback)
         {
-            var locale = Loc.GetString(feedback, ("entity", target!.Value));
-            var feedbackMessage = $"[font size={args.FontSize}][color={args.FontColor}]{locale}[/color][/font]";
-            SendDescToChat(feedbackMessage, session);
+            if (!string.IsNullOrEmpty(feedback))
+            {
+                var locale = Loc.GetString(feedback, ("entity", target.Value));
+                var feedbackMessage = $"[font size={args.FontSize}][color={args.FontColor}]{locale}[/color][/font]";
+                SendDescToChat(feedbackMessage, session);
+            }
         }
     }
 

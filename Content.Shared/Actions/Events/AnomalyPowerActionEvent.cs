@@ -74,7 +74,17 @@ public sealed partial class AnomalyPowerActionEvent : InstantActionEvent
 [DataRecord]
 public partial record struct AnomalyPowerSettings()
 {
-    public string PowerName;
+    public required string PowerName;
+
+    /// <summary>
+    ///     The mana cost for this psionic power.
+    /// </summary>
+    public float ManaCost = 50f;
+
+    /// <summary>
+    ///     Whether to check for psionic insulation before using this power.
+    /// </summary>
+    public bool CheckInsulation = true;
 
     /// <summary>
     ///     When casting above the Supercritical Threshold, if not 0, this will cause all powers to enter cooldown for the given duration.

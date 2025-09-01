@@ -1,13 +1,16 @@
+using Content.Shared.Abilities.Psionics;
 using Content.Shared.Actions;
 using Content.Shared.Administration.Logs;
+using Content.Shared.Database;
 using Content.Shared.Mobs;
 using Content.Shared.Mobs.Components;
 using Content.Shared.Popups;
 using Content.Shared.Psionics.Glimmer;
 using Robust.Shared.Random;
 using Robust.Shared.Serialization;
+using System;
 
-namespace Content.Shared.Abilities.Psionics
+namespace Content.Shared.Nyanotrasen.Abilities.Psionics
 {
     public sealed class SharedPsionicAbilitiesSystem : EntitySystem
     {
@@ -65,15 +68,19 @@ namespace Content.Shared.Abilities.Psionics
             if (!Resolve(uid, ref component, false))
                 return;
 
-            if (component.PsionicAbility == null)
-                return;
+            // Update all psionic actions based on eligibility
+            foreach (var action in component.Actions.Values)
+            {
+                if (action == null)
+                    continue;
 
-            _actions.TryGetActionData( component.PsionicAbility, out var actionData );
+                _actions.TryGetActionData(action.Value, out var actionData);
 
-            if (actionData == null)
-                return;
+                if (actionData == null)
+                    continue;
 
-            _actions.SetEnabled(actionData.Owner, IsEligibleForPsionics(uid));
+                _actions.SetEnabled(actionData.Owner, IsEligibleForPsionics(uid));
+            }
         }
 
         private bool IsEligibleForPsionics(EntityUid uid)
@@ -89,6 +96,110 @@ namespace Content.Shared.Abilities.Psionics
             RaiseLocalEvent(uid, ev, false);
 
             _glimmerSystem.Glimmer += _robustRandom.Next(minGlimmer, maxGlimmer);
+        }
+
+        /// <summary>
+        ///     Checks if a psionic can attempt to use their power.
+        /// </summary>
+        public bool OnAttemptPowerUse(EntityUid uid, string power)
+        {
+            if (!TryComp<PsionicComponent>(uid, out var psionicComponent))
+                return false;
+
+            if (HasComp<PsionicInsulationComponent>(uid))
+                return false;
+
+            if (HasComp<MindbrokenComponent>(uid))
+                return false;
+
+            return IsEligibleForPsionics(uid);
+        }
+
+        /// <summary>
+        ///     Checks if a psionic can attempt to use their power with mana cost.
+        /// </summary>
+        public bool OnAttemptPowerUse(EntityUid uid, string power, float manaCost)
+        {
+            return OnAttemptPowerUse(uid, power);
+        }
+
+        /// <summary>
+        ///     Checks if a psionic can attempt to use their power with mana cost and insulation check.
+        /// </summary>
+        public bool OnAttemptPowerUse(EntityUid uid, string power, float manaCost, bool checkInsulation)
+        {
+            if (!TryComp<PsionicComponent>(uid, out var psionicComponent))
+                return false;
+
+            if (checkInsulation && HasComp<PsionicInsulationComponent>(uid))
+                return false;
+
+            if (HasComp<MindbrokenComponent>(uid))
+                return false;
+
+            return IsEligibleForPsionics(uid);
+        }
+
+        /// <summary>
+        ///     Gets the modified amplification for a psionic entity.
+        /// </summary>
+        public float ModifiedAmplification(EntityUid uid, PsionicComponent? component = null)
+        {
+            if (!Resolve(uid, ref component))
+                return 1.0f;
+
+            return component.CurrentAmplification;
+        }
+
+        /// <summary>
+        ///     Gets the modified dampening for a psionic entity.
+        /// </summary>
+        public float ModifiedDampening(EntityUid uid, PsionicComponent? component = null)
+        {
+            if (!Resolve(uid, ref component))
+                return 1.0f;
+
+            return component.CurrentDampening;
+        }
+
+        /// <summary>
+        ///     Validates if a psionic power can be used and handles the attempt.
+        /// </summary>
+        public bool OnAttemptPowerUse(EntityUid uid, string power, float? manaCost = null, bool doAfterCheck = true)
+        {
+            if (!TryComp<PsionicComponent>(uid, out var component))
+                return false;
+
+            // Check if already casting
+            if (doAfterCheck && component.DoAfter != null)
+            {
+                _popups.PopupEntity(Loc.GetString(component.AlreadyCasting), uid, uid);
+                return false;
+            }
+
+            // Check mana cost
+            if (manaCost.HasValue && component.Mana < manaCost.Value)
+            {
+                _popups.PopupEntity(Loc.GetString(component.NoMana), uid, uid);
+                return false;
+            }
+
+            // Deduct mana if cost specified
+            if (manaCost.HasValue)
+            {
+                component.Mana -= manaCost.Value;
+                component.Mana = Math.Max(0, component.Mana);
+            }
+
+            return true;
+        }
+
+        /// <summary>
+        ///     Logs power usage for admin tracking.
+        /// </summary>
+        public void LogPowerUsed(EntityUid uid, string power)
+        {
+            _adminLogger.Add(Database.LogType.Psionics, Database.LogImpact.Low, $"{ToPrettyString(uid)} used psionic power {power}");
         }
     }
 

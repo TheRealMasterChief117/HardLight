@@ -1,4 +1,5 @@
 using Content.Shared.Abilities.Psionics;
+using Content.Shared.Nyanotrasen.Abilities.Psionics;
 using Content.Shared.Actions.Events;
 using Content.Shared.Psionics.Glimmer;
 using Robust.Shared.Random;
@@ -49,8 +50,7 @@ public sealed partial class AnomalyPowerSystem : EntitySystem
 
     private void OnPowerUsed(EntityUid uid, PsionicComponent component, AnomalyPowerActionEvent args)
     {
-        if (HasComp<PsionicInsulationComponent>(uid)
-            || HasComp<MindbrokenComponent>(uid))
+        if (!_psionics.OnAttemptPowerUse(args.Performer, args.Settings.PowerName, args.Settings.ManaCost, args.Settings.CheckInsulation))
             return;
 
         var overcharged = args.Settings.DoSupercritical ? _glimmerSystem.Glimmer * component.CurrentAmplification

@@ -13,16 +13,20 @@
     quickEquip: true
     slots:
     - back
-  - type: Reflective
-    chance: 0.5
-    reflectSound:
+  - type: Reflect
+    reflectProb: 0.6
+    reflects:
+    - Energy
+    - NonEnergy
+    spread: 15
+    soundOnReflect:
       path: /Audio/Weapons/block_metal1.ogg
   - type: Armor
     modifiers:
       coefficients:
-        Blunt: 0.75
-        Slash: 0.75
-        Piercing: 0.75
+        Blunt: 0.6
+        Slash: 0.6
+        Piercing: 0.7
   - type: MeleeWeapon
     autoAttack: true
     mustBeEquippedToUse: true

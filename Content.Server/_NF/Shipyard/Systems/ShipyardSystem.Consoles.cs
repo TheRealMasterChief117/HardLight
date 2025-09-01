@@ -355,14 +355,6 @@ public sealed partial class ShipyardSystem : SharedShipyardSystem
             return;
         }
 
-        // Debug logging for ship save operation
-        var hasStationKey = TryComp<StationRecordKeyStorageComponent>(targetId, out var keyStorage) && keyStorage.Key != null;
-        Log.Debug($"Ship save request: player={player}, deed={deed.ShuttleName}, hasStationKey={hasStationKey}, shuttleUid={deed.ShuttleUid}");
-
-        // IMPORTANT: Ship saving should work regardless of StationRecordKey status
-        // StationRecordKey is for player identification/records, not ship ownership
-        // Ship ownership is determined solely by ShuttleDeedComponent
-
         // Request ship save through the ShipSaveSystem
         var shipSaveSystem = _entitySystemManager.GetEntitySystem<Content.Server.Shuttles.Save.ShipSaveSystem>();
 
@@ -741,19 +733,6 @@ public sealed partial class ShipyardSystem : SharedShipyardSystem
             {
                 sellValue = (int)_pricing.AppraiseGrid(loopAppraisalShuttle.Value, LacksPreserveOnSaleComp);
                 sellValue = CalculateShipResaleValue((uid, component), sellValue);
-
-                // Debug logging to track ship save value calculation
-                var hasStationKey = TryComp<StationRecordKeyStorageComponent>(targetId, out var debugKeyStorage) && debugKeyStorage.Key != null;
-                Log.Debug($"Ship deed UI refresh: sellValue={sellValue}, hasStationKey={hasStationKey}, shuttleUid={deed.ShuttleUid}");
-
-                // IMPORTANT: Ensure ship deed functionality is independent of StationRecordKey
-                // Ship deed operations should work regardless of station record status
-                // If sellValue is 0 but we have a valid deed, set minimum value to enable save button
-                if (sellValue <= 0 && deed != null && deed.ShuttleUid != null)
-                {
-                    sellValue = 1; // Minimum value to enable save button on client
-                    Log.Debug($"Ship deed sellValue was 0, setting to 1 to enable save functionality");
-                }
             }
 
             var fullName = deed != null ? GetFullName(deed) : null;

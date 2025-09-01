@@ -90,3 +90,6 @@ public sealed partial class AssayDoAfterEvent : DoAfterEvent
 
     public override DoAfterEvent Clone() => this;
 }
+
+[Serializable, NetSerializable]
+public sealed partial class LifeDrainDoAfterEvent : SimpleDoAfterEvent { }

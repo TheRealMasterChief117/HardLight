@@ -50,9 +50,14 @@ public sealed class PsionicAbilitiesSystem : EntitySystem
         // Any entity with InnatePowers should also be psionic, but in case they aren't already...
         EnsureComp<PsionicComponent>(uid, out var psionic);
 
-        foreach (var proto in comp.PowersToAdd)
-            if (!psionic.ActivePowers.Contains(_prototypeManager.Index(proto)))
-                InitializePsionicPower(uid, _prototypeManager.Index(proto), psionic, false);
+        foreach (var protoId in comp.PowersToAdd)
+        {
+            if (_prototypeManager.TryIndex<PsionicPowerPrototype>(protoId, out var proto))
+            {
+                if (!psionic.ActivePowers.Contains(proto))
+                    InitializePsionicPower(uid, proto, psionic, false);
+            }
+        }
     }
 
     private void OnPsionicShutdown(EntityUid uid, PsionicComponent component, ComponentShutdown args)

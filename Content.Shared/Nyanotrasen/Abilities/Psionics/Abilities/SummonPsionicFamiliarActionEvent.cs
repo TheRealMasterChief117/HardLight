@@ -3,7 +3,7 @@ using Robust.Shared.Prototypes;
 
 namespace Content.Shared.Nyanotrasen.Abilities.Psionics.Abilities;
 
-public sealed partial class SummonPsionicFamiliarActionEvent : BaseActionEvent
+public sealed partial class SummonPsionicFamiliarActionEvent : InstantActionEvent
 {
     [DataField]
     public EntProtoId? FamiliarProto;

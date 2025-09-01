@@ -304,13 +304,30 @@ public abstract class SharedMeleeWeaponSystem : EntitySystem
                 return false;
         }
 
-        // Use hands clothing if applicable.
-        if (_inventory.TryGetSlotEntity(entity, "gloves", out var gloves) &&
-            TryComp<MeleeWeaponComponent>(gloves, out var glovesMelee))
+        // #HL Use any clothing with melee weapons, hands/gloves have highest priority
+        if (_inventory.TryGetSlots(entity, out var slotDefinitions))
         {
-            weaponUid = gloves.Value;
-            melee = glovesMelee;
-            return true;
+            // Check gloves first (highest priority after held items)
+            if (_inventory.TryGetSlotEntity(entity, "gloves", out var gloves) &&
+                TryComp<MeleeWeaponComponent>(gloves, out var glovesMelee))
+            {
+                weaponUid = gloves.Value;
+                melee = glovesMelee;
+                return true;
+            }
+            
+            // Check all other slots
+            foreach (var slot in slotDefinitions)
+            {
+                if (slot.Name == "gloves") continue; // Already checked
+                if (_inventory.TryGetSlotEntity(entity, slot.Name, out var slotEntity) &&
+                    TryComp<MeleeWeaponComponent>(slotEntity, out var slotMelee))
+                {
+                    weaponUid = slotEntity.Value;
+                    melee = slotMelee;
+                    return true;
+                }
+            }
         }
 
         // Use our own melee

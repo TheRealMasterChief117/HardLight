@@ -201,6 +201,9 @@
     emagStaticPacks:
     - NFServiceTechfabDeprecatedEmagStatic
   - type: OreSiloClient
+  - type: DeviceLinkSink
+    ports:
+      - FillbotAnyItem
 
 - type: entity
   parent: [ BlueprintReceiverBase, ServiceTechFab ]
@@ -231,6 +234,9 @@
     dynamicPacks:
     - NFServiceTechfabDeprecated
   - type: OreSiloClient
+  - type: DeviceLinkSink
+    ports:
+      - FillbotAnyItem
 
 - type: entity
   parent: [ BlueprintReceiverBase, BaseLatheLube ]
@@ -262,6 +268,9 @@
     dynamicPacks:
     - NFEngineeringTechfabDeprecated
   - type: OreSiloClient
+  - type: DeviceLinkSink
+    ports:
+      - FillbotAnyItem
 
 - type: entity
   parent: [ BlueprintReceiverBase, BaseLatheLube ]
@@ -296,6 +305,9 @@
     emagStaticPacks:
     - NFSalvageTechfabDeprecatedEmag
   - type: OreSiloClient
+  - type: DeviceLinkSink
+    ports:
+      - FillbotAnyItem
 
 - type: entity
   id: NfsdTechFab
@@ -334,6 +346,9 @@
   - type: PirateBountyItem # Mono
     id: Techfab
   - type: OreSiloClient
+  - type: DeviceLinkSink
+    ports:
+      - FillbotAnyItem
 
 - type: entity
   id: MercenaryTechFab
@@ -372,6 +387,9 @@
   - type: PirateBountyItem # Mono
     id: Techfab
   - type: OreSiloClient
+  - type: DeviceLinkSink
+    ports:
+      - FillbotAnyItem
 
 - type: entity
   id: MercenaryTechFabHacked
@@ -420,6 +438,9 @@
   - type: PirateBountyItem # Mono
     id: Techfab
   - type: OreSiloClient
+  - type: DeviceLinkSink
+    ports:
+      - FillbotAnyItem
 
 - type: entity
   parent: [BaseStructureDisableToolUse, BaseLathe]
@@ -469,6 +490,9 @@
       tags:
         - PrizeTicket
   - type: OreSiloClient
+  - type: DeviceLinkSink
+    ports:
+      - FillbotAnyItem
 
 - type: entity
   id: BlueprintLithograph
@@ -499,6 +523,9 @@
     - NFBlueprints
   - type: RequireProjectileTarget
   - type: OreSiloClient
+  - type: DeviceLinkSink
+    ports:
+      - FillbotAnyItem
 
 - type: entity
   id: ScrapProcessor
@@ -535,6 +562,9 @@
     staticPacks:
     - NFScrapStatic
   - type: OreSiloClient
+  - type: DeviceLinkSink
+    ports:
+      - FillbotAnyItem
 
 - type: entity
   id: BiogeneratorFill

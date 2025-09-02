@@ -133,11 +133,11 @@
     molsPerSecondPerUnitMass: 0.0005
   - type: Speech
     speechVerb: LargeMob
-  # - type: Psionic
-    # removable: false
-  # - type: InnatePsionicPowers
-    # powersToAdd:
-      # - TelepathyPower
+  - type: Psionic
+    removable: false
+  - type: InnatePsionicPowers
+    powersToAdd:
+      - TelepathyPower
   # - type: LanguageKnowledge
     # speaks:
     # - Xeno
@@ -152,6 +152,8 @@
     # color: "#808080"
     # activateSound: null
     # deactivateSound: null
+  - type: PotentialPsionic #Nyano - Summary: makes potentially psionic. 
+    chance: -2
 
 - type: entity
   name: Praetorian

@@ -63,3 +63,6 @@
     price: 300 # Frontier: 1500<300
   - type: MaterialStorageMagnetPickup
     range: 0.30
+  - type: DeviceLinkSink
+    ports:
+      - FillbotAnyItem

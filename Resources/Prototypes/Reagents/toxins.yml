@@ -295,6 +295,8 @@
         damage:
           types:
             Radiation: 3
+      - !type:ChemRerollPsionic
+        bonusMultiplier: 5
 
 - type: reagent
   id: HeartbreakerToxin
@@ -343,13 +345,16 @@
   metabolisms:
     Poison:
       effects:
-      - !type:GenericStatusEffect
-        key: SeeingRainbows
-        component: SeeingRainbows
-        type: Add
-        time: 10
-        refresh: false
-  # TODO: PROPER hallucinations
+      - !type:HealthChange
+        probability: 0.1
+        damage:
+          groups:
+            Toxin: 2
+      - !type:ChemRemovePsionic #Nyano - Summary: removes psionics from the user at 20u. 
+        conditions:
+        - !type:ReagentThreshold
+          reagent: MindbreakerToxin
+          min: 20
 
 - type: reagent
   id: Histamine

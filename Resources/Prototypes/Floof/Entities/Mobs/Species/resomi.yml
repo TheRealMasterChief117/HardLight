@@ -54,12 +54,13 @@
       alternateState: Resomi_burning
     - type: Speech
       speechVerb: Parrot
-      speechSounds: MaleAvali
+      speechSounds: UnisexResomi
+      allowedEmotes: ['Chirp', 'Hisses', 'Purr', 'Growl', 'Trill', 'Scree', 'Call', 'Squawk']
     - type: Vocal
       sounds:
-        Male: MaleAvali
-        Unsexed: MaleAvali
-        Female: FemaleAvali
+        Male: UnisexResomi
+        Unsexed: UnisexResomi
+        Female: UnisexResomi
     - type: Hands
       handDisplacement:
         sizeMaps:

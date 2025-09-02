@@ -102,6 +102,9 @@
   - type: RequireProjectileTarget
   - type: PotentialDeadDrop # Frontier
     hintText: dead-drop-hint-disposals # Frontier
+  - type: DeviceLinkSink
+    ports:
+      - FillbotAnyItem
 
 - type: entity
   id: MailingUnit
@@ -156,3 +159,6 @@
         type: MailingUnitBoundUserInterface
       enum.ConfigurationUiKey.Key:
         type: ConfigurationBoundUserInterface
+  - type: DeviceLinkSink
+    ports:
+      - FillbotAnyItem

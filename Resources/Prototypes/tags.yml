@@ -811,6 +811,9 @@
   id: Hotsauce
 
 - type: Tag
+  id: HydroponicsToolClippers
+
+- type: Tag
   id: Ice
 
 - type: Tag
@@ -1251,6 +1254,9 @@
   id: SiliconEmotes
 
 - type: Tag
+  id: SiliconMob
+
+- type: Tag
   id: SkeletonMotorcycleKeys
 
 - type: Tag
@@ -1449,7 +1455,13 @@
   id: WeaponShotgunKammerer
 
 - type: Tag
+  id: WeldbotFixableStructure
+
+- type: Tag
   id: WeldingMask
+
+- type: Tag
+  id: WeldingTool
 
 - type: Tag
   id: WetFloorSign

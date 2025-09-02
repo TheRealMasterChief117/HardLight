@@ -192,6 +192,7 @@
         - CanPilot
         - FootstepSound
         - DoorBumpOpener
+        - SiliconMob
     - type: Hands
     - type: Inventory
       templateId: human

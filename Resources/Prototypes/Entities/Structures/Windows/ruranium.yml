@@ -117,6 +117,7 @@
     mode: SnapgridCenter
     snap:
     - Window
+    - WeldbotFixableStructure
   components:
   - type: Sprite
     drawdepth: WallTops
@@ -125,6 +126,7 @@
   - type: Tag
     tags:
     - Diagonal
+    - WeldbotFixableStructure
   - type: IconSmooth
     mode: Diagonal
     key: walls # Frontier: windows<walls

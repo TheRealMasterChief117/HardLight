@@ -161,3 +161,9 @@
   id: OperatingTable
   name: signal-port-name-operating-table
   description: signal-port-description-operating-table
+
+- type: sourcePort
+  id: FillItems # Used by Fillbot
+  name: signal-port-name-fillitems
+  description: signal-port-description-fillitems
+  defaultLinks: [ FillbotAnyItem ]

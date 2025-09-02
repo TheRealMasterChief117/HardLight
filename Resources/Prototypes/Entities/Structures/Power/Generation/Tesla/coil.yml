@@ -49,6 +49,9 @@
       input:
         !type:CableDeviceNode
         nodeGroupID: HVPower
+  - type: Tag
+    tags:
+      - WeldbotFixableStructure
   - type: PowerMonitoringDevice
     group: Generator
     loadNode: input

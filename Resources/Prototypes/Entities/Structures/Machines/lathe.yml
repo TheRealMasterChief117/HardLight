@@ -56,6 +56,9 @@
   - type: TechnologyDatabase
   - type: MaterialStorageMagnetPickup # Frontier
     range: 0.30 # Frontier
+  - type: DeviceLinkSink
+    ports:
+      - FillbotAnyItem
 
 # a lathe that can be sped up with space lube / slowed down with glue
 - type: entity
@@ -160,6 +163,9 @@
     - blueprint
   - type: PirateBountyItem # Frontier
     id: Autolathe # Frontier
+  - type: DeviceLinkSink
+    ports:
+      - FillbotAnyItem
 
 - type: entity
   id: AutolatheHyperConvection
@@ -171,6 +177,9 @@
     sprite: Structures/Machines/autolathe_hypercon.rsi
   - type: Machine
     board: AutolatheHyperConvectionMachineCircuitboard
+  - type: DeviceLinkSink
+    ports:
+      - FillbotAnyItem
 
 - type: entity
   id: Protolathe
@@ -242,6 +251,9 @@
     - SyringeGuns # Delta-V
     emagStaticPacks:
     - CivilianAmmoRecipePack
+  - type: DeviceLinkSink
+    ports:
+      - FillbotAnyItem
 
 - type: entity
   id: ProtolatheHyperConvection
@@ -253,6 +265,9 @@
     sprite: Structures/Machines/protolathe_hypercon.rsi
   - type: Machine
     board: ProtolatheHyperConvectionMachineCircuitboard
+  - type: DeviceLinkSink
+    ports:
+      - FillbotAnyItem
 
 - type: entity
   id: CircuitImprinter
@@ -310,6 +325,9 @@
       - Ingot
   - type: OreSiloClient
   - type: RequireProjectileTarget
+  - type: DeviceLinkSink
+    ports:
+      - FillbotAnyItem
 
 - type: entity
   id: CircuitImprinterHyperConvection
@@ -321,6 +339,9 @@
     sprite: Structures/Machines/circuit_imprinter_hypercon.rsi
   - type: Machine
     board: CircuitImprinterHyperConvectionMachineCircuitboard
+  - type: DeviceLinkSink
+    ports:
+      - FillbotAnyItem
 
 - type: entity
   id: ExosuitFabricator
@@ -365,6 +386,9 @@
   - type: GuideHelp
     guides:
     - Robotics
+  - type: DeviceLinkSink
+    ports:
+      - FillbotAnyItem
 
 - type: entity
   id: Biofabricator
@@ -405,6 +429,9 @@
   - type: EmagLatheRecipes
     emagStaticPacks:
     - HostileCubesStatic
+  - type: DeviceLinkSink
+    ports:
+      - FillbotAnyItem
 
 - type: entity
   id: SecurityTechFab
@@ -456,6 +483,9 @@
   - type: OreSiloClient
   # - type: LatheAnnouncing # Frontier: spammy
   #   channels: [Security] # Frontier
+  - type: DeviceLinkSink
+    ports:
+      - FillbotAnyItem
 
 - type: entity
   id: AmmoTechFab
@@ -493,6 +523,9 @@
       - Ingot
   - type: PirateBountyItem # Mono
     id: Techfab
+  - type: DeviceLinkSink
+    ports:
+      - FillbotAnyItem
 
 - type: entity
   id: MedicalTechFab
@@ -540,6 +573,9 @@
   - type: OreSiloClient
   # - type: LatheAnnouncing # Frontier: spammy
   #   channels: [Medical] # Frontier
+  - type: DeviceLinkSink
+    ports:
+      - FillbotAnyItem
 
 - type: entity
   parent: BaseLathe
@@ -594,6 +630,9 @@
       - RawMaterial
       - Ingot
   - type: OreSiloClient
+  - type: DeviceLinkSink
+    ports:
+      - FillbotAnyItem
 
 - type: entity
   id: Biogenerator
@@ -662,6 +701,9 @@
     spriteLayers:
     - beaker
   # End Frontier: emag lathe recipes, item mapper
+  - type: DeviceLinkSink
+    ports:
+      - FillbotAnyItem
 
 - type: entity
   parent: BaseLathe
@@ -699,6 +741,9 @@
     # - RGlassSmelting # Frontier: raw mats only
   - type: PlaceableSurface # DeltaV: Allow ore bags to dump into it directly
     isPlaceable: false # but not place on it if you just click it with a random item
+  - type: DeviceLinkSink
+    ports:
+      - FillbotAnyItem
 
 - type: entity
   parent: OreProcessor
@@ -717,6 +762,9 @@
     - OreSmelting
     - RGlassSmelting
     - AdvancedSmelting
+  - type: DeviceLinkSink
+    ports:
+      - FillbotAnyItem
 
 - type: entity
   parent: BaseLathe
@@ -748,6 +796,9 @@
     runningState: base_machine_processing
     staticPacks:
     - SheetifierStatic
+  - type: DeviceLinkSink
+    ports:
+      - FillbotAnyItem
 
 - type: entity
   parent: BaseLathe
@@ -796,6 +847,9 @@
       - Plastic
       - Ingot # Frontier
   - type: OreSiloClient
+  - type: DeviceLinkSink
+    ports:
+      - FillbotAnyItem
 
 # Shitmed Change Start
 - type: entity
@@ -833,3 +887,6 @@
     emagStaticPacks:
     - MedicalPizzaLimbsStatic
 # Shitmed Change End
+  - type: DeviceLinkSink
+    ports:
+      - FillbotAnyItem

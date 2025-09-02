@@ -22,6 +22,7 @@
     tags:
       - ForceFixRotations
       - Window
+      - WeldbotFixableStructure
   - type: Sprite
     drawdepth: WallTops
     sprite: _NF/Structures/Windows/window.rsi # Frontier
@@ -138,6 +139,7 @@
   - type: Tag
     tags:
       - Window
+      - WeldbotFixableStructure
   - type: MeleeSound
     soundGroups:
       Brute:
@@ -258,6 +260,7 @@
   - type: Tag
     tags:
     - Diagonal
+    - WeldbotFixableStructure
   - type: IconSmooth
     mode: Diagonal
     base: state

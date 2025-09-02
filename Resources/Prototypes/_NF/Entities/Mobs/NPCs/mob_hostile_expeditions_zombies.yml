@@ -83,7 +83,7 @@
       24: 1
       90: 1
   - type: SpawnOnTrigger
-    proto: MobZWorm
+    proto: MobZombieGearT1
   - type: DamageStateVisuals
     states:
       Alive:
@@ -120,6 +120,8 @@
       types:
         Piercing: 6
         Poison: 8
+  - type: SpawnOnTrigger
+    proto: MobZombieGearT1
 
 # Little worm shit that comes out of dead enemies
 - type: entity
@@ -149,6 +151,13 @@
         Base: worm_dead
       Dead:
         Base: worm_dead
+  - type: PointLight
+    enabled: true
+    autoRot: true
+    netsync: false
+    radius: 2
+    energy: 3
+    color: "#a83244"
 
 #T2
 - type: entity
@@ -184,7 +193,7 @@
     baseWalkSpeed : 2
     baseSprintSpeed : 4
   - type: SpawnOnTrigger
-    proto: MobZWorm
+    proto: MobZombieGearT2
   - type: DamageStateVisuals
     states:
       Alive:
@@ -245,7 +254,7 @@
     soundGunshot:
       collection: BulletMiss
   - type: SpawnOnTrigger
-    proto: MobZWorm
+    proto: MobZombieGearT3
 
 - type: entity
   parent: BaseMobZombieExpeditions
@@ -295,7 +304,7 @@
     totalIntensity: 60 # about a 2-3 tile radius
     canCreateVacuum: false
 
-#T4
+#T4 (wiiiiitch, witchwitchwitchwitchwitch)
 - type: entity
   parent: [ BaseMobZombieExpeditions, MobHostileBossBase, NFMobBossRestrictions ]
   id: MobZP0
@@ -303,8 +312,8 @@
   description: Whether fortune or misfortune, this individual exhibited no symptoms of the disease they carried until it was far too late. Their natural resistance only gave the virus more time to mutate. They're barely human, now.
   components:
   - type: MovementSpeedModifier
-    baseWalkSpeed : 3.8
-    baseSprintSpeed : 4.3
+    baseWalkSpeed : 0.1
+    baseSprintSpeed : 0.1
   - type: Sprite
     layers:
     - map: ["enum.DamageStateVisualLayers.Base"]
@@ -322,14 +331,15 @@
   - type: MobThresholds
     thresholds:
       0: Alive
-      140: Dead
+      180: Dead
   - type: SlowOnDamage
     speedModifierThresholds:
-      96: 0.7
-      128: 0.5
+      40: 48
+      96: 48
+      179: 48
   - type: MeleeWeapon
     autoAttack: false
-    attackRate: 1.75
+    attackRate: 1
     soundHit:
         path: /Audio/Weapons/Xeno/alien_claw_flesh3.ogg
     angle: 0
@@ -341,4 +351,4 @@
         Poison: 8
         Structural: 30
   - type: SpawnOnTrigger
-    proto: MobZWorm
+    proto: MobZombieGearT4

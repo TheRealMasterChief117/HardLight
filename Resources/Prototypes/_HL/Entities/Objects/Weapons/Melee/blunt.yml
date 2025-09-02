@@ -42,6 +42,9 @@
   description: A baseball bat with nails tastefully hammered through the end.
   parent: BaseBat
   components:
+  - type: Sprite
+    sprite: _HL/Objects/Weapons/Melee/bats.rsi
+    state: spiked
   - type: MeleeWeapon
     damage:
       types:
@@ -64,6 +67,9 @@
   description: A baseball bat with steel sheets adorning the strike face.
   parent: BaseBat
   components:
+  - type: Sprite
+    sprite: _HL/Objects/Weapons/Melee/bats.rsi
+    state: reinforced
   - type: MeleeWeapon
     damage:
       types:

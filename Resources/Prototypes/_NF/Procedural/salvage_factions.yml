@@ -118,6 +118,29 @@
     Megafauna: MobArgocyteLeviathingExpeditions
     Difficulties: NFModerate
 
+- type: salvageFaction
+  id: HLZombies
+  desc: nf-salvage-faction-argocytes
+  entries:
+    - proto: MobZTaken
+      cost: 0.5
+    - proto: MobZVasophage
+      cost: 1
+      prob: 0.4
+    - proto: MobZHeadless
+      cost: 1
+    - proto: MobZBloated
+      cost: 2
+    - proto: MobZCarrier
+      cost: 3
+    - proto: MobZP0
+      cost: 4
+      prob: 0.05
+  configs:
+    DefenseStructure: MobZBloated
+    Megafauna: MobZP0
+    Difficulties: NFModerate
+
 # region Hazardous
 
 

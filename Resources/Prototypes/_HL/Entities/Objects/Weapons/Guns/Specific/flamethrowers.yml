@@ -3,33 +3,29 @@
   name: improvised flamethrower
   parent: BaseItem
   id: flamethrower
-  description: I hate everything.
+  description: A surprisingly well made device crafted out of scrap and old tools that manages to shoot individual jets of flame.
   components:
   - type: Sprite
-    sprite: Objects/Weapons/Guns/Snipers/amr.rsi
+    sprite: _HL/Objects/Weapons/Guns/Flamethrowers/impflamethrower.rsi
     layers:
-      - state: base
-        map: ["enum.GunVisualLayers.Base"]
-      - state: mag-0
-        map: ["enum.GunVisualLayers.Mag"]
-      - state: barrel
-        visible: true
-        map: ["enum.ToggleVisuals.Layer"]
+    - state: icon
+      map: ["enum.GunVisualLayers.Base"]
   - type: Clothing
-    sprite: Objects/Weapons/Guns/Snipers/amr.rsi
+    sprite: _HL/Objects/Weapons/Guns/Flamethrowers/impflamethrower.rsi
     slots:
     - Back
     - suitStorage
   - type: Item
-    size: Small
-    sprite: Objects/Weapons/Guns/Snipers/amr.rsi
+    size: Large
+    sprite: _HL/Objects/Weapons/Guns/Flamethrowers/impflamethrower.rsi
   - type: Gun
     fireRate: 3
     selectedMode: SemiAuto
     availableModes:
     - SemiAuto
     soundGunshot:
-      path: /Audio/Weapons/Guns/Gunshots/sniper.ogg
+      path: /Audio/Effects/teleport_departure.ogg
+    cameraRecoilScalarModified: 0.1
   - type: RefillableSolution
     solution: Welder
   - type: SolutionContainerManager

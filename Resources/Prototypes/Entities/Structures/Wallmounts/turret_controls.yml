@@ -208,7 +208,7 @@
     - Borg
 
 - type: entity
-  parent: WeaponEnergyTurretStationControlPanelBase
+  parent: WeaponEnergyTurretStationControlPanel
   id: WeaponEnergyTurretSecurityControlPanel
   suffix: Security
   components:
@@ -225,7 +225,7 @@
     - Borg
 
 - type: entity
-  parent: WeaponEnergyTurretStationControlPanelBase
+  parent: WeaponEnergyTurretStationControlPanel
   id: WeaponEnergyTurretCommandControlPanel
   suffix: Command
   components:

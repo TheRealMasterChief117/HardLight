@@ -174,19 +174,96 @@ public sealed class ShipyardGridSaveSystem : EntitySystem
             tempMapId = _mapManager.CreateMap();
             _sawmill.Info($"Created temporary map {tempMapId}");
 
-            // Move the grid to the temporary map and normalize its position/rotation
-            var gridTransform = _entityManager.GetComponent<TransformComponent>(gridUid);
-            _transformSystem.SetCoordinates(gridUid, new EntityCoordinates(_mapManager.GetMapEntityId(tempMapId), Vector2.Zero));
-            _transformSystem.SetLocalRotation(gridUid, Angle.Zero);
+            // Step 2: Move the grid to the temporary map and clean it
+            var tempGridUid = await MoveAndCleanGrid(gridUid, tempMapId.Value);
+            if (tempGridUid == null)
+            {
+                _sawmill.Error("Failed to move and clean grid");
+                return false;
+            }
 
-            _sawmill.Info($"Teleported grid {gridUid} to temporary map {tempMapId} at origin with normalized rotation");
+            _sawmill.Info($"Successfully moved and cleaned grid to {tempGridUid}");
 
-            return tempMapId;
+            // Step 3: Save the grid using MapLoaderSystem to a temporary file
+            var fileName = $"{shipName}.yml";
+            var tempFilePath = new ResPath("/") / "UserData" / fileName;
+            _sawmill.Info($"Attempting to save grid as {fileName}");
+
+            bool success = _mapLoader.TrySaveGrid(tempGridUid.Value, tempFilePath);
+
+            if (success)
+            {
+                _sawmill.Info($"Successfully saved grid to {fileName}");
+
+                // Step 4: Read the YAML file and send to client
+                try
+                {
+                    using var fileStream = _resourceManager.UserData.OpenRead(tempFilePath);
+                    using var reader = new StreamReader(fileStream);
+                    var yamlContent = await reader.ReadToEndAsync();
+
+                    // Send the YAML data to the client for local saving
+                    var saveMessage = new SendShipSaveDataClientMessage(shipName, yamlContent);
+                    RaiseNetworkEvent(saveMessage, playerSession);
+
+                    _sawmill.Info($"Sent ship data '{shipName}' to client {playerSession.Name} for local saving");
+
+                    // Clean up the temporary server file with retry logic
+                    await TryDeleteFileWithRetry(tempFilePath);
+                }
+                catch (Exception ex)
+                {
+                    _sawmill.Error($"Failed to read/send YAML file: {ex}");
+                    success = false;
+                }
+            }
+            else
+            {
+                _sawmill.Error($"Failed to save grid to {fileName}");
+            }
+
+            return success;
         }
         catch (Exception ex)
         {
-            _sawmill.Error($"Step 1 failed: {ex}");
-            return null;
+            _sawmill.Error($"Exception during ship save: {ex}");
+            return false;
+        }
+        finally
+        {
+            // Step 6: Clean up temporary resources with proper timing
+            if (tempMapId.HasValue)
+            {
+                // Give all systems significant time to finish processing the map deletion
+                await Task.Delay(500);
+
+                try
+                {
+                    _mapManager.DeleteMap(tempMapId.Value);
+                    _sawmill.Info($"Cleaned up temporary map {tempMapId}");
+                }
+                catch (Exception ex)
+                {
+                    _sawmill.Error($"Failed to clean up temporary map {tempMapId}: {ex}");
+                }
+            }
+
+            // Delete the original grid after all processing is complete
+            if (_entityManager.EntityExists(gridUid))
+            {
+                // Additional delay to ensure all systems finish processing entity changes
+                await Task.Delay(300);
+
+                try
+                {
+                    _entityManager.DeleteEntity(gridUid);
+                    _sawmill.Info($"Deleted original grid entity {gridUid}");
+                }
+                catch (Exception ex)
+                {
+                    _sawmill.Error($"Failed to delete original grid entity {gridUid}: {ex}");
+                }
+            }
         }
     }
 
@@ -358,109 +435,6 @@ public sealed class ShipyardGridSaveSystem : EntitySystem
         {
             _sawmill.Error($"Step 3 failed: {ex}");
             return false;
-        }
-    }
-
-    /// <summary>
-    /// STEP 4: Save the grid
-    /// </summary>
-    private async Task<bool> Step4_SaveGrid(EntityUid gridUid, string shipName, ICommonSession playerSession)
-    {
-        try
-        {
-            _sawmill.Info($"Step 4: Saving grid as '{shipName}'");
-
-            // Save the grid using MapLoaderSystem to a temporary file
-            // Step 2: Move the grid to the temporary map and clean it
-            var tempGridUid = await MoveAndCleanGrid(gridUid, tempMapId.Value);
-            if (tempGridUid == null)
-            {
-                _sawmill.Error("Failed to move and clean grid");
-                return false;
-            }
-
-            _sawmill.Info($"Successfully moved and cleaned grid to {tempGridUid}");
-
-            // Step 3: Save the grid using MapLoaderSystem to a temporary file
-            var fileName = $"{shipName}.yml";
-            var tempFilePath = new ResPath("/") / "UserData" / fileName;
-            _sawmill.Info($"Attempting to save grid as {fileName}");
-
-            bool success = _mapLoader.TrySaveGrid(tempGridUid.Value, tempFilePath);
-
-            if (success)
-            {
-                _sawmill.Info($"Successfully saved grid to {fileName}");
-
-                // Step 4: Read the YAML file and send to client
-                try
-                {
-                    using var fileStream = _resourceManager.UserData.OpenRead(tempFilePath);
-                    using var reader = new StreamReader(fileStream);
-                    var yamlContent = await reader.ReadToEndAsync();
-
-                    // Send the YAML data to the client for local saving
-                    var saveMessage = new SendShipSaveDataClientMessage(shipName, yamlContent);
-                    RaiseNetworkEvent(saveMessage, playerSession);
-
-                    _sawmill.Info($"Sent ship data '{shipName}' to client {playerSession.Name} for local saving");
-
-                    // Clean up the temporary server file with retry logic
-                    await TryDeleteFileWithRetry(tempFilePath);
-                }
-                catch (Exception ex)
-                {
-                    _sawmill.Error($"Failed to read/send YAML file: {ex}");
-                    success = false;
-                }
-            }
-            else
-            {
-                _sawmill.Error($"Failed to save grid to {fileName}");
-            }
-
-            return success;
-        }
-        catch (Exception ex)
-        {
-            _sawmill.Error($"Exception during ship save: {ex}");
-            return false;
-        }
-        finally
-        {
-            // Step 6: Clean up temporary resources with proper timing
-            if (tempMapId.HasValue)
-            {
-                // Give all systems significant time to finish processing the map deletion
-                await Task.Delay(500);
-
-                try
-                {
-                    _mapManager.DeleteMap(tempMapId.Value);
-                    _sawmill.Info($"Cleaned up temporary map {tempMapId}");
-                }
-                catch (Exception ex)
-                {
-                    _sawmill.Error($"Failed to clean up temporary map {tempMapId}: {ex}");
-                }
-            }
-
-            // Delete the original grid after all processing is complete
-            if (_entityManager.EntityExists(gridUid))
-            {
-                // Additional delay to ensure all systems finish processing entity changes
-                await Task.Delay(300);
-
-                try
-                {
-                    _entityManager.DeleteEntity(gridUid);
-                    _sawmill.Info($"Deleted original grid entity {gridUid}");
-                }
-                catch (Exception ex)
-                {
-                    _sawmill.Error($"Failed to delete original grid entity {gridUid}: {ex}");
-                }
-            }
         }
     }
 

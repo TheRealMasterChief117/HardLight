@@ -13,7 +13,7 @@
       TurretCompatibleWeapon:
         amount: 1
         defaultPrototype: NFWeaponEnergyRifleSniperCannon # Frontier: WeaponLaserCannon<NFWeaponEnergyRifleSniperCannon
-        examineName: construction-insert-info-examine-name-laser-cannon 
+        examineName: construction-insert-info-examine-name-laser-cannon
       ProximitySensor:
         amount: 1
         defaultPrototype: ProximitySensor
@@ -21,8 +21,8 @@
       PowerCell:
         amount: 1
         defaultPrototype: PowerCellMedium
-        examineName: construction-insert-info-examine-name-power-cell 
-        
+        examineName: construction-insert-info-examine-name-power-cell
+
 - type: entity
   id: WeaponEnergyTurretAIMachineCircuitboard
   parent: WeaponEnergyTurretStationMachineCircuitboard
@@ -36,7 +36,7 @@
     prototype: WeaponEnergyTurretAI
 
 - type: entity
-  parent: WeaponEnergyTurretStationMachineCircuitboardBase
+  parent: WeaponEnergyTurretStationMachineCircuitboard
   id: WeaponEnergyTurretSecurityMachineCircuitboard
   suffix: Security
   components:
@@ -45,9 +45,9 @@
     state: security
   - type: MachineBoard
     prototype: WeaponEnergyTurretSecurity
-    
+
 - type: entity
-  parent: WeaponEnergyTurretStationMachineCircuitboardBase
+  parent: WeaponEnergyTurretStationMachineCircuitboard
   id: WeaponEnergyTurretCommandMachineCircuitboard
   suffix: Command
   components:

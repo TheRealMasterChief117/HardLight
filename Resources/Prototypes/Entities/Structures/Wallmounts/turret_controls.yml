@@ -24,8 +24,8 @@
           collection: MetalGlassBreak
           params:
             volume: -4
-      #- !type:ChangeConstructionNodeBehavior - To be added in a later PR
-      #  node: machineFrame
+      - !type:ChangeConstructionNodeBehavior
+        node: machineFrame
       - !type:DoActsBehavior
         acts: [ "Destruction" ]
   - type: Transform
@@ -36,9 +36,11 @@
   - type: ContainerContainer
     containers:
       board: !type:Container
-  #- type: Construction - To be added in a later PR
-  #  graph: WeaponEnergyTurretControlPanel
-  #  node: frame
+  - type: Construction
+    graph: WeaponEnergyTurretControlPanel
+    node: frame
+    containers:
+    - board
   placement:
     mode: SnapgridCenter
     snap:
@@ -171,13 +173,13 @@
   - type: Electrified
     enabled: false
     usesApcPower: true
-  #- type: ContainerFill - Will be added in a later PR
-  #  containers:
-  #    board:
-  #    - WeaponEnergyTurretStationControlPanelElectronics
-  #- type: Construction - Will be added in a later PR
-  #  graph: WeaponEnergyTurretControlPanel
-  #  node: finish
+  - type: ContainerFill
+    containers:
+      board:
+      - WeaponEnergyTurretStationControlPanelElectronics
+  - type: Construction
+    graph: WeaponEnergyTurretControlPanel
+    node: finish
 
 - type: entity
   parent: WeaponEnergyTurretStationControlPanel
@@ -187,10 +189,10 @@
   components:
   - type: AccessReader
     access: [["StationAi"], ["ResearchDirector"]]
-  #- type: ContainerFill - Will be added in a later PR
-  #  containers:
-  #    board:
-  #    - WeaponEnergyTurretAIControlPanelElectronics
+  - type: ContainerFill
+    containers:
+      board:
+      - WeaponEnergyTurretAIControlPanelElectronics
   - type: DeviceNetwork
     receiveFrequencyId: TurretAI
     transmitFrequencyId: TurretControlAI
@@ -202,5 +204,39 @@
     accessGroups:
     - Silicon
     accessLevels:
+    - BasicSilicon
+    - Borg
+
+- type: entity
+  parent: WeaponEnergyTurretStationControlPanelBase
+  id: WeaponEnergyTurretSecurityControlPanel
+  suffix: Security
+  components:
+  - type: AccessReader
+    access: [["StationAi"], ["Security"]]
+  - type: ContainerFill
+    containers:
+      board:
+      - WeaponEnergyTurretSecurityControlPanelElectronics
+  - type: TurretTargetSettings
+    exemptAccessLevels:
+    - Security
+    - BasicSilicon
+    - Borg
+
+- type: entity
+  parent: WeaponEnergyTurretStationControlPanelBase
+  id: WeaponEnergyTurretCommandControlPanel
+  suffix: Command
+  components:
+  - type: AccessReader
+    access: [["StationAi"], ["Command"]]
+  - type: ContainerFill
+    containers:
+      board:
+      - WeaponEnergyTurretCommandControlPanelElectronics
+  - type: TurretTargetSettings
+    exemptAccessLevels:
+    - Command
     - BasicSilicon
     - Borg

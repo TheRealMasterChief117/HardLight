@@ -246,7 +246,7 @@
         damage:
           types:
             Heat: -2
-            Shock: -2 
+            Shock: -2
             Cold: -2 # Was 1.5, Buffed due to limb damage changes(GoobStation)
       - !type:HealthChange
         conditions:
@@ -299,7 +299,7 @@
         damage:
           types:
             Poison: 1.5 #Avali blood is ammonia based, so chems made to treat normal bloodloss poison them instead (Lethal Dose: 20u)
-            Asphyxiation: 1 
+            Asphyxiation: 1
             Bloodloss: 1
 
 - type: reagent

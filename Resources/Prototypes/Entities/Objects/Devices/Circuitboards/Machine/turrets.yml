@@ -31,29 +31,6 @@
   components:
   - type: Sprite
     sprite: Objects/Misc/module.rsi
-    state: science
-  - type: MachineBoard
-    prototype: WeaponEnergyTurretAI
-
-- type: entity
-  parent: WeaponEnergyTurretStationMachineCircuitboard
-  id: WeaponEnergyTurretSecurityMachineCircuitboard
-  suffix: Security
-  components:
-  - type: Sprite
-    sprite: Objects/Misc/module.rsi
-    state: security
-  - type: MachineBoard
-    prototype: WeaponEnergyTurretSecurity
-
-- type: entity
-  parent: WeaponEnergyTurretStationMachineCircuitboard
-  id: WeaponEnergyTurretCommandMachineCircuitboard
-  suffix: Command
-  components:
-  - type: Sprite
-    sprite: Objects/Misc/module.rsi
     state: command
   - type: MachineBoard
-    prototype: WeaponEnergyTurretCommand
-
+    prototype: WeaponEnergyTurretAI

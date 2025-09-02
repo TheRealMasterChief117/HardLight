@@ -120,7 +120,7 @@
 
 - type: salvageFaction
   id: HLZombies
-  desc: nf-salvage-faction-argocytes
+  desc: hl-salvage-faction-zombies
   entries:
     - proto: MobZTaken
       cost: 0.5
@@ -360,7 +360,7 @@
 
 - type: salvageFaction
   id: HLWizards
-  desc: nf-salvage-faction-Wizards
+  desc: hl-salvage-faction-Wizards
   entries:
     - proto: MobWizardMeleeT1
       cost: 2

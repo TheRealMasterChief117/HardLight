@@ -43,8 +43,7 @@
     animation: WeaponArcClaw
     damage:
       types:
-        Blunt: 4
-        Slash: 4
+        Blunt: 8
         Poison: 4
         Structural: 20
   - type: ReplacementAccent
@@ -210,7 +209,7 @@
   - MobHumanoidHostileAISimpleRanged
   id: MobZCarrier
   name: carrier
-  description: This unfortunate soul has had their flesh mutated into the perfect environment for Vasophages to grow, and will happily throw these at you should you get too close
+  description: This unfortunate soul has had their flesh mutated into the perfect environment for Vasophages to grow, and will happily throw these at you should you get too close.
   components:
   - type: MovementSpeedModifier
     baseWalkSpeed : 1.5
@@ -231,8 +230,8 @@
       140: Dead
   - type: SlowOnDamage
     speedModifierThresholds:
-      20: 0.7
-      26: 0.5
+      80: 0.4
+      100: 0.7
   - type: RechargeBasicEntityAmmo
     rechargeCooldown: 15
     rechargeSound:
@@ -282,7 +281,7 @@
   - type: SlowOnDamage
     speedModifierThresholds:
       90: 0.7
-      140: 0.5
+      150: 0.9
   - type: MeleeWeapon
     attackRate: 1
     soundHit:

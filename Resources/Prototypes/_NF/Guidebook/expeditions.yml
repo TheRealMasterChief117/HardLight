@@ -76,3 +76,8 @@
   id: MobsExpeditionGuideWizard
   name: guide-entry-expedition-wizards
   text: "/ServerInfo/_NF/Guidebook/MobsHostileExpedition/wizards.xml"
+
+- type: guideEntry
+  id: MobsExpeditionGuideZombie
+  name: guide-entry-expedition-zombies
+  text: "/ServerInfo/_NF/Guidebook/MobsHostileExpedition/zombies.xml"

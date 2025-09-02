@@ -13,7 +13,7 @@
 - type: entity
   id: RightHandSiliconIndestructible
   name: "right silicon hand"
-  parent: [BaseItem, BaseRightArm]
+  parent: [BaseItem, BaseRightHand]
   components:
     - type: Damageable
     - type: BodyPart

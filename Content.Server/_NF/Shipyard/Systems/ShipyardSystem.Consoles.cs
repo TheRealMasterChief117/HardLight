@@ -321,6 +321,7 @@ public sealed partial class ShipyardSystem : SharedShipyardSystem
         deed.ShuttleName = String.Join(" ", nameParts.SkipLast(hasSuffix ? 1 : 0));
     }
 
+    /* Ship saving functionality commented out
     public void OnSaveMessage(EntityUid uid, ShipyardConsoleComponent component, ShipyardConsoleSaveMessage args)
     {
         if (args.Actor is not { Valid: true } player)
@@ -382,7 +383,9 @@ public sealed partial class ShipyardSystem : SharedShipyardSystem
         ConsolePopup(player, $"Ship {deed.ShuttleName} has been saved!");
         PlayConfirmSound(player, uid, component);
     }
+    */
 
+    /* Ship loading functionality commented out  
     public void OnLoadMessage(EntityUid uid, ShipyardConsoleComponent component, ShipyardConsoleLoadMessage args)
     {
         if (args.Actor is not { Valid: true } player)
@@ -466,6 +469,7 @@ public sealed partial class ShipyardSystem : SharedShipyardSystem
             }
         });
     }
+    */
 
     public void OnSellMessage(EntityUid uid, ShipyardConsoleComponent component, ShipyardConsoleSellMessage args)
     {

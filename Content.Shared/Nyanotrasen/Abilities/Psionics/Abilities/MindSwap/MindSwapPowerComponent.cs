@@ -12,5 +12,8 @@ namespace Content.Shared.Abilities.Psionics
 
         [DataField("mindSwapActionEntity")]
         public EntityUid? MindSwapActionEntity;
+
+        [DataField("useDelay")]
+        public float UseDelay = 8f;
     }
 }

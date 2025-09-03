@@ -134,6 +134,8 @@
   metabolisms:
     Poison:
       effects:
+      - !type:ChemRerollPsionic
+        bonusMultiplier: 1.2
       - !type:HealthChange
         damage:
           types:
@@ -168,6 +170,8 @@
       effects:
       - !type:SatiateThirst
         factor: 2
+      - !type:ChemRerollPsionic
+        bonusMultiplier: 1.4
     Medicine:
       metabolismRate : 0.04 # Technically a narcotic, it takes a while for the body to process the toxins.
       effects:
@@ -234,6 +238,8 @@
         damage:
           types:
             Caustic: 0.1
+      - !type:ChemRerollPsionic
+        bonusMultiplier: 2
       - !type:PopupMessage
         type: Local
         visualType: LargeCaution
@@ -300,6 +306,8 @@
     Poison:
       metabolismRate: 0.1
       effects:
+      - !type:ChemRerollPsionic
+        bonusMultiplier: 2.5
       - !type:MovespeedModifier
         walkSpeedModifier: 1.05
         sprintSpeedModifier: 1.05
@@ -361,6 +369,8 @@
     Medicine:
       metabolismRate : 0.1
       effects:
+      - !type:ChemRerollPsionic
+        bonusMultiplier: 4
       - !type:PopupMessage
         type: Local
         visualType: Large
@@ -415,6 +425,8 @@
     Poison:
       metabolismRate: 0.5
       effects:
+      - !type:ChemRerollPsionic
+        bonusMultiplier: 6
       - !type:HealthChange
         conditions:
           - !type:ReagentThreshold

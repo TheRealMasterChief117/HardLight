@@ -1,5 +1,6 @@
 using Content.Shared.Inventory.Events;
 using Content.Shared.Clothing.Components;
+using Content.Shared.Nyanotrasen.Abilities.Psionics;
 using Content.Shared.StatusEffect;
 
 namespace Content.Shared.Abilities.Psionics

@@ -25,4 +25,4 @@
     itemIconStyle: NoItem
     icon:
       sprite: _HL/Objects/Magic/chaplainIcons.rsi
-      state: shadowicons
+      state: shadowicon

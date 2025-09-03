@@ -176,7 +176,7 @@ namespace Content.Server.Psionics
             chance = Math.Clamp(chance, 0, 1);
 
             if (_random.Prob(chance))
-                _psionicAbilitiesSystem.AddPsionics(uid, warn);
+                _psionicAbilitiesSystem.AddPsionics(uid);
         }
 
         public void RerollPsionics(EntityUid uid, PotentialPsionicComponent? psionic = null, float bonusMuliplier = 1f)

@@ -71,9 +71,10 @@ public sealed class ShipyardGridSaveSystem : EntitySystem
         _mapSystem = _entitySystemManager.GetEntitySystem<SharedMapSystem>();
 
         // Subscribe to shipyard console events
-        SubscribeLocalEvent<ShipyardConsoleComponent, ShipyardConsoleSaveMessage>(OnSaveShipMessage);
+        // SubscribeLocalEvent<ShipyardConsoleComponent, ShipyardConsoleSaveMessage>(OnSaveShipMessage);
     }
 
+    /*
     private void OnSaveShipMessage(EntityUid consoleUid, ShipyardConsoleComponent component, ShipyardConsoleSaveMessage args)
     {
         if (args.Actor is not { Valid: true } player)
@@ -133,6 +134,7 @@ public sealed class ShipyardGridSaveSystem : EntitySystem
             }
         });
     }
+    */
 
     /// <summary>
     /// Removes all ShuttleDeedComponents that reference the specified shuttle EntityUid
@@ -176,14 +178,14 @@ public sealed class ShipyardGridSaveSystem : EntitySystem
             _sawmill.Info($"Starting 5-step ship save process for grid {gridUid} as '{shipName}'");
 
             // STEP 1: Create a blank map and teleport the ship to it for saving
-            tempMapId = await Step1_CreateBlankMapAndTeleportShip(gridUid);
+            tempMapId = await Step1_CreateBlankMapAndTeleportShip(gridUid, shipName, playerSession);
             if (!tempMapId.HasValue)
             {
                 _sawmill.Error("Step 1 failed: Could not create temporary map or teleport ship");
                 return false;
             }
             tempGridUid = gridUid; // Grid was moved, same EntityUid
-            _sawmill.Info($"Step 1 complete: Ship teleported to temporary map {tempMapId.Value}");
+            _sawmill.Info($"Step 1 complete: Ship teleported to temporary map {tempMapId}");
 
             // STEP 2: Empty containers and clean grid of problematic components, delete freefloating entities
             var step2Success = await Step2_EmptyContainersAndCleanGrid(tempGridUid.Value);
@@ -238,11 +240,11 @@ public sealed class ShipyardGridSaveSystem : EntitySystem
                 try
                 {
                     _mapManager.DeleteMap(tempMapId.Value);
-                    _sawmill.Info($"Cleaned up temporary map {tempMapId.Value}");
+                    _sawmill.Info($"Cleaned up temporary map {tempMapId}");
                 }
                 catch (Exception ex)
                 {
-                    _sawmill.Error($"Failed to clean up temporary map {tempMapId.Value}: {ex}");
+                    _sawmill.Error($"Failed to clean up temporary map {tempMapId}: {ex}");
                 }
             }
         }
@@ -253,29 +255,107 @@ public sealed class ShipyardGridSaveSystem : EntitySystem
     /// <summary>
     /// STEP 1: Create a blank map and teleport the ship to it for saving
     /// </summary>
-    private async Task<MapId?> Step1_CreateBlankMapAndTeleportShip(EntityUid gridUid)
+    private async Task<MapId?> Step1_CreateBlankMapAndTeleportShip(EntityUid gridUid, string shipName, ICommonSession playerSession)
     {
+        MapId tempMapId = default;
         try
         {
             _sawmill.Info("Step 1: Creating blank map and teleporting ship");
 
             // Create a temporary blank map for saving
-            var tempMapId = _mapManager.CreateMap();
+            tempMapId = _mapManager.CreateMap();
             _sawmill.Info($"Created temporary map {tempMapId}");
 
-            // Move the grid to the temporary map and normalize its position/rotation
-            var gridTransform = _entityManager.GetComponent<TransformComponent>(gridUid);
-            _transformSystem.SetCoordinates(gridUid, new EntityCoordinates(_mapManager.GetMapEntityId(tempMapId), Vector2.Zero));
-            _transformSystem.SetLocalRotation(gridUid, Angle.Zero);
+            // Step 2: Move the grid to the temporary map and clean it
+            var tempGridUid = await MoveAndCleanGrid(gridUid, tempMapId);
+            if (tempGridUid == null)
+            {
+                _sawmill.Error("Failed to move and clean grid");
+                return null;
+            }
 
-            _sawmill.Info($"Teleported grid {gridUid} to temporary map {tempMapId} at origin with normalized rotation");
+            _sawmill.Info($"Successfully moved and cleaned grid to {tempGridUid}");
 
-            return tempMapId;
+            // Step 3: Save the grid using MapLoaderSystem to a temporary file
+            var fileName = $"{shipName}.yml";
+            var tempFilePath = new ResPath("/") / "UserData" / fileName;
+            _sawmill.Info($"Attempting to save grid as {fileName}");
+
+            bool success = _mapLoader.TrySaveGrid(tempGridUid.Value, tempFilePath);
+
+            if (success)
+            {
+                _sawmill.Info($"Successfully saved grid to {fileName}");
+
+                // Step 4: Read the YAML file and send to client
+                try
+                {
+                    using var fileStream = _resourceManager.UserData.OpenRead(tempFilePath);
+                    using var reader = new StreamReader(fileStream);
+                    var yamlContent = await reader.ReadToEndAsync();
+
+                    // Send the YAML data to the client for local saving
+                    var saveMessage = new SendShipSaveDataClientMessage(shipName, yamlContent);
+                    RaiseNetworkEvent(saveMessage, playerSession);
+
+                    _sawmill.Info($"Sent ship data '{shipName}' to client {playerSession.Name} for local saving");
+
+                    // Clean up the temporary server file with retry logic
+                    await TryDeleteFileWithRetry(tempFilePath);
+                }
+                catch (Exception ex)
+                {
+                    _sawmill.Error($"Failed to read/send YAML file: {ex}");
+                    success = false;
+                }
+            }
+            else
+            {
+                _sawmill.Error($"Failed to save grid to {fileName}");
+            }
+
+            return success ? tempMapId : null;
         }
         catch (Exception ex)
         {
-            _sawmill.Error($"Step 1 failed: {ex}");
+            _sawmill.Error($"Exception during ship save: {ex}");
             return null;
+        }
+        finally
+        {
+            // Step 6: Clean up temporary resources with proper timing
+            if (tempMapId != default)
+            {
+                // Give all systems significant time to finish processing the map deletion
+                await Task.Delay(500);
+
+                try
+                {
+                    _mapManager.DeleteMap(tempMapId);
+                    _sawmill.Info($"Cleaned up temporary map {tempMapId}");
+                }
+                catch (Exception ex)
+                {
+                    _sawmill.Error($"Failed to clean up temporary map {tempMapId}: {ex}");
+                }
+            }
+
+            // Delete the original grid after all processing is complete
+            if (_entityManager.EntityExists(gridUid))
+            {
+                // Additional delay to ensure all systems finish processing entity changes
+                await Task.Delay(300);
+
+                try
+                {
+                    _entityManager.DeleteEntity(gridUid);
+                    _sawmill.Info($"Deleted original grid entity {gridUid}");
+                }
+                catch (Exception ex)
+                {
+                    _sawmill.Error($"Failed to delete original grid entity {gridUid}: {ex}");
+                }
+            }
         }
     }
 
@@ -431,37 +511,13 @@ public sealed class ShipyardGridSaveSystem : EntitySystem
                 }
 
                 // Remove problematic components from remaining entities
-                if (_entityManager.RemoveComponent<ActorComponent>(entity))
-                {
-                    componentsRemoved++;
-                    _sawmill.Debug($"Removed ActorComponent from {entity}");
-                }
-
-                if (_entityManager.RemoveComponent<EyeComponent>(entity))
-                {
-                    componentsRemoved++;
-                    _sawmill.Debug($"Removed EyeComponent from {entity}");
-                }
 
                 // Note: Removed PhysicsComponent deletion that was causing collision issues in loaded ships
                 // PhysicsComponent and FixturesComponent are needed for proper collision detection
 
                 // Remove atmospheric components that hold runtime state
-                if (_entityManager.RemoveComponent<AtmosDeviceComponent>(entity))
-                {
-                    componentsRemoved++;
-                    _sawmill.Debug($"Removed AtmosDeviceComponent from {entity}");
-                }
 
                 // Reset power components to clean state
-                if (_entityManager.TryGetComponent<BatteryComponent>(entity, out var battery))
-                {
-                    if (_entitySystemManager.TryGetEntitySystem<BatterySystem>(out var batterySystem))
-                    {
-                        batterySystem.SetCharge(entity, battery.MaxCharge);
-                        _sawmill.Debug($"Reset battery charge for {entity}");
-                    }
-                }
             }
 
             _sawmill.Info($"Step 3 complete: Removed {structuresRemoved} problematic structures, cleaned {componentsRemoved} components");

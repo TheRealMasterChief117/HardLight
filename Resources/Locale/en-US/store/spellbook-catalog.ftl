@@ -72,7 +72,7 @@ spellbook-shadow-name = Raise Shadow
 spellbook-shadow-description = Breathes temporary life into your shadow. The shadow is not inherently hostile to many, but will defend you and itself if provoked.
 
 spellbook-teleport-name = Space Between Stars
-spellbook-teleport-description = Change places with your target, has multiple charges, which individually replenish over time.
+spellbook-teleport-description = Clap and exchange positions with another. Has 5 charges on a 20 second cooldown each.
 
 spellbook-dreamling-name = Call Dreamlings
 spellbook-dreamling-description = Summons several wisps of dream stuff. They are neutral creatures that simply wander around realspace until their energy is depleted.
@@ -86,8 +86,8 @@ spellbook-nightmarel-description = Summons seven hallucinatory slimes. Being hal
 spellbook-shadowf-name = Fade to Black
 spellbook-shadowf-description = Turn yourself into a shadow figure and back at will. While a shadow, you cannot interact with anything, suffocate or suffer barotrauma, and can fly.
 
-spellbook-clap-name = The Space Between Stars
-spellbook-clap-description = Clap and exchange positions with another. Has 5 charges on a 20 second cooldown each.
+spellbook-stars-name = Quiet Fracture
+spellbook-stars-description = Opens minor tears in reality on the floor, nothing to worry over, right?
 
 spellbook-water-name = Create Water
 spellbook-water-description = Siphons minor amounts of moisture in the air and condenses it into a puddle.

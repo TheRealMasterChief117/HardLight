@@ -60,6 +60,8 @@
     Narcotic:
       metabolismRate: 0.2
       effects:
+      - !type:ChemRerollPsionic
+        bonusMultiplier: 4
       # Major speed boost combining all precursors
       - !type:MovespeedModifier
         walkSpeedModifier: 1.4
@@ -132,6 +134,8 @@
     Narcotic:
       metabolismRate: 0.1
       effects:
+      - !type:ChemRerollPsionic
+        bonusMultiplier: 8
       # Blood corruption effect
       - !type:ChangeBloodReagent
         bloodReagent: BloodBlack

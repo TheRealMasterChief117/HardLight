@@ -3,6 +3,7 @@ using Content.Shared.Bed.Sleep;
 using Content.Shared.Magic.Events;
 using Content.Shared.Damage;
 using Content.Shared.Mobs.Components;
+using Content.Shared.Nyanotrasen.Abilities.Psionics;
 using Robust.Shared.Prototypes;
 using Robust.Shared.Timing;
 using Content.Shared.Mind;
@@ -33,8 +34,10 @@ namespace Content.Shared.Abilities.Psionics
             _actions.TryGetActionData( component.MassSleepActionEntity, out var actionData );
             if (actionData is { UseDelay: not null })
                 _actions.StartUseDelay(component.MassSleepActionEntity);
-            if (TryComp<PsionicComponent>(uid, out var psionic) && psionic.PsionicAbility == null)
-                psionic.PsionicAbility = component.MassSleepActionEntity;
+            if (TryComp<PsionicComponent>(uid, out var psionic) && component.MassSleepActionId != null)
+            {
+                psionic.Actions[component.MassSleepActionId] = component.MassSleepActionEntity;
+            }
         }
 
         private void OnShutdown(EntityUid uid, MassSleepPowerComponent component, ComponentShutdown args)

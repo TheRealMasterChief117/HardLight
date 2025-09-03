@@ -39,6 +39,7 @@ guide-entry-expedition-silicons = Rogue Silicons
 guide-entry-expedition-syndicate-naval-forces = Syndicate Naval Forces
 guide-entry-expedition-xenos = Xenos
 guide-entry-expedition-wizards = Wizards
+guide-entry-expedition-zombies = Zombies
 
 # Shipyard entries
 guide-entry-shipyard-adder = Adder

@@ -1,6 +1,7 @@
 - type: entity
-  id: WeaponEnergyTurretStationMachineCircuitboard
+  abstract: true
   parent: BaseMachineCircuitboard
+  id: WeaponEnergyTurretStationMachineCircuitboardBase
   name: sentry turret machine board
   description: A machine printed circuit board for a sentry turret.
   components:
@@ -12,7 +13,7 @@
     tagRequirements:
       TurretCompatibleWeapon:
         amount: 1
-        defaultPrototype: NFWeaponEnergyRifleSniperCannon # Frontier: WeaponLaserCannon<NFWeaponEnergyRifleSniperCannon
+        defaultPrototype: WeaponLaserCannon
         examineName: construction-insert-info-examine-name-laser-cannon
       ProximitySensor:
         amount: 1
@@ -24,10 +25,9 @@
         examineName: construction-insert-info-examine-name-power-cell
 
 - type: entity
+  parent: WeaponEnergyTurretStationMachineCircuitboardBase
   id: WeaponEnergyTurretAIMachineCircuitboard
-  parent: WeaponEnergyTurretStationMachineCircuitboard
-  name: AI sentry turret machine board
-  description: A machine printed circuit board for an AI sentry turret.
+  suffix: AI, Silicon
   components:
   - type: Sprite
     sprite: Objects/Misc/module.rsi
@@ -36,7 +36,7 @@
     prototype: WeaponEnergyTurretAI
 
 - type: entity
-  parent: WeaponEnergyTurretStationMachineCircuitboard
+  parent: WeaponEnergyTurretStationMachineCircuitboardBase
   id: WeaponEnergyTurretSecurityMachineCircuitboard
   suffix: Security
   components:
@@ -45,9 +45,9 @@
     state: security
   - type: MachineBoard
     prototype: WeaponEnergyTurretSecurity
-
+    
 - type: entity
-  parent: WeaponEnergyTurretStationMachineCircuitboard
+  parent: WeaponEnergyTurretStationMachineCircuitboardBase
   id: WeaponEnergyTurretCommandMachineCircuitboard
   suffix: Command
   components:

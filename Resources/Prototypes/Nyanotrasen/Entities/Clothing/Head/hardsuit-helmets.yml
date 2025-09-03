@@ -15,30 +15,30 @@
     #guides:
     #- Psionics
 
-  ###   Hardlight change    looks like upstream removed it with PR 3156 https://github.com/new-frontiers-14/frontier-station-14/pull/3156 I dont know if we want to keep this. as eventually this will be going away. The sprites were deleted  ###
-#- type: entity
-#  parent: ClothingHeadHelmetHardsuitSyndie
-#  id: ClothingHeadHelmetHardsuitSyndieReverseEngineered
-#  noSpawn: true
-#  name: SA-123 combat hardsuit helmet
-#  description: An advanced hardsuit helmet designed for work in special operations.
-#  components:
-#  - type: Sprite
-#    sprite: Nyanotrasen/Clothing/Head/ReverseEngineering/syndicate.rsi
-#  - type: Clothing
-#    sprite: Nyanotrasen/Clothing/Head/ReverseEngineering/syndicate.rsi
-#
-#- type: entity
-#  parent: ClothingHeadHelmetHardsuitCybersun
-#  id: ClothingHeadHelmetHardsuitJuggernautReverseEngineered
-#  noSpawn: true
-#  name: SA-127 combat hardsuit helmet
-#  description: An assault hardsuit helmet featuring a top-secret translucent polymer.
-#  components:
-#  - type: Sprite
-#    sprite: Nyanotrasen/Clothing/Head/ReverseEngineering/juggernaut.rsi
-#  - type: Clothing
-#    sprite: Nyanotrasen/Clothing/Head/ReverseEngineering/juggernaut.rsi
+- type: entity
+  parent: ClothingHeadHelmetHardsuitSyndie
+  id: ClothingHeadHelmetHardsuitSyndieReverseEngineered
+  noSpawn: true
+  name: SA-123 combat hardsuit helmet
+  description: An advanced hardsuit helmet designed for work in special operations.
+  components:
+  - type: Sprite
+    sprite: Nyanotrasen/Clothing/Head/ReverseEngineering/syndicate.rsi
+  - type: Clothing
+    sprite: Nyanotrasen/Clothing/Head/ReverseEngineering/syndicate.rsi
+
+- type: entity
+  parent: ClothingHeadHelmetHardsuitCybersun
+  id: ClothingHeadHelmetHardsuitJuggernautReverseEngineered
+  noSpawn: true
+  name: SA-127 combat hardsuit helmet
+  description: An assault hardsuit helmet featuring a top-secret translucent polymer.
+  components:
+  - type: Sprite
+    sprite: Nyanotrasen/Clothing/Head/ReverseEngineering/juggernaut.rsi
+  - type: Clothing
+    sprite: Nyanotrasen/Clothing/Head/ReverseEngineering/juggernaut.rsi
+
 - type: entity
   parent: ClothingHeadHelmetHardsuitERTLeader
   id: ClothingHeadHelmetHardsuitERTCentcomm

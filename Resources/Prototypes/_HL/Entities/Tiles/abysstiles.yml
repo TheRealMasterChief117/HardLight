@@ -1,0 +1,41 @@
+- type: entity
+  id: AbyssalCrystalTile
+  name: crystalline abyss
+  description: a crystalline material
+  placement:
+    mode: SnapgridCenter
+  can_crowbar: true
+  components:
+    - type: Clickable
+    - type: Sprite
+      sprite: /Textures/_HL/Tiles/Misc/crystallineabyss.rsi
+      layers:
+        - state: crystallineabyss
+      drawdepth: LowFloors
+    - type: SyncSprite
+    - type: RequiresTile
+    - type: Transform
+      anchored: true
+    - type: Tag
+      tags:
+        - HideContextMenu
+
+- type: entity
+  id: AbyssalTile
+  name: the abyss
+  description: the stuff of the abyss
+  placement:
+    mode: SnapgridCenter
+  components:
+    - type: Clickable
+    - type: Sprite
+      sprite: /Textures/_HL/Tiles/Misc/theabyss.rsi
+      state: theabyss
+      drawdepth: LowFloors
+    - type: SyncSprite
+    - type: RequiresTile
+    - type: Transform
+      anchored: true
+    - type: Tag
+      tags:
+        - HideContextMenu

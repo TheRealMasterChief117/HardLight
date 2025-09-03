@@ -62,12 +62,12 @@
       whitelist:
         tags:
           - SecurityUplink
-    - !type:BuyerJobCondition
-      whitelist:
-        - Bailiff
-        - SeniorOfficer
-        - Sheriff
-
+#  - !type:BuyerJobCondition
+#    whitelist:
+#      - Bailiff
+#      - SeniorOfficer
+#      - Sheriff
+#
 - type: listing
   id: UplinkSecurityCombatHardsuit
   name:  uplink-security-hardsuit-combat-name
@@ -99,11 +99,11 @@
       whitelist:
         tags:
           - SecurityUplink
-    - !type:BuyerJobCondition
-      whitelist:
-        - Bailiff
-        - SeniorOfficer
-        - Sheriff
+ #   - !type:BuyerJobCondition
+ #     whitelist:
+ #       - Bailiff
+ #       - SeniorOfficer
+ #       - Sheriff
 
 - type: listing
   id: UplinkSecurityHardsuitSheriff
@@ -120,9 +120,9 @@
       whitelist:
         tags:
           - SecurityUplink
-    - !type:BuyerJobCondition
-      whitelist:
-        - Sheriff
+ #   - !type:BuyerJobCondition
+ #     whitelist:
+ #       - Sheriff
 
 - type: listing
   id: UplinkSecurityHardsuitSyndieReverseEngineered
@@ -139,16 +139,16 @@
       whitelist:
         tags:
           - SecurityUplink
-    - !type:BuyerJobCondition
-      whitelist:
-        - Sheriff
+#   - !type:BuyerJobCondition
+#     whitelist:
+#       - Sheriff
 
 #region weapons
 - type: listing
   id: UplinkSecurityMk32
   name:  uplink-security-mk32-name
   description: uplink-security-mk32-desc
-  productEntity: NFWeaponPistolUniversalNfsd
+  productEntity: WeaponPistolMk32
   icon: { sprite: _DV/Objects/Weapons/Guns/Pistols/universal.rsi, state: icon }
   cost:
     FrontierUplinkCoin: 2
@@ -212,7 +212,7 @@
   id: UplinkSecurityEnforcer
   name:  uplink-security-enforcer-name
   description: uplink-security-enforcer-desc
-  productEntity: NFWeaponShotgunEnforcer
+  productEntity: WeaponShotgunEnforcer  # Hardlight change
   icon: { sprite: Objects/Weapons/Guns/Shotguns/enforcer.rsi, state: icon }
   cost:
     FrontierUplinkCoin: 3
@@ -223,11 +223,11 @@
       whitelist:
         tags:
           - SecurityUplink
-    - !type:BuyerJobCondition
-      whitelist:
-        - Bailiff
-        - SeniorOfficer
-        - Sheriff
+ #   - !type:BuyerJobCondition
+ #     whitelist:
+ #       - Bailiff
+ #       - SeniorOfficer
+ #       - Sheriff
 
 - type: listing
   id: UplinkSecurityLecter
@@ -244,11 +244,11 @@
       whitelist:
         tags:
           - SecurityUplink
-    - !type:BuyerJobCondition
-      whitelist:
-        - Bailiff
-        - SeniorOfficer
-        - Sheriff
+ #   - !type:BuyerJobCondition
+ #     whitelist:
+ #       - Bailiff
+ #       - SeniorOfficer
+ #       - Sheriff
 
 - type: listing
   id: UplinkSecurityVulcan
@@ -265,11 +265,11 @@
       whitelist:
         tags:
           - SecurityUplink
-    - !type:BuyerJobCondition
-      whitelist:
-        - Bailiff
-        - SeniorOfficer
-        - Sheriff
+  #  - !type:BuyerJobCondition
+  #    whitelist:
+  #      - Bailiff
+  #      - SeniorOfficer
+  #      - Sheriff
 
 - type: listing
   id: UplinkSecurityLaserCarbine
@@ -286,11 +286,11 @@
       whitelist:
         tags:
           - SecurityUplink
-    - !type:BuyerJobCondition
-      whitelist:
-        - Bailiff
-        - SeniorOfficer
-        - Sheriff
+ #   - !type:BuyerJobCondition
+ #     whitelist:
+ #       - Bailiff
+ #       - SeniorOfficer
+ #       - Sheriff
 
 - type: listing
   id: UplinkSecurityLaserCannon
@@ -326,11 +326,11 @@
       whitelist:
         tags:
           - SecurityUplink
-    - !type:BuyerJobCondition
-      whitelist:
-        - Bailiff
-        - SeniorOfficer
-        - Sheriff
+  #  - !type:BuyerJobCondition
+  #    whitelist:
+  #      - Bailiff
+  #      - SeniorOfficer
+  #      - Sheriff
 
 - type: listing
   id: UplinkSecurityWT550
@@ -347,10 +347,10 @@
       whitelist:
         tags:
           - SecurityUplink
-    - !type:BuyerJobCondition
-      whitelist:
-        - Bailiff
-        - Sheriff
+ #  - !type:BuyerJobCondition
+ #    whitelist:
+ #      - Bailiff
+ #      - Sheriff
 
 - type: listing
   id: UplinkSecurityEnergyGun
@@ -367,10 +367,10 @@
       whitelist:
         tags:
           - SecurityUplink
-    - !type:BuyerJobCondition
-      whitelist:
-        - Bailiff
-        - Sheriff
+  #  - !type:BuyerJobCondition
+  #    whitelist:
+  #      - Bailiff
+  #      - Sheriff
 
 - type: listing
   id: UplinkSecurityEmpRpg
@@ -387,9 +387,9 @@
       whitelist:
         tags:
           - SecurityUplink
-    - !type:BuyerJobCondition
-      whitelist:
-        - Sheriff
+#    - !type:BuyerJobCondition Hardlight
+#      whitelist:
+#        - Sheriff
 
 #region utililty
 - type: listing
@@ -455,9 +455,9 @@
       whitelist:
         tags:
           - SecurityUplink
-    - !type:BuyerJobCondition
-      whitelist:
-        - Sheriff
+#    - !type:BuyerJobCondition
+#      whitelist:
+#        - Sheriff
 
 - type: listing
   id: UplinkSecurityKey
@@ -474,9 +474,9 @@
       whitelist:
         tags:
           - SecurityUplink
-    - !type:BuyerJobCondition
-      whitelist:
-        - Sheriff
+#    - !type:BuyerJobCondition  #Hardlight change
+#      whitelist:
+#        - Sheriff
 
 - type: listing
   id: UplinkSecurityEmpRocket
@@ -493,9 +493,9 @@
       whitelist:
         tags:
           - SecurityUplink
-    - !type:BuyerJobCondition
-      whitelist:
-        - Sheriff
+#    - !type:BuyerJobCondition Hardlight
+#      whitelist:
+#        - Sheriff
 
 - type: listing
   id: UplinkSecurityThrusterKit
@@ -512,11 +512,11 @@
       whitelist:
         tags:
           - SecurityUplink
-    - !type:BuyerJobCondition
-      whitelist:
-        - Bailiff
-        - SeniorOfficer
-        - Sheriff
+#     - !type:BuyerJobCondition Hardlight
+#       whitelist:
+#         - Bailiff
+#         - SeniorOfficer
+#         - Sheriff
 
 #region magazines
 - type: listing
@@ -550,11 +550,11 @@
       whitelist:
         tags:
           - SecurityUplink
-    - !type:BuyerJobCondition
-      whitelist:
-        - Bailiff
-        - SeniorOfficer
-        - Sheriff
+#   - !type:BuyerJobCondition  Hardlight
+#     whitelist:
+#       - Bailiff
+#       - SeniorOfficer
+#       - Sheriff
 
 - type: listing
   id: UplinkSecurity7.62x51mmMagazine
@@ -603,11 +603,11 @@
       whitelist:
         tags:
           - SecurityUplink
-    - !type:BuyerJobCondition
-      whitelist:
-        - Bailiff
-        - SeniorOfficer
-        - Sheriff
+#    - !type:BuyerJobCondition Hardlight
+#      whitelist:
+#        - Bailiff
+#        - SeniorOfficer
+#        - Sheriff
 
 - type: listing
   id: UplinkSecurityMagazineSubMachineGunTopMounted35Overpressure
@@ -624,10 +624,10 @@
       whitelist:
         tags:
           - SecurityUplink
-    - !type:BuyerJobCondition
-      whitelist:
-        - Bailiff
-        - Sheriff
+ #   - !type:BuyerJobCondition Hardlight
+ #     whitelist:
+ #       - Bailiff
+ #       - Sheriff
 
 - type: listing
   id: UplinkSecurityPistolMagazineRubber
@@ -660,11 +660,11 @@
       whitelist:
         tags:
           - SecurityUplink
-    - !type:BuyerJobCondition
-      whitelist:
-        - Bailiff
-        - SeniorOfficer
-        - Sheriff
+ #   - !type:BuyerJobCondition Hardlight
+ #     whitelist:
+ #       - Bailiff
+ #       - SeniorOfficer
+ #       - Sheriff
 
 - type: listing
   id: UplinkSecurity7.62x39mmMagazineRubber
@@ -681,11 +681,11 @@
       whitelist:
         tags:
         - SecurityUplink
-    - !type:BuyerJobCondition
-        whitelist:
-          - Bailiff
-          - SeniorOfficer
-          - Sheriff
+#   - !type:BuyerJobCondition Hardlight
+#       whitelist:
+#         - Bailiff
+#         - SeniorOfficer
+#         - Sheriff
 
 - type: listing
   id: UplinkSecurityHypo
@@ -702,10 +702,10 @@
       whitelist:
         tags:
           - SecurityUplink
-    - !type:BuyerJobCondition
-      whitelist:
-        - Brigmedic
-        - Sheriff
+#   - !type:BuyerJobCondition Hardlight
+#     whitelist:
+#       - Brigmedic
+#       - Sheriff
 
 - type: listing
   id: UplinkSecurityAmbuzol
@@ -722,10 +722,10 @@
       whitelist:
         tags:
           - SecurityUplink
-    - !type:BuyerJobCondition
-      whitelist:
-        - Brigmedic
-        - Sheriff
+#   - !type:BuyerJobCondition Hardlight
+#     whitelist:
+#       - Brigmedic
+#       - Sheriff
 
 - type: listing
   id: UplinkSecurityMedkit
@@ -742,10 +742,10 @@
       whitelist:
         tags:
           - SecurityUplink
-    - !type:BuyerJobCondition
-      whitelist:
-        - Brigmedic
-        - Sheriff
+  # - !type:BuyerJobCondition Hardlight
+  #   whitelist:
+  #     - Brigmedic
+  #     - Sheriff
 
 - type: listing
   id: UplinkSecurityInspector
@@ -810,11 +810,11 @@
       whitelist:
         tags:
           - SecurityUplink
-    - !type:BuyerJobCondition
-      whitelist:
-        - Bailiff
-        - SeniorOfficer
-        - Sheriff
+ #   - !type:BuyerJobCondition hardlight
+ #     whitelist:
+ #       - Bailiff
+ #       - SeniorOfficer
+ #       - Sheriff
 
 - type: listing
   id: UplinkSecurityHammer
@@ -831,11 +831,11 @@
       whitelist:
         tags:
           - SecurityUplink
-    - !type:BuyerJobCondition
-      whitelist:
-        - Bailiff
-        - SeniorOfficer
-        - Sheriff
+#   - !type:BuyerJobCondition Hardlight
+#     whitelist:
+#       - Bailiff
+#       - SeniorOfficer
+#       - Sheriff
 
 - type: listing
   id: UplinkSecurityTeleShield
@@ -868,11 +868,11 @@
       whitelist:
         tags:
           - SecurityUplink
-    - !type:BuyerJobCondition
-      whitelist:
-        - Bailiff
-        - SeniorOfficer
-        - Sheriff
+#   - !type:BuyerJobCondition Hardlight
+#     whitelist:
+#       - Bailiff
+#       - SeniorOfficer
+#       - Sheriff
 
 - type: listing
   id: UplinkSecuritySwat
@@ -889,11 +889,11 @@
       whitelist:
         tags:
           - SecurityUplink
-    - !type:BuyerJobCondition
-      whitelist:
-        - Bailiff
-        - SeniorOfficer
-        - Sheriff
+#   - !type:BuyerJobCondition Hardlight
+#     whitelist:
+#       - Bailiff
+#       - SeniorOfficer
+#       - Sheriff
 
 - type: listing
   id: UplinkSecuritySpeedloader
@@ -1022,11 +1022,11 @@
       whitelist:
         tags:
           - SecurityUplink
-    - !type:BuyerJobCondition
-      whitelist:
-        - Bailiff
-        - SeniorOfficer
-        - Sheriff
+  # - !type:BuyerJobCondition Hardlight
+  #   whitelist:
+  #     - Bailiff
+  #     - SeniorOfficer
+  #     - Sheriff
 
 - type: listing
   id: UplinkSecuritySmokeGrenadeBox
@@ -1091,11 +1091,11 @@
       whitelist:
         tags:
           - SecurityUplink
-    - !type:BuyerJobCondition
-      whitelist:
-        - Bailiff
-        - SeniorOfficer
-        - Sheriff
+  #  - !type:BuyerJobCondition Hardlight
+  #    whitelist:
+  #      - Bailiff
+  #      - SeniorOfficer
+  #      - Sheriff
 
 - type: listing
   id: UplinkSecurityHoverbikeNfsdFlatpack
@@ -1112,11 +1112,11 @@
       whitelist:
         tags:
           - SecurityUplink
-    - !type:BuyerJobCondition
-      whitelist:
-        - Bailiff
-        - SeniorOfficer
-        - Sheriff
+ # - !type:BuyerJobCondition Hardlight
+ #   whitelist:
+ #     - Bailiff
+ #     - SeniorOfficer
+ #     - Sheriff
 
 - type: listing
   id: UplinkSecurityLethalArmory
@@ -1133,7 +1133,7 @@
       whitelist:
         tags:
           - SecurityUplink
-    - !type:BuyerJobCondition
+    - !type:BuyerJobCondition Hardlight
       whitelist:
         - Bailiff
         - SeniorOfficer
@@ -1186,7 +1186,7 @@
       whitelist:
         tags:
           - SecurityUplink
-    - !type:BuyerJobCondition
+    - !type:BuyerJobCondition Hardlight
       whitelist:
         - Bailiff
         - SeniorOfficer
@@ -1255,6 +1255,6 @@
       whitelist:
         tags:
           - SecurityUplink
-    - !type:BuyerJobCondition
-      whitelist:
-        - Sheriff
+#    - !type:BuyerJobCondition Hardlight
+#      whitelist:
+#        - Sheriff

@@ -198,7 +198,12 @@ public sealed partial class SalvageSystem
             // comp.NextOffer += TimeSpan.FromSeconds(_cooldown); // Frontier
             comp.NextOffer = currentTime + TimeSpan.FromSeconds(_cooldown); // Frontier
             comp.CooldownTime = TimeSpan.FromSeconds(_cooldown); // Frontier
-            GenerateMissions(comp);
+
+            // HARDLIGHT: Only generate missions if not already generating and no active mission
+            if (!comp.GeneratingMissions && comp.ActiveMission == 0)
+            {
+                GenerateMissions(comp);
+            }
             UpdateConsoles((uid, comp));
         }
     }
@@ -222,53 +227,76 @@ public sealed partial class SalvageSystem
         // End Frontier: separate timeout/announcement for success/failures
         component.ActiveMission = 0;
         component.Cooldown = true;
+
+        // HARDLIGHT: Clear missions when expedition finishes to prevent UI confusion
+        component.Missions.Clear();
+
         UpdateConsoles(expedition);
     }
 
     private void GenerateMissions(SalvageExpeditionDataComponent component)
     {
-        component.Missions.Clear();
-
-        // Frontier: generate missions from an arbitrary set of difficulties
-        if (_missionDifficulties.Count <= 0)
+        // HARDLIGHT: Prevent duplicate mission generation
+        if (component.GeneratingMissions)
         {
-            Log.Error("No expedition mission difficulties to pick from!");
+            Log.Debug("Skipping mission generation - already in progress");
             return;
         }
 
-        // this doesn't support having more missions than types of ratings
-        // but the previous system didn't do that either.
-        var allDifficulties = _missionDifficulties; // Frontier: Enum.GetValues<DifficultyRating>() < _missionDifficulties
-        _random.Shuffle(allDifficulties);
-        var difficulties = allDifficulties.Take(MissionLimit).ToList();
+        component.GeneratingMissions = true;
 
-        // If we support more missions than there are accepted types, pick more until you're up to MissionLimit
-        while (difficulties.Count < MissionLimit)
+        try
         {
-            var difficultyIndex = _random.Next(_missionDifficulties.Count);
-            difficulties.Add(_missionDifficulties[difficultyIndex]);
-        }
-        difficulties.Sort((x, y) => { return Comparer<int>.Default.Compare(x.value, y.value); });
+            component.Missions.Clear();
 
-        // HARDLIGHT: Always start mission indices from 0 for consistency
-        var missionIndex = 0;
-        for (var i = 0; i < MissionLimit; i++)
-        {
-            var mission = new SalvageMissionParams
+            // Frontier: generate missions from an arbitrary set of difficulties
+            if (_missionDifficulties.Count <= 0)
             {
-                Index = (ushort)missionIndex,
-                MissionType = (SalvageMissionType)_random.NextByte((byte)SalvageMissionType.Max + 1), // Frontier
-                Seed = _random.Next(),
-                Difficulty = difficulties[i].id,
-            };
+                Log.Error("No expedition mission difficulties to pick from!");
+                return;
+            }
 
-            component.Missions[(ushort)missionIndex] = mission;
-            missionIndex++;
+            // this doesn't support having more missions than types of ratings
+            // but the previous system didn't do that either.
+            var allDifficulties = _missionDifficulties; // Frontier: Enum.GetValues<DifficultyRating>() < _missionDifficulties
+            _random.Shuffle(allDifficulties);
+            var difficulties = allDifficulties.Take(MissionLimit).ToList();
+
+            // If we support more missions than there are accepted types, pick more until you're up to MissionLimit
+            while (difficulties.Count < MissionLimit)
+            {
+                var difficultyIndex = _random.Next(_missionDifficulties.Count);
+                difficulties.Add(_missionDifficulties[difficultyIndex]);
+            }
+            difficulties.Sort((x, y) => { return Comparer<int>.Default.Compare(x.value, y.value); });
+
+            // HARDLIGHT: Always start mission indices from 0 for consistency
+            var missionIndex = 0;
+            for (var i = 0; i < MissionLimit; i++)
+            {
+                var mission = new SalvageMissionParams
+                {
+                    Index = (ushort)missionIndex,
+                    MissionType = (SalvageMissionType)_random.NextByte((byte)SalvageMissionType.Max + 1), // Frontier
+                    Seed = _random.Next(),
+                    Difficulty = difficulties[i].id,
+                };
+
+                component.Missions[(ushort)missionIndex] = mission;
+                missionIndex++;
+            }
+
+            // Update NextIndex to continue from where we left off if more missions are generated later
+            component.NextIndex = (ushort)missionIndex;
+            // End Frontier: generate missions from an arbitrary set of difficulties
+
+            Log.Debug($"Generated {component.Missions.Count} new missions");
         }
-
-        // Update NextIndex to continue from where we left off if more missions are generated later
-        component.NextIndex = (ushort)missionIndex;
-        // End Frontier: generate missions from an arbitrary set of difficulties
+        finally
+        {
+            // HARDLIGHT: Always clear the flag, even if generation fails
+            component.GeneratingMissions = false;
+        }
     }
 
     // HARDLIGHT: Public method for round persistence system to properly regenerate missions
@@ -324,6 +352,8 @@ public sealed partial class SalvageSystem
         {
             component.ActiveMission = 0;
             component.Cooldown = false;
+            // HARDLIGHT: Don't regenerate missions here, let UpdateConsole handle it
+            // This prevents the UI swapping issue
             UpdateConsoles((uid, component));
 
             Log.Info($"Expedition mission {ev.MissionIndex} failed for entity {uid}, reset console state");
@@ -350,6 +380,14 @@ public sealed partial class SalvageSystem
             UpdateConsole((uid, component));
 
             Log.Info($"Expedition console {uid} handled failed mission {ev.MissionIndex} via station expedition data");
+        }
+        // HARDLIGHT: Also handle successful missions to ensure proper state management
+        else if (stationData != null &&
+                 stationData.ActiveMission == ev.MissionIndex &&
+                 ev.Success)
+        {
+            Log.Debug($"Expedition console {uid} handled successful mission {ev.MissionIndex}");
+            // Don't change state for successful missions - let the normal completion flow handle it
         }
     }
 

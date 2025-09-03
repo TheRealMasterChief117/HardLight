@@ -69,8 +69,11 @@ public sealed class ShipyardConsoleBoundUserInterface : BoundUserInterface
             return;
 
         var shipCount = _shipFileManagementSystem.GetSavedShipFiles().Count;
-        // Reduced to debug level to prevent console spam
-        Logger.Debug($"InitializeSaveLoadControls: ShipFileManagementSystem has {shipCount} ships");
+        // Only log if there are ships to avoid spam when no ships are saved
+        if (shipCount > 0)
+        {
+            Logger.Debug($"InitializeSaveLoadControls: ShipFileManagementSystem has {shipCount} ships");
+        }
 
         /* Ship saving functionality commented out
         _loadShipButton = _menu.FindControl<Button>("LoadShipButton");

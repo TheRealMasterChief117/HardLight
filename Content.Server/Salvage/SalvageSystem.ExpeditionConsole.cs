@@ -318,7 +318,7 @@ public sealed partial class SalvageSystem
         Log.Debug("UpdateConsoles called but consoles are now independent - no action needed");
     }
 
-    private void UpdateConsole(Entity<SalvageExpeditionConsoleComponent> component)
+    public void UpdateConsole(Entity<SalvageExpeditionConsoleComponent> component)
     {
         var consoleComp = component.Comp;
         var uid = component.Owner;
@@ -341,15 +341,22 @@ public sealed partial class SalvageSystem
             return;
         }
 
-        // Generate missions if needed and no active mission
-        if (data.Missions.Count == 0 && data.ActiveMission == 0)
+        // HARDLIGHT: Only generate missions if truly needed and not already generating
+        // This prevents the race condition that causes UI issues
+        bool shouldGenerateMissions = data.Missions.Count == 0 &&
+                                     data.ActiveMission == 0 &&
+                                     !data.GeneratingMissions &&
+                                     !data.Cooldown;
+
+        if (shouldGenerateMissions)
         {
+            Log.Debug($"Generating missions for console {ToPrettyString(uid)} - conditions met");
             GenerateMissions(data);
         }
 
         var state = new SalvageExpeditionConsoleState(
             data.NextOffer,
-            data.ActiveMission != 0,
+            data.Cooldown, // HARDLIGHT: Use cooldown state instead of ActiveMission for independent consoles
             false, // Console is functional when station data exists
             data.ActiveMission,
             data.Missions.Values.ToList(),
@@ -358,7 +365,7 @@ public sealed partial class SalvageSystem
         );
 
         _ui.SetUiState(component.Owner, SalvageConsoleUiKey.Expedition, state);
-        Log.Debug($"Updated console {ToPrettyString(uid)} with {state.Missions.Count} missions from station");
+        Log.Debug($"Updated console {ToPrettyString(uid)} with {state.Missions.Count} missions from station (Active: {data.ActiveMission}, Cooldown: {data.Cooldown})");
     }
 
     // HARDLIGHT: Direct mission spawning for console-specific expeditions

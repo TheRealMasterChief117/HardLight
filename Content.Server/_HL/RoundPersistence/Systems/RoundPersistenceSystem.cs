@@ -157,14 +157,15 @@ public sealed class RoundPersistenceSystem : EntitySystem
         if (!_cfg.GetCVar(HLCCVars.RoundPersistenceEnabled) || !_cfg.GetCVar(HLCCVars.RoundPersistenceExpeditions))
             return;
 
-        // HARDLIGHT: Use a delay to ensure the console is fully initialized
-        RobustTimer.Spawn(TimeSpan.FromMilliseconds(100), () =>
+        // HARDLIGHT: Use a delay to ensure the console is fully initialized AND that station data has been restored
+        // Station restoration happens after 1000ms, so console restoration must happen after that
+        RobustTimer.Spawn(TimeSpan.FromMilliseconds(1100), () =>
         {
             RestoreConsoleExpeditionData(uid, component);
         });
     }    /// <summary>
     /// HARDLIGHT: Restore expedition data directly to console from persistence storage
-    /// TODO: This method needs to be rewritten to work with station-based expedition data instead of LocalExpeditionData
+    /// This method now properly works with station-based expedition data
     /// </summary>
     private void RestoreConsoleExpeditionData(EntityUid consoleUid, SalvageExpeditionConsoleComponent consoleComp)
     {
@@ -178,9 +179,30 @@ public sealed class RoundPersistenceSystem : EntitySystem
         var gridUid = xform.GridUid.Value;
         var gridName = MetaData(gridUid).EntityName;
 
-        Log.Info($"Console expedition data restoration temporarily disabled for {gridName} - LocalExpeditionData system removed");
-        // TODO: Implement station-based expedition data restoration
-        // The LocalExpeditionData system has been eliminated in favor of pure server-side station lookup
+        // Try to find the owning station
+        var owningStation = _station.GetOwningStation(consoleUid, xform);
+        if (owningStation == null)
+        {
+            Log.Debug($"Console {ToPrettyString(consoleUid)} on {gridName} has no owning station - expedition data will be generated fresh");
+            return;
+        }
+
+        // If the station has expedition data, the console should use it automatically
+        if (TryComp<SalvageExpeditionDataComponent>(owningStation.Value, out var expeditionData))
+        {
+            Log.Info($"Console {ToPrettyString(consoleUid)} on {gridName} linked to station {MetaData(owningStation.Value).EntityName} with {expeditionData.Missions.Count} missions");
+            
+            // Force a console update to ensure it displays the station's expedition data
+            if (TryComp<SalvageExpeditionConsoleComponent>(consoleUid, out var console))
+            {
+                // Use the salvage system to update this specific console
+                _salvageSystem.UpdateConsole(new Entity<SalvageExpeditionConsoleComponent>(consoleUid, console));
+            }
+        }
+        else
+        {
+            Log.Warning($"Console {ToPrettyString(consoleUid)} on {gridName} is linked to station {MetaData(owningStation.Value).EntityName} but station has no expedition data - this should not happen after station restoration");
+        }
     }
 
     /// <summary>
@@ -460,7 +482,9 @@ public sealed class RoundPersistenceSystem : EntitySystem
                 while (consoleQuery.MoveNext(out var consoleUid, out var consoleComp, out var uiComp, out var xform))
                 {
                     var consoleStation = _station.GetOwningStation(consoleUid, xform);
-                    if (consoleStation == stationUid)
+                    
+                    // Update consoles that belong directly to this station OR shuttles that should use this station's data
+                    if (consoleStation == stationUid || ShouldUpdateShuttleConsole(consoleUid, consoleStation, stationUid))
                     {
                         // Force UI update by triggering console update logic
                         if (TryComp<SalvageExpeditionDataComponent>(stationUid, out var stationData))
@@ -470,7 +494,7 @@ public sealed class RoundPersistenceSystem : EntitySystem
                         }
                     }
                 }
-                _sawmill.Info($"Updated expedition console UIs for station {stationName}");
+                _sawmill.Info($"Updated expedition console UIs for station {stationName} and associated shuttles");
             });
 
             _sawmill.Info($"Restored expedition data with {expeditionData.Missions.Count} missions, NextOffer: {expeditionComp.NextOffer}, Claimed: {expeditionComp.Claimed}");

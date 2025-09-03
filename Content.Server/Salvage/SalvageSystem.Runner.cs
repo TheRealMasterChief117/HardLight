@@ -399,18 +399,20 @@ public sealed partial class SalvageSystem
                 data.ActiveMission = 0;
                 data.CanFinish = false;
                 data.Cooldown = false;
+                // HARDLIGHT: Clear missions immediately to prevent UI confusion
+                data.Missions.Clear();
 
                 // Update console to show cleared state
                 UpdateConsole((component.Console.Value, consoleComp));
 
-                // Generate new missions after a delay to prevent visual glitches
+                // HARDLIGHT: Generate new missions after a shorter delay to reduce confusion
                 var consoleUid = component.Console.Value;
-                consoleUid.SpawnTimer(TimeSpan.FromSeconds(2), () =>
+                consoleUid.SpawnTimer(TimeSpan.FromSeconds(0.5), () =>
                 {
                     if (Exists(consoleUid) && TryComp<SalvageExpeditionConsoleComponent>(consoleUid, out var comp))
                     {
                         var stationData = GetStationExpeditionData(consoleUid);
-                        if (stationData != null)
+                        if (stationData != null && !stationData.GeneratingMissions)
                         {
                             GenerateMissions(stationData);
                             UpdateConsole((consoleUid, comp));

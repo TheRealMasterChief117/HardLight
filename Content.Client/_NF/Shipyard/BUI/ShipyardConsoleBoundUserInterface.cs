@@ -44,7 +44,7 @@ public sealed class ShipyardConsoleBoundUserInterface : BoundUserInterface
             _menu = this.CreateWindow<ShipyardConsoleMenu>();
             _menu.OnOrderApproved += ApproveOrder;
             _menu.OnSellShip += SellShip;
-            _menu.OnSaveShip += SaveShip;
+            // _menu.OnSaveShip += SaveShip;
             _menu.TargetIdButton.OnPressed += _ => SendMessage(new ItemSlotButtonPressedEvent("ShipyardConsole-targetId"));
 
             // Disable the NFSD popup for now.
@@ -254,8 +254,8 @@ public sealed class ShipyardConsoleBoundUserInterface : BoundUserInterface
         if (disposing)
         {
             // Unsubscribe from events to prevent memory leaks
-            _shipFileManagementSystem.OnShipsUpdated -= RefreshSavedShipList;
-            _shipFileManagementSystem.OnShipLoaded -= OnShipLoaded;
+            // _shipFileManagementSystem.OnShipsUpdated -= RefreshSavedShipList;
+            // _shipFileManagementSystem.OnShipLoaded -= OnShipLoaded;
         }
     }
 }

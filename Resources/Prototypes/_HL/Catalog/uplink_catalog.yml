@@ -9,3 +9,19 @@
 # Utility
 
 #Weapons
+
+- type: listing
+  id: UplinkSecurityWeaponBigLeady
+  name:  uplink-security-Weapons-BigL-name
+  description: uplink-security-Weapons-BigL-desc
+  productEntity: WeaponShotgunBigLeady
+  icon: { sprite: _Mono/Objects/Weapons/Guns/Shotguns/BigLeady.rsi, state: icon }
+  cost:
+    FrontierUplinkCoin: 10
+  categories:
+    - UplinkSecurityWeapons
+  conditions:
+    - !type:StoreWhitelistCondition
+      whitelist:
+        tags:
+          - SecurityUplink

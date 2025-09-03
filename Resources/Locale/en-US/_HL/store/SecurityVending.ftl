@@ -24,3 +24,5 @@ uplink-security-hardsuit-command-desc = A heavily armored NFSD suit. Space proof
 # Security Vending machine
 
 # Weapons
+uplink-security-Weapons-BigL-name = Big Leady
+uplink-security-Weapons-BigL-desc = An old yet faithful design, and a favorite among irregular forces on many worlds.

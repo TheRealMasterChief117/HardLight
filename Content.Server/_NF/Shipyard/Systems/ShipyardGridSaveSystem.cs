@@ -176,14 +176,14 @@ public sealed class ShipyardGridSaveSystem : EntitySystem
             _sawmill.Info($"Starting 5-step ship save process for grid {gridUid} as '{shipName}'");
 
             // STEP 1: Create a blank map and teleport the ship to it for saving
-            tempMapId = await Step1_CreateBlankMapAndTeleportShip(gridUid);
+            tempMapId = await Step1_CreateBlankMapAndTeleportShip(gridUid, shipName, playerSession);
             if (!tempMapId.HasValue)
             {
                 _sawmill.Error("Step 1 failed: Could not create temporary map or teleport ship");
                 return false;
             }
             tempGridUid = gridUid; // Grid was moved, same EntityUid
-            _sawmill.Info($"Step 1 complete: Ship teleported to temporary map {tempMapId.Value}");
+            _sawmill.Info($"Step 1 complete: Ship teleported to temporary map {tempMapId}");
 
             // STEP 2: Empty containers and clean grid of problematic components, delete freefloating entities
             var step2Success = await Step2_EmptyContainersAndCleanGrid(tempGridUid.Value);
@@ -238,11 +238,11 @@ public sealed class ShipyardGridSaveSystem : EntitySystem
                 try
                 {
                     _mapManager.DeleteMap(tempMapId.Value);
-                    _sawmill.Info($"Cleaned up temporary map {tempMapId.Value}");
+                    _sawmill.Info($"Cleaned up temporary map {tempMapId}");
                 }
                 catch (Exception ex)
                 {
-                    _sawmill.Error($"Failed to clean up temporary map {tempMapId.Value}: {ex}");
+                    _sawmill.Error($"Failed to clean up temporary map {tempMapId}: {ex}");
                 }
             }
         }
@@ -253,22 +253,23 @@ public sealed class ShipyardGridSaveSystem : EntitySystem
     /// <summary>
     /// STEP 1: Create a blank map and teleport the ship to it for saving
     /// </summary>
-    private async Task<MapId?> Step1_CreateBlankMapAndTeleportShip(EntityUid gridUid)
+    private async Task<MapId?> Step1_CreateBlankMapAndTeleportShip(EntityUid gridUid, string shipName, ICommonSession playerSession)
     {
+        MapId tempMapId = default;
         try
         {
             _sawmill.Info("Step 1: Creating blank map and teleporting ship");
 
             // Create a temporary blank map for saving
-            var tempMapId = _mapManager.CreateMap();
+            tempMapId = _mapManager.CreateMap();
             _sawmill.Info($"Created temporary map {tempMapId}");
 
             // Step 2: Move the grid to the temporary map and clean it
-            var tempGridUid = await MoveAndCleanGrid(gridUid, tempMapId.Value);
+            var tempGridUid = await MoveAndCleanGrid(gridUid, tempMapId);
             if (tempGridUid == null)
             {
                 _sawmill.Error("Failed to move and clean grid");
-                return false;
+                return null;
             }
 
             _sawmill.Info($"Successfully moved and cleaned grid to {tempGridUid}");
@@ -311,24 +312,24 @@ public sealed class ShipyardGridSaveSystem : EntitySystem
                 _sawmill.Error($"Failed to save grid to {fileName}");
             }
 
-            return success;
+            return success ? tempMapId : null;
         }
         catch (Exception ex)
         {
             _sawmill.Error($"Exception during ship save: {ex}");
-            return false;
+            return null;
         }
         finally
         {
             // Step 6: Clean up temporary resources with proper timing
-            if (tempMapId.HasValue)
+            if (tempMapId != default)
             {
                 // Give all systems significant time to finish processing the map deletion
                 await Task.Delay(500);
 
                 try
                 {
-                    _mapManager.DeleteMap(tempMapId.Value);
+                    _mapManager.DeleteMap(tempMapId);
                     _sawmill.Info($"Cleaned up temporary map {tempMapId}");
                 }
                 catch (Exception ex)

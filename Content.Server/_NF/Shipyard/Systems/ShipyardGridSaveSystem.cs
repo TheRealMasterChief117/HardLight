@@ -71,9 +71,10 @@ public sealed class ShipyardGridSaveSystem : EntitySystem
         _mapSystem = _entitySystemManager.GetEntitySystem<SharedMapSystem>();
 
         // Subscribe to shipyard console events
-        SubscribeLocalEvent<ShipyardConsoleComponent, ShipyardConsoleSaveMessage>(OnSaveShipMessage);
+        // SubscribeLocalEvent<ShipyardConsoleComponent, ShipyardConsoleSaveMessage>(OnSaveShipMessage);
     }
 
+    /*
     private void OnSaveShipMessage(EntityUid consoleUid, ShipyardConsoleComponent component, ShipyardConsoleSaveMessage args)
     {
         if (args.Actor is not { Valid: true } player)
@@ -133,6 +134,7 @@ public sealed class ShipyardGridSaveSystem : EntitySystem
             }
         });
     }
+    */
 
     /// <summary>
     /// Removes all ShuttleDeedComponents that reference the specified shuttle EntityUid

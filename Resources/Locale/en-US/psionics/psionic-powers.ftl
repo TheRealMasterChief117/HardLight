@@ -1,5 +1,6 @@
 generic-power-initialization-feedback = I Awaken.
 already-casting = I cannot channel more than one power at a time.
+no-mana = I cannot channel enough power.
 
 # Dispel
 dispel-power-description = Dispel summoned entities such as familiars or forcewalls.
@@ -9,7 +10,7 @@ dispel-power-metapsionic-feedback = {CAPITALIZE($entity)} is a mighty stone, sta
 # Mass Sleep
 mass-sleep-power-description = Put targets in a small area to sleep.
 mass-sleep-initialization-feedback = Reaching out to the minds around me, I have located the words that can send others to the realm of dreams.
-mass-sleep-metapsionic-feedback = {CAPITALIZE($entity)} bears the indelible mark of a dream thief.
+mass-sleep-power-metapsionic-feedback = {CAPITALIZE($entity)} bears the indelible mark of a dream thief.
 
 # Mind Swap
 mind-swap-power-description = Swap minds with the target. Either can change back after 20 seconds.
@@ -57,7 +58,7 @@ healing-word-power-initialization-feedback =
     At the beginning of time, a word was spoken that brought life into the Spheres.
     Though it taxes my mind to know it, this Secret is known to me now.
     I need only speak it.
-healing-word-power-metapsionic-feedback = {CAPITALIZE($entity)} bears the Lesser Secret of Life.
+healing-word-power-feedback = {CAPITALIZE($entity)} bears the Lesser Secret of Life.
 healing-word-begin = {CAPITALIZE($entity)} mutters a word that brings both joy and pain alike to those who hear it.
 
 # Revivify
@@ -68,8 +69,8 @@ revivify-power-initialization-feedback =
     For a moment, my soul journeys across time and space to the beginning of it all, there I hear it.
     The Secret of Life in its fullness. I feel my entire existence burning out from within, merely by knowing it.
     Power flows through me as a mighty river, begging to be released with a simple spoken word.
-revivify-power-metapsionic-feedback = {CAPITALIZE($entity)} bears the Greater Secret of Life.
-revivify-word-begin = {CAPITALIZE($entity)} enunciates a word of such divine power, that those who hear it weep from joy.
+revivify-power-feedback = {CAPITALIZE($entity)} bears the Greater Secret of Life.
+revivify-begin = {CAPITALIZE($entity)} enunciates a word of such divine power, that those who hear it weep from joy.
 
 # Telegnosis
 telegnosis-power-description = Create a telegnostic projection to remotely observe things.
@@ -95,19 +96,21 @@ xenoglossy-power-initialization-feedback =
     I feel an empathy with all creation, so that I may understand them and be understood.
     The barrier between thought and expressions is permeable to me.
 
-psionic-language-power-metapsionic-feedback = The noösphere flows freely through {CAPITALIZE($entity)}, who seems to digest it and pass it back out undisturbed.
+psionic-language-power-feedback = The noösphere flows freely through {CAPITALIZE($entity)}, who seems to digest it and pass it back out undisturbed.
 
 # Psychognomy
 psychognomy-power-description = You have some vague sense of the form of the source of telepathic messages.
 psychognomy-power-initialization-feedback =
     I have pierced the veil, and I know I'm not alone. More concerning, the piercing I made seems to be still indefinitely permeable.
     When energy passes through the perforations in the noösphere, I get a faint glimpse of the material origin.
+psionic-psychognomy-power-feedback = {CAPITALIZE($entity)} can partially trace a telepathic message's origin.
 
 # Telepathy
 telepathy-power-description = You are capable of both sending and receiving telepathic messages.
 telepathy-power-initialization-feedback =
     The voices I've heard all my life begin to clear, yet they do not leave me. Before, they were as incoherent whispers,
     now my senses broaden, I come to a realization that they are part of a communal shared hallucination. Behind every voice is a glimmering sentience.
+psionic-telepathy-power-feedback = {CAPITALIZE($entity)} is capable of understanding and communicating without words or actions
 
 # Shadeskip
 action-name-shadeskip = Shadeskip
@@ -140,10 +143,26 @@ pyrokinetic-flare-power-initialization-feedback =
     My gaze is briefly filled with a flash of immense light and head, and for a single moment I can see a glimpse of a realm
     of fire and pain, of hunger and suffering. Just as soon as I glimpse it, the vision fades. But the memory of that flash lingers within my mind.
     I can recall it still, a glimpse of the fires of Gehenna.
-pyrokinetic-flare-power-metapsionic-feedback = Guh these don't even matter because nobody can read this line in-game and I don't know when I'm ever bringing back Narrow Pulse
+pyrokinetic-flare-power-metapsionic-feedback = {CAPITALIZE($entity)} can use a spark of fire to blind enemies
+
+# Summon Imp
+action-name-summon-imp = Summon Imp
+action-description-summon-imp =
+    Summon and bind an Imp from Gehenna to serve as your Familiar.
+summon-imp-power-description = { action-description-summon-imp }
+summon-imp-power-initialization-feedback =
+    For a brief time, I find myself wandering the blackened fields of Gehenna. I sift between the ashes, finding a smoldering coal in the shape of an eye.
+    I breathe upon it, and it bursts alight with flame. Before I return, the creature thanks me and tells me its name.
+
+# Summon Remilia
+action-name-summon-remilia = Summon Remilia
+action-description-summon-remilia =
+    Call forth your ever-loyal familiar Remilia.
+summon-remilia-power-description = { action-description-summon-remilia }
 
 # Psionic System Messages
 mindbreaking-feedback = The light of life vanishes from {CAPITALIZE($entity)}'s eyes, leaving behind a husk pretending at sapience
+hard-mindbreaking-feedback = Your character's personhood has been obliterated. If you wish to continue playing, consider respawning as a new character.
 examine-mindbroken-message =
     Eyes unblinking, staring deep into the horizon. {CAPITALIZE($entity)} is a sack of meat pretending it has a soul.
     There is nothing behind its gaze, no evidence there can be found of the divine light of creation.
@@ -151,20 +170,12 @@ psionic-roll-failed = For a moment, my consciousness expands, yet I feel that it
 entity-anomaly-no-grid = There is nowhere for me to conjure beings.
 power-overwhelming-power-feedback = {CAPITALIZE($entity)} wields a vast connection to the noösphere
 
-# Shadowkin ShadeSkip
-action-description-shadowkin-shadeskip = Aaramrra!
-
-# DarkSwap
-action-name-darkswap = DarkSwap
-action-description-darkswap = Mmra Mamm!
-
-ethereal-pickup-fail = My hand sizzles as it passes through...
-
 # Psionic Familiar System
 psionic-familiar-cant-attack-master = I am bound by my Master, I cannot harm them.
 psionic-familiar-despawn-text = {CAPITALIZE($entity)} returns from whence it came!
 ghost-role-information-familiar-name = Psionic Familiar
 ghost-role-information-familiar-description = An interdimensional creature bound to the will of a Psion.
+ghost-role-information-familiar-rules =
     Obey the one who summoned you. Do not act against the interests of your Master. You will die for your Master if it is necessary.
 
 # Assay Power

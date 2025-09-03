@@ -23,10 +23,12 @@ public sealed class ShipyardConsoleBoundUserInterface : BoundUserInterface
 
     public int? ShipSellValue { get; private set; }
 
+    /* Ship saving UI controls commented out
     private Button? _loadShipButton;
     private Button? _saveShipButton;
     private ItemList? _savedShipsList;
     private int _selectedShipIndex = -1;
+    */
 
 
 
@@ -70,6 +72,7 @@ public sealed class ShipyardConsoleBoundUserInterface : BoundUserInterface
         // Reduced to debug level to prevent console spam
         Logger.Debug($"InitializeSaveLoadControls: ShipFileManagementSystem has {shipCount} ships");
 
+        /* Ship saving functionality commented out
         _loadShipButton = _menu.FindControl<Button>("LoadShipButton");
         _saveShipButton = _menu.FindControl<Button>("SaveShipButton");
         _savedShipsList = _menu.FindControl<ItemList>("SavedShipsList");
@@ -86,8 +89,10 @@ public sealed class ShipyardConsoleBoundUserInterface : BoundUserInterface
         _shipFileManagementSystem.OnShipLoaded += OnShipLoaded;
 
         RefreshSavedShipList();
+        */
     }
 
+    /* Ship saving functionality commented out
     private void OnSaveShipButtonPressed(BaseButton.ButtonEventArgs args)
     {
         // Allow saving as long as owner is valid - don't require existing ship deed
@@ -174,6 +179,7 @@ public sealed class ShipyardConsoleBoundUserInterface : BoundUserInterface
             _loadShipButton.Disabled = savedShipFiles.Count == 0;
         }
     }
+    */
 
     private static string ExtractFileNameWithoutExtension(string filePath)
     {

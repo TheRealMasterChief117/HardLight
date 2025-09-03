@@ -286,8 +286,8 @@
 
 #Security Command Hardsuit
 - type: entity
-  parent: ClothingOuterHardsuitBaseNFNfsd
-  id: ClothingOuterHardsuitSyndieCommander # Hardlight change
+  parent: ClothingOuterHardsuitSyndieCommander
+  id: ClothingOuterHardsuitNfsdCommand # Hardlight change
   name: NFSD command combat suit
   description: A heavily armored NFSD suit. Space proof, with thick armor plating at the expense of mobility with built in Non-slip boots. This variant has supervisor rank markings
   components:

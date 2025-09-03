@@ -191,7 +191,7 @@ public sealed class RoundPersistenceSystem : EntitySystem
         if (TryComp<SalvageExpeditionDataComponent>(owningStation.Value, out var expeditionData))
         {
             Log.Info($"Console {ToPrettyString(consoleUid)} on {gridName} linked to station {MetaData(owningStation.Value).EntityName} with {expeditionData.Missions.Count} missions");
-            
+
             // Force a console update to ensure it displays the station's expedition data
             if (TryComp<SalvageExpeditionConsoleComponent>(consoleUid, out var console))
             {
@@ -482,7 +482,7 @@ public sealed class RoundPersistenceSystem : EntitySystem
                 while (consoleQuery.MoveNext(out var consoleUid, out var consoleComp, out var uiComp, out var xform))
                 {
                     var consoleStation = _station.GetOwningStation(consoleUid, xform);
-                    
+
                     // Update consoles that belong directly to this station OR shuttles that should use this station's data
                     if (consoleStation == stationUid || ShouldUpdateShuttleConsole(consoleUid, consoleStation, stationUid))
                     {

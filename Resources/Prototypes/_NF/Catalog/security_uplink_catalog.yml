@@ -1,3 +1,6 @@
+# Hardlight change to removed all Whitelist requirements so it will all show up on the uplink for the vending machine
+
+
 #region hardsuits
 - type: listing
   id: UplinkSecurityHardsuit

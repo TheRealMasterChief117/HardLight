@@ -103,7 +103,7 @@
   name: magazine (20x82mm)
   parent: BaseMagazineLightRifle
   components:
-#  - type: Tag
+#  - type: Tag  This is causing a crash
 #    tags:
 #      - MagazineAMR
   - type: BallisticAmmoProvider

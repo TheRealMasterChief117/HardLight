@@ -280,7 +280,7 @@
         Heat: 0.60
         Radiation: 0.50
         Caustic: 0.7
-  - type: ClothingSpeedModifier  # Hardlight change 25 percent is way to much for the little armor it gives
+  - type: ClothingSpeedModifier  # Hardlight change 25 percent is way to much for the little armor it gives.
     walkModifier: 0.85
     sprintModifier: 0.85
 

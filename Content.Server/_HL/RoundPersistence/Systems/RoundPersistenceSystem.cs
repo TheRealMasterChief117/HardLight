@@ -155,7 +155,7 @@ public sealed class RoundPersistenceSystem : EntitySystem
     private void OnExpeditionConsoleMapInit(EntityUid uid, SalvageExpeditionConsoleComponent component, MapInitEvent args)
     {
         Log.Info($"OnExpeditionConsoleMapInit called for console {ToPrettyString(uid)}");
-        
+
         if (!_cfg.GetCVar(HLCCVars.RoundPersistenceEnabled) || !_cfg.GetCVar(HLCCVars.RoundPersistenceExpeditions))
         {
             Log.Info($"Round persistence disabled for console {ToPrettyString(uid)}");
@@ -163,7 +163,7 @@ public sealed class RoundPersistenceSystem : EntitySystem
         }
 
         Log.Info($"Scheduling console restoration for {ToPrettyString(uid)} in 2000ms");
-        
+
         // HARDLIGHT: Use a longer delay to ensure the console is fully initialized AND that station data has been restored AND that shuttle docking is complete
         // Station restoration happens after 1000ms, shuttle docking happens during station restoration, so console restoration must happen well after that
         RobustTimer.Spawn(TimeSpan.FromMilliseconds(2000), () =>
@@ -634,6 +634,11 @@ public sealed class RoundPersistenceSystem : EntitySystem
                 {
                     shuttlesDocked++;
                     _sawmill.Info($"Docked shuttle {shuttleRecord.Name} ({shuttleUid}) to its home station {stationName}");
+                    
+                    // Manually ensure the shuttle has proper station membership
+                    var stationMember = EntityManager.EnsureComponent<StationMemberComponent>(shuttleUid.Value);
+                    stationMember.Station = stationUid;
+                    _sawmill.Info($"Set station membership for shuttle {shuttleRecord.Name} ({shuttleUid}) to station {stationName}");
                 }
                 else
                 {
@@ -657,6 +662,11 @@ public sealed class RoundPersistenceSystem : EntitySystem
                     {
                         shuttlesDocked++;
                         _sawmill.Info($"Docked unowned shuttle {shipData.ShipName} ({shuttleUid}) to station {stationName}");
+                        
+                        // Manually ensure the shuttle has proper station membership
+                        var stationMember = EntityManager.EnsureComponent<StationMemberComponent>(shuttleUid.Value);
+                        stationMember.Station = stationUid;
+                        _sawmill.Info($"Set station membership for shuttle {shipData.ShipName} ({shuttleUid}) to station {stationName}");
                     }
                     else
                     {

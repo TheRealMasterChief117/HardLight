@@ -2,7 +2,7 @@
   name: Big Leady (4 gauge)
   parent: [BaseWeaponShotgun, BaseGunWieldable, BaseC3SyndicateContraband]
   id: WeaponShotgunBigLeady
-  description: An old yet faithful design, and a favorite among irregular forces on many worlds. #Hardlight Change doesnt used 12
+  description: An old yet faithful design, and a favorite among irregular forces on many worlds. #Hardlight Change doesnt used 12.
   components: # intend for BigLeady to have tighter choke for slower fire rate and/or manual cycling
   - type: Item
     size: Normal

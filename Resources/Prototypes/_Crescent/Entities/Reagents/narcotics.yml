@@ -192,6 +192,8 @@
         damage:
           types:
             Slash: 5
+            Piercing: 5
+            Blunt: 5
 
 - type: reagent
   id: Bloodeye
@@ -237,7 +239,7 @@
       - !type:HealthChange
         damage:
           types:
-            Poison: 5
+            Poison: 0.1
 
 - type: reagent
   id: NuclearFuel
@@ -254,6 +256,6 @@
       - !type:HealthChange
         damage:
           types:
-            Radiation: 5
-            Poison: 5
+            Radiation: 0.5
+            Poison: 0.5
             Cellular: 0.5

@@ -44,7 +44,7 @@ public sealed partial class SalvageSystem
     /// <summary>
     /// Gets the expedition data for the station that owns the given console.
     /// </summary>
-    private SalvageExpeditionDataComponent? GetStationExpeditionData(EntityUid consoleUid)
+    public SalvageExpeditionDataComponent? GetStationExpeditionData(EntityUid consoleUid)
     {
         var station = _station.GetOwningStation(consoleUid);
         if (station == null)

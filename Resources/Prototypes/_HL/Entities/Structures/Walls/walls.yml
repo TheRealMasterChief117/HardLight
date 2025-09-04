@@ -1,0 +1,47 @@
+- type: entity
+  parent: BaseWall
+  id: AbyssalWall
+  name: crystalline abyss wall
+  components:
+  - type: Tag
+    tags:
+      - Wall
+  - type: Sprite
+    sprite: _HL/Structures/Walls/crystallineabyss.rsi
+  - type: Icon
+    sprite: _HL/Structures/Walls/crystallineabyss.rsi
+  - type: Destructible
+    thresholds:
+    - trigger:
+        !type:DamageTrigger
+        damage: 200
+      behaviors:
+      - !type:DoActsBehavior
+        acts: [ "Destruction" ]
+  - type: IconSmooth
+    key: walls
+    base: crystallineabyss
+
+- type: entity
+  parent: BaseWall
+  id: AbyssWall
+  name: the abyss
+  components:
+  - type: Tag
+    tags:
+      - Wall
+  - type: Sprite
+    sprite: _HL/Structures/Walls/abysswall.rsi
+  - type: Icon
+    sprite: _HL/Structures/Walls/abysswall.rsi
+  - type: Destructible
+    thresholds:
+    - trigger:
+        !type:DamageTrigger
+        damage: 1000
+      behaviors:
+      - !type:DoActsBehavior
+        acts: [ "Destruction" ]
+  - type: IconSmooth
+    key: walls
+    base: crystallineabyss

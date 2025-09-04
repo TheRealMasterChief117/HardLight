@@ -43,11 +43,11 @@
       whitelist:
         tags:
           - SecurityUplink
-#  - !type:BuyerJobCondition Hardlight
-#    whitelist:
-#      - Brigmedic
-#      - Bailiff
-#      - Sheriff
+    - !type:BuyerJobCondition
+      whitelist:
+        - Brigmedic
+        - Bailiff
+        - Sheriff
 
 
 - type: listing

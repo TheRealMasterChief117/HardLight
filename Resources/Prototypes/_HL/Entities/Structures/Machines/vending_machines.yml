@@ -1,6 +1,6 @@
 - type: entity
   parent: [BaseStructureDisableAnchoring, StorePresetSecurityUplink, VendingMachine]
-  id: VendingMachineSecurityVend
+  id: VendingMachineSecurityVend1
   name: SecurityVend
   description: Desgin by SESWC to help every officers day
   components:

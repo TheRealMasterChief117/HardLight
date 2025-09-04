@@ -103,9 +103,9 @@
   name: magazine (20x82mm)
   parent: BaseMagazineLightRifle
   components:
-#  - type: Tag
-#    tags:
-#      - MagazineAMR
+  - type: Tag
+    tags:
+      - MagazineAMR
   - type: BallisticAmmoProvider
     proto: CartridgeAntiMaterielBig
     capacity: 3

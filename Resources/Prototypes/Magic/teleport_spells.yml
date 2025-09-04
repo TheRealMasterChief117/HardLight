@@ -65,3 +65,31 @@
       state: voidblink
     event: !type:VoidApplauseSpellEvent
       effect: EffectVoidBlink
+
+- type: entity
+  id: ActionVoidApplauseChap
+  name: The Space Between Stars
+  description: Clap your hands and swap places with the target, has multiple charges.
+  components:
+  - type: EntityTargetAction
+    requiresCharge: true
+    range: 20
+#    sound: !type:SoundPathSpecifier
+#      path: /Audio/Magic/Eldritch/voidblink.ogg
+    itemIconStyle: BigAction
+    whitelist:
+      components:
+      - Body
+    canTargetSelf: false
+    interactOnMiss: false
+    checkCanAccess: false
+    repeat: false
+    icon:
+      sprite: Objects/Magic/Eldritch/eldritch_actions.rsi
+      state: voidblink
+    event: !type:VoidApplauseSpellEvent
+      effect: EffectVoidBlink
+  - type: LimitedCharges
+    maxCharges: 5
+  - type: AutoRecharge
+    rechargeDuration: 20

@@ -1,3 +1,6 @@
+
+#MARK: Base prototypes
+
 - type: entity
   parent: BaseItem
   id: BaseArrow
@@ -64,6 +67,15 @@
 
 - type: entity
   parent: BaseArrow
+  id: BaseArrowTrigger
+  abstract: true
+  components:
+  - type: TriggerOnProjectileHit
+
+#MARK: Manufactured arrows
+
+- type: entity
+  parent: BaseArrow
   id: ArrowRegular
   name: bodkin arrow
   description: Has a sharp, narrow tip to punch clean through.
@@ -82,6 +94,8 @@
     damage:
       types:
         Piercing: 49
+  - type: EmbeddableProjectile
+    removalTime: 1
 
 - type: entity
   parent: BaseArrow
@@ -104,6 +118,8 @@
       types:
         Slash: 25
         Piercing: 25
+  - type: EmbeddableProjectile
+    removalTime: 1.5
 
 - type: entity
   parent: BaseArrow
@@ -127,6 +143,42 @@
   - type: StaticPrice
     price: 10
     vendPrice: 10
+
+- type: entity
+  parent: BaseArrowTrigger
+  id: ArrowExplosive
+  name: explosive arrow
+  description: Similar to a practice arrow but for the plunger of an old explosive on the front.
+  components:
+  - type: Sprite
+    layers:
+    - state: tail
+      color: orange
+    - state: rod
+      color: "#959595"
+    - state: tip
+      color: "white"
+    - state: solution1
+      map: ["enum.SolutionContainerLayers.Fill"]
+      visible: false
+  - type: Projectile
+    damage:
+      types:
+        Piercing: 15
+    deleteOnCollide: true
+  - type: ExplodeOnTrigger
+  - type: Explosive
+    explosionType: Default
+    maxIntensity: 1.5
+    intensitySlope: 1.25
+    totalIntensity: 2.75
+    maxTileBreak: 1
+  - type: PointLight
+    radius: 1.3
+    color: orange
+    energy: 0.8
+
+#MARK: Improvised arrows
 
 - type: entity
   parent: BaseArrow

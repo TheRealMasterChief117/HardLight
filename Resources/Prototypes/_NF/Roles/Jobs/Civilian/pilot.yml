@@ -10,16 +10,18 @@
   supervisors: job-supervisors-hire
   weight: 2 # Prioritize station & department jobs
   displayWeight: 30 # Second from the top
+  access:
+  - Captain
   accessGroups: # Frontier
   - GeneralAccess
   special:
   - !type:GiveItemOnHolidaySpecial
     holiday: FrontierBirthday
     prototype: FrontierBirthdayGift
-#  - !type:AddComponentSpecial
-#    components:
-#      - type: SurgerySpeedModifier
-#        SpeedModifier: 1.25
+  - !type:AddComponentSpecial
+    components:
+      - type: SurgerySpeedModifier
+        SpeedModifier: 1.25
 
 
 - type: startingGear

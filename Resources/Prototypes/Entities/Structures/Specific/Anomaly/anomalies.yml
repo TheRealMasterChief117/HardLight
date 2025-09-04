@@ -46,6 +46,14 @@
   - type: EmitSoundOnSpawn
     sound:
       path: /Audio/Effects/teleport_arrival.ogg
+  - type: Psionic
+    removable: false
+    roller: false
+  - type: InnatePsionicPowers
+    powersToAdd:
+      - TelepathyPower
+  - type: GlimmerSource
+    active: false
   - type: SecretDataAnomaly
     randomStartSecretMin: 0
     randomStartSecretMax: 2
@@ -115,6 +123,11 @@
     damage:
       types:
         Heat: 10
+  - type: Psionic
+    removable: false
+    roller: false
+    assayFeedback:
+      - anomaly-pyroclastic-feedback
 
 - type: entity
   id: AnomalyGravity
@@ -147,6 +160,11 @@
   - type: SingularityDistortion
     intensity: 1000
     falloffPower: 2.7
+  - type: Psionic
+    removable: false
+    roller: false
+    assayFeedback:
+      - anomaly-gravity-feedback
 
 - type: entity
   id: AnomalyElectricity
@@ -170,6 +188,11 @@
     castShadows: false
   - type: ElectricityAnomaly
   - type: Electrified
+  - type: Psionic
+    removable: false
+    roller: false
+    assayFeedback:
+      - anomaly-electricity-feedback
 
 - type: entity
   id: AnomalyFlesh
@@ -263,6 +286,11 @@
       - MobFleshClamp
       - MobFleshLover
       - FleshKudzu
+  - type: Psionic
+    removable: false
+    roller: false
+    assayFeedback:
+      - anomaly-flesh-feedback
 
 - type: entity
   id: AnomalyBluespace
@@ -310,6 +338,14 @@
       collection: RadiationPulse
       params:
         volume: 5
+    anomalyContactDamage:
+      types:
+        Radiation: 10
+  - type: Psionic
+    removable: false
+    roller: false
+    assayFeedback:
+      - anomaly-bluespace-feedback
 
 - type: entity
   id: AnomalyIce
@@ -355,6 +391,11 @@
     releasedGas: 8 # Frezon. Please replace if there is a better way to specify this
     releaseOnMaxSeverity: true
     spawnRadius: 0
+  - type: Psionic
+    removable: false
+    roller: false
+    assayFeedback:
+      - anomaly-ice-feedback
   - type: DamageOnInteract
     damage:
       types:
@@ -402,6 +443,11 @@
         maxAmount: 50
         maxRange: 12
       floor: FloorAsteroidTile
+  - type: Psionic
+    removable: false
+    roller: false
+    assayFeedback:
+      - anomaly-rock-feedback
 
 - type: entity
   id: AnomalyRockUranium
@@ -758,6 +804,11 @@
         maxRange: 6
       spawns:
       - KudzuFlowerAngry
+  - type: Psionic
+    removable: false
+    roller: false
+    assayFeedback:
+      - anomaly-flora-feedback
 
 - type: entity
   id: AnomalyFloraBulb
@@ -914,6 +965,11 @@
     solution: anomaly
   - type: InjectableSolution
     solution: beaker
+  - type: Psionic
+    removable: false
+    roller: false
+    assayFeedback:
+      - anomaly-liquid-feedback
 
 - type: entity
   id: AnomalyShadow
@@ -967,6 +1023,11 @@
   - type: Tag
     tags:
       - SpookyFog
+  - type: Psionic
+    removable: false
+    roller: false
+    assayFeedback:
+      - anomaly-shadow-feedback
   - type: DamageOnInteract
     damage:
       types:

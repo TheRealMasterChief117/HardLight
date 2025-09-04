@@ -12,6 +12,8 @@ using Content.Shared.EntityTable;
 using Content.Server.Mind; // Frontier
 using Content.Server._NF.Roles.Systems; // Frontier
 
+using Content.Server.Psionics.Glimmer;
+using Content.Shared.Psionics.Glimmer;
 namespace Content.Server.StationEvents;
 
 public sealed class EventManagerSystem : EntitySystem
@@ -24,6 +26,9 @@ public sealed class EventManagerSystem : EntitySystem
     [Dependency] public readonly GameTicker GameTicker = default!;
     [Dependency] private readonly RoundEndSystem _roundEnd = default!;
     [Dependency] private readonly JobTrackingSystem _jobs = default!; // Frontier
+    [Dependency] private readonly GlimmerSystem _glimmerSystem = default!; //Nyano - Summary: pulls in the glimmer system.
+
+    private ISawmill _sawmill = default!;
 
     public bool EventsEnabled { get; private set; }
     private void SetEnabled(bool value) => EventsEnabled = value;
@@ -274,6 +279,36 @@ public sealed class EventManagerSystem : EntitySystem
         {
             return false;
         }
+
+        // Frontier: Check max players
+        if (playerCount > stationEvent.MaximumPlayers)
+        {
+            return false;
+        }
+
+        // Frontier: require jobs to run event
+        foreach (var (jobProtoId, numJobs) in stationEvent.RequiredJobs)
+        {
+            if (_jobs.GetNumberOfActiveRoles(jobProtoId, false) < numJobs)
+                return false;
+        }
+        // End Frontier
+
+        if (_roundEnd.IsRoundEndRequested() && !stationEvent.OccursDuringRoundEnd)
+        {
+            return false;
+        }
+
+        // Nyano - Summary: - Begin modified code block: check for glimmer events.
+        // This could not be cleanly done anywhere else.
+        if (_configurationManager.GetCVar(CCVars.GlimmerEnabled) &&
+            prototype.TryGetComponent<GlimmerEventComponent>(out var glimmerEvent) &&
+            (_glimmerSystem.Glimmer < glimmerEvent.MinimumGlimmer ||
+            _glimmerSystem.Glimmer > glimmerEvent.MaximumGlimmer))
+        {
+            return false;
+        }
+        // Nyano - End modified code block.
 
         // Frontier: Check max players
         if (playerCount > stationEvent.MaximumPlayers)

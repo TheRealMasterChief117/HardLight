@@ -504,4 +504,6 @@ public enum LogType
     ShuttleInfoChanged = 208,
     #endregion Frontier Values
     // End Frontier
+    BagOfHolding = 420, //Nyano - Summary: adds bag of holding. 
+    Psionics = 421, //Nyano - Summary: ads psionic as a log type.
 }

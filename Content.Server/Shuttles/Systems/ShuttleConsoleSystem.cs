@@ -65,6 +65,7 @@ public sealed partial class ShuttleConsoleSystem : SharedShuttleConsoleSystem
         {
             subs.Event<ShuttleConsoleFTLBeaconMessage>(OnBeaconFTLMessage);
             subs.Event<ShuttleConsoleFTLPositionMessage>(OnPositionFTLMessage);
+            subs.Event<ShuttleConsoleFTLStationDockMessage>(OnStationDockFTLMessage);
             subs.Event<BoundUIClosedEvent>(OnConsoleUIClose);
         });
 
@@ -294,7 +295,8 @@ public sealed partial class ShuttleConsoleSystem : SharedShuttleConsoleSystem
                 FTLState.Invalid,
                 default,
                 new List<ShuttleBeaconObject>(),
-                new List<ShuttleExclusionObject>());
+                new List<ShuttleExclusionObject>(),
+                new List<ShuttleStationObject>());
         }
 
         if (_ui.HasUi(consoleUid, ShuttleConsoleUiKey.Key))
@@ -457,13 +459,16 @@ public sealed partial class ShuttleConsoleSystem : SharedShuttleConsoleSystem
 
         List<ShuttleBeaconObject>? beacons = null;
         List<ShuttleExclusionObject>? exclusions = null;
+        List<ShuttleStationObject>? stations = null;
         GetBeacons(ref beacons);
         GetExclusions(ref exclusions);
+        GetStations(ref stations);
 
         return new ShuttleMapInterfaceState(
             ftlState,
             stateDuration,
             beacons ?? new List<ShuttleBeaconObject>(),
-            exclusions ?? new List<ShuttleExclusionObject>());
+            exclusions ?? new List<ShuttleExclusionObject>(),
+            stations ?? new List<ShuttleStationObject>());
     }
 }

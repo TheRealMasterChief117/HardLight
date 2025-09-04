@@ -1,0 +1,8 @@
+- type: entity
+  id: BannerNanotrasenreal
+  parent: BannerBase
+  name: NT banner
+  description: A banner displaying the Nanotrasen logo.
+  components:
+  - type: Sprite
+    sprite: _HL/Nanotrasen/banner.rsi # Frontier - unique sprites

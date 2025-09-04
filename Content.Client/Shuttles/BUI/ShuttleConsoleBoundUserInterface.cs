@@ -24,6 +24,7 @@ public sealed partial class ShuttleConsoleBoundUserInterface : BoundUserInterfac
 
         _window.RequestFTL += OnFTLRequest;
         _window.RequestBeaconFTL += OnFTLBeaconRequest;
+        _window.RequestStationFTL += OnFTLStationRequest;
         _window.DockRequest += OnDockRequest;
         _window.UndockRequest += OnUndockRequest;
 //        NfOpen(); // Frontier
@@ -51,6 +52,15 @@ public sealed partial class ShuttleConsoleBoundUserInterface : BoundUserInterfac
         SendMessage(new ShuttleConsoleFTLBeaconMessage()
         {
             Beacon = ent,
+            Angle = angle,
+        });
+    }
+
+    private void OnFTLStationRequest(NetEntity ent, Angle angle)
+    {
+        SendMessage(new ShuttleConsoleFTLStationDockMessage()
+        {
+            Station = ent,
             Angle = angle,
         });
     }

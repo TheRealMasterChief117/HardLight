@@ -306,9 +306,17 @@ namespace Content.Server.Voting.Managers
                 var ticker = _entityManager.EntitySysManager.GetEntitySystem<GameTicker>();
                 if (ticker.CanUpdateMap())
                 {
-                    if (_gameMapManager.TrySelectMapIfEligible(picked.ID))
+                    // Use SelectMap instead of TrySelectMapIfEligible to honor the vote result
+                    // regardless of preset restrictions - democracy should override game rules
+                    if (_gameMapManager.CheckMapExists(picked.ID))
                     {
+                        _gameMapManager.SelectMap(picked.ID);
                         ticker.UpdateInfoText();
+                    }
+                    else
+                    {
+                        _adminLogger.Add(LogType.Vote, LogImpact.High, $"Voted map {picked.ID} does not exist! Map selection failed.");
+                        _chatManager.DispatchServerAnnouncement($"Error: Voted map '{picked.MapName}' is invalid and could not be selected.");
                     }
                 }
                 else

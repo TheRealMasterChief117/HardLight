@@ -31,8 +31,8 @@
     HeadTop: MobHumanoidAnyMarking
     HeadSide: MobHumanoidAnyMarking
     Tail: MobHumanoidAnyMarking
-    Hair: MobHumanoidMarkingMatchSkin
-    FacialHair: MobHumanoidAnyMarking
+    Hair: MobHumanoidAnyMarking #Hardlight change
+    FacialHair: MobHumanoidAnyMarking #hardlight change
     Chest: MobIPCTorso
     LArm: MobIPCLArm
     RArm: MobIPCRArm
@@ -47,10 +47,10 @@
   id: MobIPCMarkingLimits
   points:
     Hair:
-      points: 0
+      points: 1 # Hardlight change
       required: false
     FacialHair:
-      points: 0
+      points: 1 # Hard light change
       required: false
     Head:
       points: 1

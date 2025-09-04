@@ -316,7 +316,26 @@
   description: flavor-complex-yeolhandy
 
 - type: flavor
+  id: blooddrop
+  flavorType: Complex
+  description: flavor-complex-blooddrop
+
+- type: flavor
+  id: whitechocolatechip
+  flavorType: Complex
+  description: flavor-complex-whitechocolatechip
+
+- type: flavor
   id: nikkonectar
   flavorType: Complex
   description: flavor-complex-nikkonectar
 
+- type: flavor
+  id: walnut
+  flavorType: Complex
+  description: flavor-complex-walnut
+
+- type: flavor
+  id: despair
+  flavorType: Complex
+  description: flavor-complex-despair

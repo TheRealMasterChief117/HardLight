@@ -267,6 +267,8 @@
         prob: 0.05
       - id: KnifeGun
         prob: 0.3
+      - id: icepage
+        prob: 0.07
     sound:
       path: /Audio/Items/jumpsuit_equip.ogg
 
@@ -302,5 +304,7 @@
         prob: 0.2
       - id: KnifeGun
         prob: 0.3
+      - id: turretpage
+        prob: 0.2
     sound:
       path: /Audio/Items/jumpsuit_equip.ogg

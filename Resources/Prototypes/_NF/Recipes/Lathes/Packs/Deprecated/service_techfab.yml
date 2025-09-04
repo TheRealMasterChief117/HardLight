@@ -92,6 +92,7 @@
     - ServiceFork
     - ServicePairedChopsticks
     - FoodBowlBig
+    - IceCreamBowl
     - FoodPlate
     - FoodPlateSmall
     - FoodPlateMuffinTin
@@ -107,6 +108,7 @@
     - CondimentCupDispenser
     - CondimentCup
     - FoodCondimentSqueezeBottleClear
+    - DrinkDisposableCup #imp
   ## EVA
     - ClothingOuterEVASuitHydro
     - ClothingOuterEVASuitJanitor
@@ -135,6 +137,7 @@
     - NFHappyHonkMcCargoEmpty
     - ClothingHeadHatMcCrown
     - CigPackMcCargo
+    - DrinkDisposableMcCup #imp
 
 - type: latheRecipePack
   id: NFServiceTechfabDeprecated

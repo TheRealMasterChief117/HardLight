@@ -103,3 +103,19 @@
   id: DiscountedItems
   name: store-discounted-items
   priority: 200
+
+#chaplain
+- type: storeCategory
+  id: STextBlessingsM
+  name: store-category-blessing-minor
+  priority: 0
+
+- type: storeCategory
+  id: STextBlessingsL
+  name: store-category-blessing-lesser
+  priority: 1
+
+- type: storeCategory
+  id: STextBlessingsG
+  name: store-category-blessing-greater
+  priority: 2

@@ -8,10 +8,22 @@
   color: "#081a80"
   metabolisms:
     Medicine:
+      metabolismRate: 0.1
       effects:
+      - !type:GenericStatusEffect
+        key: PsionicallyInsulated #Nyano - Summary: makes the user psionically insulated from effects.
+        component: PsionicInsulation #Nyano - Summary: see above.
+        type: Add
       - !type:GenericStatusEffect
         key: Stutter
         component: ScrambledAccent
+        type: Add
+      - !type:GenericStatusEffect
+        key: PsionicsDisabled #Nyano - Summary: disables psinoics from being used by the wearer.
+        component: PsionicsDisabled #Nyano - Summary: see above. 
+        type: Add
+    Alcohol:
+      effects:
       - !type:Drunk
         slurSpeech: false
         boozePower: 20
@@ -234,7 +246,7 @@
         damage:
           types:
             Heat: -2
-            Shock: -2 
+            Shock: -2
             Cold: -2 # Was 1.5, Buffed due to limb damage changes(GoobStation)
       - !type:HealthChange
         conditions:
@@ -263,6 +275,10 @@
     Medicine:
       effects:
       - !type:HealthChange
+        conditions:
+        - !type:OrganType #starliight
+          type: Avali
+          shouldHave: false
         damage:
           types:
             Asphyxiation: -1
@@ -275,6 +291,16 @@
           types:
             Asphyxiation: 3
             Cold: 1
+      - !type:HealthChange #Starlight
+        conditions:
+        - !type:OrganType
+          type: Avali
+          shouldHave: true
+        damage:
+          types:
+            Poison: 1.5 #Avali blood is ammonia based, so chems made to treat normal bloodloss poison them instead (Lethal Dose: 20u)
+            Asphyxiation: 1
+            Bloodloss: 1
 
 - type: reagent
   id: DexalinPlus
@@ -288,6 +314,10 @@
     Medicine:
       effects:
       - !type:HealthChange
+        conditions:
+        - !type:OrganType #starliight
+          type: Avali
+          shouldHave: false
         damage:
           types:
             Asphyxiation: -3.5
@@ -307,6 +337,16 @@
           types:
             Asphyxiation: 5
             Cold: 3
+      - !type:HealthChange #Starlight
+        conditions:
+        - !type:OrganType
+          type: Avali
+          shouldHave: true
+        damage:
+          types:
+            Poison: 2.5 #Avali blood is ammonia based, so chems made to treat normal bloodloss poison them instead. Dex+ is worse. (Lethal Dose: 15u)
+            Asphyxiation: 1.5
+            Bloodloss: 1
 
 # this ones a doozy
 - type: reagent
@@ -692,6 +732,31 @@
           factor: 2
         - !type:ModifyBloodLevel
           amount: 6
+    Medicine: #Starlight
+      metabolismRate: 0.5
+      effects:
+        - !type:ModifyBloodLevel
+          conditions:
+          - !type:OrganType
+           type: Avali
+           shouldHave: false
+          amount: 6
+        - !type:ModifyBleedAmount
+          conditions:
+          - !type:OrganType
+           type: Avali
+           shouldHave: true
+          amount: 2
+        - !type:HealthChange
+          conditions:
+          - !type:OrganType
+           type: Avali
+           shouldHave: true
+          damage:
+            types:
+              Poison: 12 #This is on par with giving someone the wrong blood-type (very lethal) / (Lethal Dose: 10u, VERY FAST ACTING)
+              Caustic: 2 #Split to prevent 15u RRing someone, as caustic can be healed with topicals.
+              Slash: 1 #Allows it to heal bleeding.
 
 - type: reagent
   id: Siderlac

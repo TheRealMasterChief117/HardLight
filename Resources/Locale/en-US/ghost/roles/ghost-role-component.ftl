@@ -184,9 +184,9 @@ ghost-role-information-centcom-official-description = Perform ColComm related du
 
 ghost-role-information-nukeop-rules = You are a [color={role-type-team-antagonist-color}][bold]{role-type-team-antagonist-name}[/bold][/color] with all other nuclear operatives. Covert syndicate agents are not guaranteed to help you.
 
-ghost-role-information-loneop-name = Lone Operative
-ghost-role-information-loneop-description = You are a lone nuclear operative. Destroy the station!
-ghost-role-information-loneop-rules = You are a [color={role-type-team-antagonist-color}][bold]{role-type-solo-antagonist-name}[/bold][/color]. Covert syndicate agents are not guaranteed to help you.
+ghost-role-information-loneop-name = Lone Syndicate Operative
+ghost-role-information-loneop-description = You are a lone syndicate operative, not part of the sector cell. Decide your own tasking, intentions and motivations.
+ghost-role-information-loneop-rules = You are a [color={role-type-team-antagonist-color}][bold]{role-type-solo-antagonist-name}[/bold][/color]. Covert syndicate agents and the sector syndicate cell are not guaranteed to help you.
 
 ghost-role-information-behonker-name = Behonker
 ghost-role-information-behonker-description = You are an antagonist, bring death and honks to those who do not follow the honkmother.

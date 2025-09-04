@@ -11,6 +11,7 @@ using Robust.Shared.CPUJob.JobQueues;
 using Robust.Shared.CPUJob.JobQueues.Queues;
 using Robust.Shared.GameStates;
 using Robust.Shared.Map;
+using Robust.Shared.Map.Components; // For MapGridComponent
 using Content.Server._NF.Salvage.Expeditions; // Frontier
 using Content.Server.Station.Components; // Frontier
 using Content.Shared.Procedural; // Frontier
@@ -50,6 +51,7 @@ public sealed partial class SalvageSystem
         SubscribeLocalEvent<SalvageExpeditionConsoleComponent, EntParentChangedMessage>(OnSalvageConsoleParent);
         SubscribeLocalEvent<SalvageExpeditionConsoleComponent, ClaimSalvageMessage>(OnSalvageClaimMessage);
         SubscribeLocalEvent<SalvageExpeditionDataComponent, ExpeditionSpawnCompleteEvent>(OnExpeditionSpawnComplete); // Frontier: more gracefully handle expedition generation failures
+        SubscribeLocalEvent<SalvageExpeditionConsoleComponent, ExpeditionSpawnCompleteEvent>(OnExpeditionSpawnCompleteConsole); // HARDLIGHT: Handle event on consoles for round persistence
         SubscribeLocalEvent<SalvageExpeditionConsoleComponent, FinishSalvageMessage>(OnSalvageFinishMessage); // Frontier: For early finish
 
         SubscribeLocalEvent<SalvageExpeditionComponent, MapInitEvent>(OnExpeditionMapInit);
@@ -129,13 +131,24 @@ public sealed partial class SalvageSystem
             }
         }
 
+        // HARDLIGHT: Handle round persistence - station might be deleted during round transitions
         if (Deleted(component.Station))
+        {
+            Log.Info($"Expedition shutdown: Station {component.Station} was deleted (likely during round persistence)");
             return;
+        }
 
-        // Finish mission
+        // Finish mission - but handle the case where expedition data might be on a different entity
+        // due to round persistence transferring data between entities
         if (TryComp<SalvageExpeditionDataComponent>(component.Station, out var data))
         {
             FinishExpedition((component.Station, data), component, uid); // Frontier: add component
+        }
+        else
+        {
+            // HARDLIGHT: For round persistence, expedition data might have been moved to a console's LocalExpeditionData
+            // This is a graceful fallback for when station entities are recreated
+            Log.Info($"Expedition shutdown: No expedition data found on station {component.Station}, expedition likely handled by local console data");
         }
     }
 
@@ -162,8 +175,22 @@ public sealed partial class SalvageSystem
                 continue;
 
             // Frontier: disable cooldown when still in FTL
-            if (!TryComp<StationDataComponent>(uid, out var stationData)
-                || !HasComp<FTLComponent>(_station.GetLargestGrid(stationData)))
+            // HARDLIGHT: Modified for round persistence - work with or without StationDataComponent
+            EntityUid? largestGrid = null;
+
+            if (TryComp<StationDataComponent>(uid, out var stationData))
+            {
+                // Normal case: station has StationDataComponent
+                largestGrid = _station.GetLargestGrid(stationData);
+            }
+            else if (HasComp<MapGridComponent>(uid))
+            {
+                // Round persistence case: uid might be a grid itself (shuttle serving as station)
+                largestGrid = uid;
+            }
+
+            // Check if the grid (whether from station or direct grid) has FTL component
+            if (largestGrid == null || !HasComp<FTLComponent>(largestGrid.Value))
             {
                 comp.Cooldown = false;
             }
@@ -171,7 +198,12 @@ public sealed partial class SalvageSystem
             // comp.NextOffer += TimeSpan.FromSeconds(_cooldown); // Frontier
             comp.NextOffer = currentTime + TimeSpan.FromSeconds(_cooldown); // Frontier
             comp.CooldownTime = TimeSpan.FromSeconds(_cooldown); // Frontier
-            GenerateMissions(comp);
+
+            // HARDLIGHT: Only generate missions if not already generating and no active mission
+            if (!comp.GeneratingMissions && comp.ActiveMission == 0)
+            {
+                GenerateMissions(comp);
+            }
             UpdateConsoles((uid, comp));
         }
     }
@@ -195,47 +227,82 @@ public sealed partial class SalvageSystem
         // End Frontier: separate timeout/announcement for success/failures
         component.ActiveMission = 0;
         component.Cooldown = true;
+
+        // HARDLIGHT: Clear missions when expedition finishes to prevent UI confusion
+        component.Missions.Clear();
+
         UpdateConsoles(expedition);
     }
 
     private void GenerateMissions(SalvageExpeditionDataComponent component)
     {
-        component.Missions.Clear();
-
-        // Frontier: generate missions from an arbitrary set of difficulties
-        if (_missionDifficulties.Count <= 0)
+        // HARDLIGHT: Prevent duplicate mission generation
+        if (component.GeneratingMissions)
         {
-            Log.Error("No expedition mission difficulties to pick from!");
+            Log.Debug("Skipping mission generation - already in progress");
             return;
         }
 
-        // this doesn't support having more missions than types of ratings
-        // but the previous system didn't do that either.
-        var allDifficulties = _missionDifficulties; // Frontier: Enum.GetValues<DifficultyRating>() < _missionDifficulties
-        _random.Shuffle(allDifficulties);
-        var difficulties = allDifficulties.Take(MissionLimit).ToList();
+        component.GeneratingMissions = true;
 
-        // If we support more missions than there are accepted types, pick more until you're up to MissionLimit
-        while (difficulties.Count < MissionLimit)
+        try
         {
-            var difficultyIndex = _random.Next(_missionDifficulties.Count);
-            difficulties.Add(_missionDifficulties[difficultyIndex]);
-        }
-        difficulties.Sort((x, y) => { return Comparer<int>.Default.Compare(x.value, y.value); });
+            component.Missions.Clear();
 
-        for (var i = 0; i < MissionLimit; i++)
-        {
-            var mission = new SalvageMissionParams
+            // Frontier: generate missions from an arbitrary set of difficulties
+            if (_missionDifficulties.Count <= 0)
             {
-                Index = component.NextIndex,
-                MissionType = (SalvageMissionType)_random.NextByte((byte)SalvageMissionType.Max + 1), // Frontier
-                Seed = _random.Next(),
-                Difficulty = difficulties[i].id,
-            };
+                Log.Error("No expedition mission difficulties to pick from!");
+                return;
+            }
 
-            component.Missions[component.NextIndex++] = mission;
+            // this doesn't support having more missions than types of ratings
+            // but the previous system didn't do that either.
+            var allDifficulties = _missionDifficulties; // Frontier: Enum.GetValues<DifficultyRating>() < _missionDifficulties
+            _random.Shuffle(allDifficulties);
+            var difficulties = allDifficulties.Take(MissionLimit).ToList();
+
+            // If we support more missions than there are accepted types, pick more until you're up to MissionLimit
+            while (difficulties.Count < MissionLimit)
+            {
+                var difficultyIndex = _random.Next(_missionDifficulties.Count);
+                difficulties.Add(_missionDifficulties[difficultyIndex]);
+            }
+            difficulties.Sort((x, y) => { return Comparer<int>.Default.Compare(x.value, y.value); });
+
+            // HARDLIGHT: Always start mission indices from 0 for consistency
+            var missionIndex = 0;
+            for (var i = 0; i < MissionLimit; i++)
+            {
+                var mission = new SalvageMissionParams
+                {
+                    Index = (ushort)missionIndex,
+                    MissionType = (SalvageMissionType)_random.NextByte((byte)SalvageMissionType.Max + 1), // Frontier
+                    Seed = _random.Next(),
+                    Difficulty = difficulties[i].id,
+                };
+
+                component.Missions[(ushort)missionIndex] = mission;
+                missionIndex++;
+            }
+
+            // Update NextIndex to continue from where we left off if more missions are generated later
+            component.NextIndex = (ushort)missionIndex;
+            // End Frontier: generate missions from an arbitrary set of difficulties
+
+            Log.Debug($"Generated {component.Missions.Count} new missions");
         }
-        // End Frontier: generate missions from an arbitrary set of difficulties
+        finally
+        {
+            // HARDLIGHT: Always clear the flag, even if generation fails
+            component.GeneratingMissions = false;
+        }
+    }
+
+    // HARDLIGHT: Public method for round persistence system to properly regenerate missions
+    public void ForceGenerateMissions(SalvageExpeditionDataComponent component)
+    {
+        GenerateMissions(component);
     }
 
     private SalvageExpeditionConsoleState GetState(SalvageExpeditionDataComponent component)
@@ -244,7 +311,7 @@ public sealed partial class SalvageSystem
         return new SalvageExpeditionConsoleState(component.NextOffer, component.Claimed, component.Cooldown, component.ActiveMission, missions, component.CanFinish, component.CooldownTime); // Frontier: add CanFinish, CooldownTime
     }
 
-    private void SpawnMission(SalvageMissionParams missionParams, EntityUid station, EntityUid? coordinatesDisk)
+    private void SpawnMission(SalvageMissionParams missionParams, EntityUid station, EntityUid? console, EntityUid? coordinatesDisk)
     {
         var cancelToken = new CancellationTokenSource();
         var job = new SpawnSalvageMissionJob(
@@ -262,6 +329,7 @@ public sealed partial class SalvageSystem
             _shuttle, // Frontier
             this, // Frontier
             station,
+            console,
             coordinatesDisk,
             missionParams,
             cancelToken.Token);
@@ -279,11 +347,47 @@ public sealed partial class SalvageSystem
     // Handle exped spawn job failures gracefully - reset the console
     private void OnExpeditionSpawnComplete(EntityUid uid, SalvageExpeditionDataComponent component, ExpeditionSpawnCompleteEvent ev)
     {
+        // HARDLIGHT: Enhanced handling for round persistence
         if (component.ActiveMission == ev.MissionIndex && !ev.Success)
         {
             component.ActiveMission = 0;
             component.Cooldown = false;
+            // HARDLIGHT: Don't regenerate missions here, let UpdateConsole handle it
+            // This prevents the UI swapping issue
             UpdateConsoles((uid, component));
+
+            Log.Info($"Expedition mission {ev.MissionIndex} failed for entity {uid}, reset console state");
+        }
+        else if (component.ActiveMission == ev.MissionIndex && ev.Success)
+        {
+            Log.Debug($"Expedition mission {ev.MissionIndex} completed successfully for entity {uid}");
+        }
+    }
+
+    // HARDLIGHT: Also handle the event on expedition consoles for round persistence
+    private void OnExpeditionSpawnCompleteConsole(EntityUid uid, SalvageExpeditionConsoleComponent component, ExpeditionSpawnCompleteEvent ev)
+    {
+        // Handle expedition completion events sent to consoles via station data
+        var stationData = GetStationExpeditionData(uid);
+        if (stationData != null &&
+            stationData.ActiveMission == ev.MissionIndex &&
+            !ev.Success)
+        {
+            stationData.ActiveMission = 0;
+            stationData.Cooldown = false;
+
+            // Update the console UI
+            UpdateConsole((uid, component));
+
+            Log.Info($"Expedition console {uid} handled failed mission {ev.MissionIndex} via station expedition data");
+        }
+        // HARDLIGHT: Also handle successful missions to ensure proper state management
+        else if (stationData != null &&
+                 stationData.ActiveMission == ev.MissionIndex &&
+                 ev.Success)
+        {
+            Log.Debug($"Expedition console {uid} handled successful mission {ev.MissionIndex}");
+            // Don't change state for successful missions - let the normal completion flow handle it
         }
     }
 

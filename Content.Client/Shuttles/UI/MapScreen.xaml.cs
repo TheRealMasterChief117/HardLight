@@ -43,6 +43,7 @@ public sealed partial class MapScreen : BoxContainer
     private StartEndTime _ftlTime;
 
     private List<ShuttleBeaconObject> _beacons = new();
+    private List<ShuttleStationObject> _stations = new();
     private List<ShuttleExclusionObject> _exclusions = new();
 
     private TimeSpan _nextPing;
@@ -56,6 +57,7 @@ public sealed partial class MapScreen : BoxContainer
 
     public event Action<MapCoordinates, Angle>? RequestFTL;
     public event Action<NetEntity, Angle>? RequestBeaconFTL;
+    public event Action<NetEntity, Angle>? RequestStationFTL;
 
     private readonly Dictionary<MapId, BoxContainer> _mapHeadings = new();
     private readonly Dictionary<MapId, List<IMapObject>> _mapObjects = new();
@@ -98,6 +100,11 @@ public sealed partial class MapScreen : BoxContainer
             RequestBeaconFTL?.Invoke(ent, angle);
         };
 
+        MapRadar.RequestStationFTL += (ent, angle) =>
+        {
+            RequestStationFTL?.Invoke(ent, angle);
+        };
+
         MapBeaconsButton.OnToggled += args =>
         {
             MapRadar.ShowBeacons = args.Pressed;
@@ -109,6 +116,7 @@ public sealed partial class MapScreen : BoxContainer
         // Only network the accumulator due to ping making the thing fonky.
         // This should work better with predicting network states as they come in.
         _beacons = state.Destinations;
+        _stations = state.Stations;
         _exclusions = state.Exclusions;
         _state = state.FTLState;
         _ftlTime = state.FTLTime;
@@ -373,6 +381,14 @@ public sealed partial class MapScreen : BoxContainer
                     continue;
 
                 _pendingMapObjects.Add((mapComp.MapId, beacon));
+            }
+
+            foreach (var (station, _) in _shuttles.GetStations(mapComp.MapId, _stations))
+            {
+                if (station.HideButton)
+                    continue;
+
+                _pendingMapObjects.Add((mapComp.MapId, station));
             }
 
             HyperspaceDestinations.AddChild(mapButton);

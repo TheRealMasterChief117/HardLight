@@ -31,15 +31,13 @@
   access:
   - Captain # Just making sure in the case of any error that this role cannot be used for any bad doing.
   accessGroups:
-  - GeneralAccess # Frontier
- #- AllAccess
-  # special:
-  # - !type:AddImplantSpecial
-    # implants: [ MindShieldImplant ]
-  # - !type:AddComponentSpecial
-    # components:
-      # - type: CommandStaff
-# End Frontier
+  - AllAccess
+  - GeneralAccess
+  special:
+  - !type:AddComponentSpecial
+    components:
+    - type: PsionicBonusChance #Nyano - Summary: makes it more likely to become psionic.
+      flatBonus: 0.025
 
 - type: startingGear
   id: CaptainGear

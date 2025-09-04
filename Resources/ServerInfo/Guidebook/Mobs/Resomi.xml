@@ -1,0 +1,20 @@
+<Document>
+  # Resomi
+
+  <Box>
+    <GuideEntityEmbed Entity="MobResomi" Caption=""/>
+  </Box>
+
+  Small, upright, raptor-like creatures with four ears and feathered tails.
+  They are very lightweight and can be picked up and carried by other species.
+
+  ## Mobility
+  Their small size allows them to move [color=#1e90ff]2.5x faster in zero-gravity[/color] environments.
+
+  ## Combat
+  Their unarmed claw attacks deal Slash damage instead of Blunt.
+  These attacks deal [color=red]5[/color] points of Slash damage.
+
+  ## Sounds
+  Resomi make sounds akin to common bird noises found on Earth, such as chirping, trilling, screeching, calling, and squawking.
+</Document>

@@ -39,6 +39,7 @@ guide-entry-expedition-silicons = Rogue Silicons
 guide-entry-expedition-syndicate-naval-forces = Syndicate Naval Forces
 guide-entry-expedition-xenos = Xenos
 guide-entry-expedition-wizards = Wizards
+guide-entry-expedition-zombies = Zombies
 
 # Shipyard entries
 guide-entry-shipyard-adder = Adder
@@ -86,6 +87,7 @@ guide-entry-shipyard-phoenix = Phoenix
 guide-entry-shipyard-pioneer = Pioneer
 guide-entry-shipyard-placebo = Placebo
 guide-entry-shipyard-prospector = Prospector
+guide-entry-shipyard-pulsar = Pulsar
 guide-entry-shipyard-retort = Retort
 guide-entry-shipyard-searchlight = Searchlight
 guide-entry-shipyard-sparrow = Sparrow

@@ -35,3 +35,17 @@
     - SpellbookEvents       #Summon Weapons, Summon Ghosts
     currencyWhitelist:
     - WizCoin
+
+# Chaplain/bible set
+- type: entity
+  id: StorePresetSpellbookFaith
+  abstract: true
+  components:
+  - type: Store
+    name: store-preset-name-stext
+    categories:
+    - STextBlessingsM
+    - STextBlessingsL
+    - STextBlessingsG
+    currencyWhitelist:
+    - MinorBlessing

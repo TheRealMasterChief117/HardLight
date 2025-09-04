@@ -19,6 +19,7 @@ public sealed partial class ShuttleConsoleWindow : FancyWindow,
 
     public event Action<MapCoordinates, Angle>? RequestFTL;
     public event Action<NetEntity, Angle>? RequestBeaconFTL;
+    public event Action<NetEntity, Angle>? RequestStationFTL;
 
     public event Action<NetEntity, NetEntity>? DockRequest;
     public event Action<NetEntity>? UndockRequest;
@@ -51,6 +52,11 @@ public sealed partial class ShuttleConsoleWindow : FancyWindow,
         MapContainer.RequestBeaconFTL += (ent, angle) =>
         {
             RequestBeaconFTL?.Invoke(ent, angle);
+        };
+
+        MapContainer.RequestStationFTL += (ent, angle) =>
+        {
+            RequestStationFTL?.Invoke(ent, angle);
         };
 
         DockContainer.DockRequest += (entity, netEntity) =>

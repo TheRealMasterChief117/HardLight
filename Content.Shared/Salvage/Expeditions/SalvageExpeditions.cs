@@ -124,6 +124,12 @@ public sealed partial class SalvageExpeditionDataComponent : Component
     /// </summary>
     [ViewVariables(VVAccess.ReadWrite), DataField]
     public TimeSpan CooldownTime;
+
+    /// <summary>
+    /// HARDLIGHT: Tracks if missions are currently being generated to prevent duplicate generation
+    /// </summary>
+    [ViewVariables(VVAccess.ReadWrite)]
+    public bool GeneratingMissions = false;
     // End Frontier: early finish, failure vs. success cooldowns
 }
 

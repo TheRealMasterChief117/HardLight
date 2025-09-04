@@ -199,7 +199,7 @@
     clothingPrototype: ClothingHeadHelmetHardsuitNfsdGold
 
 - type: entity
-  parent: ClothingOuterHardsuitSecurityRed # Hardlight change.
+  parent: ClothingOuterHardsuitNfsdBronze
   id: ClothingOuterHardsuitNfsdSheriff
   name: NFSD sheriff patrol suit
   description: The standard-issue NFSD space proof suit for patrol duty. This gold variant has sheriff rank markings.
@@ -271,25 +271,25 @@
     clothingPrototype: ClothingHeadHelmetHardsuitNfsdCombat
   - type: ExplosionResistance
     damageCoefficient: 0.4
-  - type: Armor  # Hardlight change.
+  - type: Armor
     modifiers:
       coefficients:
         Blunt: 0.5
-        Slash: 0.5
-        Piercing: 0.3
+        Slash: 0.6
+        Piercing: 0.6
         Heat: 0.60
         Radiation: 0.50
         Caustic: 0.7
   - type: ClothingSpeedModifier  # Hardlight change 25 percent is way to much for the little armor it gives.
     walkModifier: 0.85
-    sprintModifier: 0.85
+    sprintModifier: 0.75
 
 #Security Command Hardsuit
 - type: entity
-  parent: ClothingOuterHardsuitSyndieCommander
-  id: ClothingOuterHardsuitNfsdCommand # Hardlight change
+  parent: ClothingOuterHardsuitBaseNFNfsd
+  id: ClothingOuterHardsuitNfsdCommand
   name: NFSD command combat suit
-  description: A heavily armored NFSD suit. Space proof, with thick armor plating at the expense of mobility with built in Non-slip boots. This variant has supervisor rank markings
+  description: A heavily armored NFSD suit. Space proof, with thick armor plating at the expense of mobility. This variant has supervisor rank markings.
   components:
   - type: Sprite
     sprite: _NF/Clothing/OuterClothing/Hardsuits/nfsd_command.rsi
@@ -308,10 +308,9 @@
         Heat: 0.50
         Radiation: 0.4
         Caustic: 0.6
-  - type: ClothingSpeedModifier  # Hardlight Change  this is to match bloodred commander
-    walkModifier: 0.9
-    sprintModifier: 0.9
-  - type: NoSlip  # Hardlight change  Sheriff should be hte only one with this
+  - type: ClothingSpeedModifier
+    walkModifier: 0.85
+    sprintModifier: 0.75
 
 # SCAF hardsuit
 - type: entity

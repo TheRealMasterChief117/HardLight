@@ -10,6 +10,8 @@ using Robust.Client.UserInterface;
 using Robust.Client.UserInterface.Controls;
 using Robust.Shared.Configuration;
 using Robust.Shared.Prototypes;
+using Robust.Shared.Timing;
+using Timer = Robust.Shared.Timing.Timer;
 
 namespace Content.Client.Salvage.UI;
 
@@ -22,6 +24,9 @@ public sealed class SalvageExpeditionConsoleBoundUserInterface : BoundUserInterf
     // [Dependency] private readonly IConfigurationManager _cfgManager = default!; // Frontier: warning suppression
     [Dependency] private readonly IEntityManager _entManager = default!;
     [Dependency] private readonly IPrototypeManager _protoManager = default!;
+    [Dependency] private readonly IGameTiming _timing = default!;
+
+    private TimeSpan? _lastStateUpdate;
 
     public SalvageExpeditionConsoleBoundUserInterface(EntityUid owner, Enum uiKey) : base(owner, uiKey)
     {
@@ -41,6 +46,23 @@ public sealed class SalvageExpeditionConsoleBoundUserInterface : BoundUserInterf
         base.UpdateState(state);
 
         if (state is not SalvageExpeditionConsoleState current || _window == null)
+            return;
+
+        // HARDLIGHT: Add debouncing to prevent rapid UI updates from causing visual issues
+        if (_lastStateUpdate.HasValue && _timing.CurTime - _lastStateUpdate.Value < TimeSpan.FromMilliseconds(100))
+        {
+            // If we got a state update too soon after the last one, delay it slightly
+            Timer.Spawn(TimeSpan.FromMilliseconds(150), () => UpdateStateInternal(current));
+            return;
+        }
+
+        _lastStateUpdate = _timing.CurTime;
+        UpdateStateInternal(current);
+    }
+
+    private void UpdateStateInternal(SalvageExpeditionConsoleState current)
+    {
+        if (_window == null)
             return;
 
         _window.Progression = null;

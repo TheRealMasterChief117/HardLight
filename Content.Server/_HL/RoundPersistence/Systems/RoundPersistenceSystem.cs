@@ -25,6 +25,7 @@ using Content.Shared.CrewManifest;
 using Content.Shared._HL.CCVar;
 using Content.Shared.GameTicking;
 using Content.Shared.Shuttles.Components;
+using Content.Shared.Station.Components;
 using Robust.Server.GameObjects;
 using Robust.Shared.GameObjects;
 using Robust.Shared.IoC;
@@ -154,17 +155,26 @@ public sealed class RoundPersistenceSystem : EntitySystem
     /// </summary>
     private void OnExpeditionConsoleMapInit(EntityUid uid, SalvageExpeditionConsoleComponent component, MapInitEvent args)
     {
-        if (!_cfg.GetCVar(HLCCVars.RoundPersistenceEnabled) || !_cfg.GetCVar(HLCCVars.RoundPersistenceExpeditions))
-            return;
+        Log.Info($"OnExpeditionConsoleMapInit called for console {ToPrettyString(uid)}");
 
-        // HARDLIGHT: Use a delay to ensure the console is fully initialized
-        RobustTimer.Spawn(TimeSpan.FromMilliseconds(100), () =>
+        if (!_cfg.GetCVar(HLCCVars.RoundPersistenceEnabled) || !_cfg.GetCVar(HLCCVars.RoundPersistenceExpeditions))
         {
+            Log.Info($"Round persistence disabled for console {ToPrettyString(uid)}");
+            return;
+        }
+
+        Log.Info($"Scheduling console restoration for {ToPrettyString(uid)} in 2000ms");
+
+        // HARDLIGHT: Use a longer delay to ensure the console is fully initialized AND that station data has been restored AND that shuttle docking is complete
+        // Station restoration happens after 1000ms, shuttle docking happens during station restoration, so console restoration must happen well after that
+        RobustTimer.Spawn(TimeSpan.FromMilliseconds(2000), () =>
+        {
+            Log.Info($"Starting console restoration for {ToPrettyString(uid)}");
             RestoreConsoleExpeditionData(uid, component);
         });
     }    /// <summary>
     /// HARDLIGHT: Restore expedition data directly to console from persistence storage
-    /// TODO: This method needs to be rewritten to work with station-based expedition data instead of LocalExpeditionData
+    /// This method now properly works with station-based expedition data
     /// </summary>
     private void RestoreConsoleExpeditionData(EntityUid consoleUid, SalvageExpeditionConsoleComponent consoleComp)
     {
@@ -178,9 +188,44 @@ public sealed class RoundPersistenceSystem : EntitySystem
         var gridUid = xform.GridUid.Value;
         var gridName = MetaData(gridUid).EntityName;
 
-        Log.Info($"Console expedition data restoration temporarily disabled for {gridName} - LocalExpeditionData system removed");
-        // TODO: Implement station-based expedition data restoration
-        // The LocalExpeditionData system has been eliminated in favor of pure server-side station lookup
+        // Try to find the owning station
+        var owningStation = _station.GetOwningStation(consoleUid, xform);
+        if (owningStation == null)
+        {
+            Log.Warning($"Console {ToPrettyString(consoleUid)} on {gridName} has no owning station - this might be the issue!");
+            return;
+        }
+
+        Log.Info($"Console {ToPrettyString(consoleUid)} on {gridName} found owning station: {MetaData(owningStation.Value).EntityName}");
+
+        // If the station has expedition data, the console should use it automatically
+        if (TryComp<SalvageExpeditionDataComponent>(owningStation.Value, out var expeditionData))
+        {
+            Log.Info($"Station {MetaData(owningStation.Value).EntityName} has expedition data with {expeditionData.Missions.Count} missions");
+
+            // Force a console update to ensure it displays the station's expedition data
+            if (TryComp<SalvageExpeditionConsoleComponent>(consoleUid, out var console))
+            {
+                Log.Info($"Forcing console update for {ToPrettyString(consoleUid)}");
+                // Use the salvage system to update this specific console
+                _salvageSystem.UpdateConsole(new Entity<SalvageExpeditionConsoleComponent>(consoleUid, console));
+
+                // Double-check: try to get the data through the salvage system's method
+                var salvageData = _salvageSystem.GetStationExpeditionData(consoleUid);
+                if (salvageData != null)
+                {
+                    Log.Info($"Salvage system found {salvageData.Missions.Count} missions for console after update");
+                }
+                else
+                {
+                    Log.Error($"Salvage system still can't find expedition data for console {ToPrettyString(consoleUid)} - this is the bug!");
+                }
+            }
+        }
+        else
+        {
+            Log.Warning($"Station {MetaData(owningStation.Value).EntityName} has no expedition data - checking if station restoration failed");
+        }
     }
 
     /// <summary>
@@ -457,20 +502,33 @@ public sealed class RoundPersistenceSystem : EntitySystem
             {
                 // Update expedition consoles directly since UpdateConsoles is private
                 var consoleQuery = AllEntityQuery<SalvageExpeditionConsoleComponent, UserInterfaceComponent, TransformComponent>();
+                var consolesUpdated = 0;
                 while (consoleQuery.MoveNext(out var consoleUid, out var consoleComp, out var uiComp, out var xform))
                 {
                     var consoleStation = _station.GetOwningStation(consoleUid, xform);
-                    if (consoleStation == stationUid)
+
+                    // Update consoles that belong directly to this station OR shuttles that should use this station's data
+                    if (consoleStation == stationUid || ShouldUpdateShuttleConsole(consoleUid, consoleStation, stationUid))
                     {
+                        _sawmill.Info($"Updating console {ToPrettyString(consoleUid)} for station {stationName}");
                         // Force UI update by triggering console update logic
                         if (TryComp<SalvageExpeditionDataComponent>(stationUid, out var stationData))
                         {
                             var state = GetExpeditionState((stationUid, stationData));
                             _ui.SetUiState((consoleUid, uiComp), SalvageConsoleUiKey.Expedition, state);
+                            consolesUpdated++;
                         }
                     }
+                    else if (consoleStation != null)
+                    {
+                        _sawmill.Debug($"Console {ToPrettyString(consoleUid)} belongs to different station {MetaData(consoleStation.Value).EntityName}");
+                    }
+                    else
+                    {
+                        _sawmill.Warning($"Console {ToPrettyString(consoleUid)} has no owning station during restoration");
+                    }
                 }
-                _sawmill.Info($"Updated expedition console UIs for station {stationName}");
+                _sawmill.Info($"Updated expedition console UIs for station {stationName} and associated shuttles ({consolesUpdated} consoles updated)");
             });
 
             _sawmill.Info($"Restored expedition data with {expeditionData.Missions.Count} missions, NextOffer: {expeditionComp.NextOffer}, Claimed: {expeditionComp.Claimed}");
@@ -577,6 +635,11 @@ public sealed class RoundPersistenceSystem : EntitySystem
                 {
                     shuttlesDocked++;
                     _sawmill.Info($"Docked shuttle {shuttleRecord.Name} ({shuttleUid}) to its home station {stationName}");
+
+                    // Manually ensure the shuttle has proper station membership
+                    var stationMember = EntityManager.EnsureComponent<StationMemberComponent>(shuttleUid.Value);
+                    stationMember.Station = stationUid;
+                    _sawmill.Info($"Set station membership for shuttle {shuttleRecord.Name} ({shuttleUid}) to station {stationName}");
                 }
                 else
                 {
@@ -600,6 +663,11 @@ public sealed class RoundPersistenceSystem : EntitySystem
                     {
                         shuttlesDocked++;
                         _sawmill.Info($"Docked unowned shuttle {shipData.ShipName} ({shuttleUid}) to station {stationName}");
+
+                        // Manually ensure the shuttle has proper station membership
+                        var stationMember = EntityManager.EnsureComponent<StationMemberComponent>(shuttleUid.Value);
+                        stationMember.Station = stationUid;
+                        _sawmill.Info($"Set station membership for shuttle {shipData.ShipName} ({shuttleUid}) to station {stationName}");
                     }
                     else
                     {

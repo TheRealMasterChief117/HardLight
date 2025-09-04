@@ -25,6 +25,7 @@ using Content.Shared.CrewManifest;
 using Content.Shared._HL.CCVar;
 using Content.Shared.GameTicking;
 using Content.Shared.Shuttles.Components;
+using Content.Shared.Station.Components;
 using Robust.Server.GameObjects;
 using Robust.Shared.GameObjects;
 using Robust.Shared.IoC;

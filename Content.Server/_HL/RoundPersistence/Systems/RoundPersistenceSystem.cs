@@ -635,7 +635,7 @@ public sealed class RoundPersistenceSystem : EntitySystem
                 {
                     shuttlesDocked++;
                     _sawmill.Info($"Docked shuttle {shuttleRecord.Name} ({shuttleUid}) to its home station {stationName}");
-                    
+
                     // Manually ensure the shuttle has proper station membership
                     var stationMember = EntityManager.EnsureComponent<StationMemberComponent>(shuttleUid.Value);
                     stationMember.Station = stationUid;
@@ -663,7 +663,7 @@ public sealed class RoundPersistenceSystem : EntitySystem
                     {
                         shuttlesDocked++;
                         _sawmill.Info($"Docked unowned shuttle {shipData.ShipName} ({shuttleUid}) to station {stationName}");
-                        
+
                         // Manually ensure the shuttle has proper station membership
                         var stationMember = EntityManager.EnsureComponent<StationMemberComponent>(shuttleUid.Value);
                         stationMember.Station = stationUid;

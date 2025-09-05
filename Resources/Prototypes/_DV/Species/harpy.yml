@@ -59,14 +59,14 @@
       required: false
     # End Frontier
     Chest:
-      points: 1
+      points: 8
       required: true
       defaultMarkings: [ HarpyChestDefault ]
     Legs:
-      points: 2
+      points: 8
       required: false
     Arms:
-      points: 1
+      points: 8
       required: false
       defaultMarkings: [ HarpyWingDefaultHuescale ]
 

@@ -55,13 +55,13 @@
       required: true
       defaultMarkings: [ FeroxiSnout ]
     Chest:
-      points: 3
+      points: 8
       required: false
     Arms:
-      points: 1
+      points: 8
       required: false
     Legs:
-      points: 1
+      points: 8
       required: false
     Tail:
       points: 1

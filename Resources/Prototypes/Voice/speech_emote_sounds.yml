@@ -36,6 +36,8 @@
       collection: Weh
     Hew:
       collection: Hew
+    Bark: # HardLight - JuiceThatMakesYouBark
+      collection: VulpkaninBarks
     Gasp:
       collection: MaleGasp
     DefaultDeathgasp:
@@ -80,6 +82,8 @@
       collection: Weh
     Hew:
       collection: Hew
+    Bark: # HardLight - JuiceThatMakesYouBark
+      collection: VulpkaninBarks
     Gasp:
       collection: FemaleGasp
     DefaultDeathgasp:
@@ -110,6 +114,8 @@
       collection: Weh
     Hew:
       collection: Hew
+    Bark: # HardLight - JuiceThatMakesYouBark
+      collection: VulpkaninBarks
     Gasp:
       collection: MaleGasp
     DefaultDeathgasp:
@@ -140,6 +146,8 @@
       collection: Weh
     Hew:
       collection: Hew
+    Bark: # HardLight - JuiceThatMakesYouBark
+      collection: VulpkaninBarks
     Gasp:
       collection: FemaleGasp
     DefaultDeathgasp:
@@ -188,6 +196,8 @@
       collection: Weh
     Hew:
       collection: Hew
+    Bark: # HardLight - JuiceThatMakesYouBark
+      collection: VulpkaninBarks
     Gasp:
       collection: MaleGasp
     DefaultDeathgasp:
@@ -238,6 +248,8 @@
       collection: Weh
     Hew:
       collection: Hew
+    Bark: # HardLight - JuiceThatMakesYouBark
+      collection: VulpkaninBarks
     Gasp:
       collection: FemaleGasp
     DefaultDeathgasp:
@@ -262,6 +274,8 @@
       collection: Weh
     Hew:
       collection: Hew
+    Bark: # HardLight - JuiceThatMakesYouBark
+      collection: VulpkaninBarks
     Belch: # Frontier
       collection: Belch # Frontier
   params:
@@ -285,6 +299,8 @@
       collection: Weh
     Hew:
       collection: Hew
+    Bark: # HardLight - JuiceThatMakesYouBark
+      collection: VulpkaninBarks
     Gasp:
       collection: MaleGasp
     DefaultDeathgasp:
@@ -313,6 +329,8 @@
       collection: Weh
     Hew:
       collection: Hew
+    Bark: # HardLight - JuiceThatMakesYouBark
+      collection: VulpkaninBarks
     Honk:
       collection: BikeHorn
     Gasp:
@@ -357,6 +375,8 @@
       collection: Weh
     Hew:
       collection: Hew
+    Bark: # HardLight - JuiceThatMakesYouBark
+      collection: VulpkaninBarks
     Gasp:
       collection: MaleGasp
     DefaultDeathgasp:
@@ -402,6 +422,8 @@
       collection: Weh
     Hew:
       collection: Hew
+    Bark: # HardLight - JuiceThatMakesYouBark
+      collection: VulpkaninBarks
     Gasp:
       collection: FemaleGasp
     DefaultDeathgasp:
@@ -433,6 +455,8 @@
       collection: Weh
     Hew:
       collection: Hew
+    Bark: # HardLight - JuiceThatMakesYouBark
+      collection: VulpkaninBarks
     Honk:
       collection: BikeHorn
     Gasp:
@@ -459,6 +483,12 @@
       path: /Audio/Items/bikehorn.ogg
     Ping:
       path: /Audio/Effects/Cargo/ping.ogg
+    Weh:
+      collection: Weh
+    Hew:
+      collection: Hew
+    Bark: # HardLight - JuiceThatMakesYouBark
+      collection: VulpkaninBarks
 
 - type: emoteSounds
   id: UnisexSiliconSyndicate
@@ -487,6 +517,8 @@
       collection: Weh
     Hew:
       collection: Hew
+    Bark: # HardLight - JuiceThatMakesYouBark
+      collection: VulpkaninBarks
     Gasp:
       collection: FemaleGasp
     DefaultDeathgasp:

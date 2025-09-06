@@ -19,5 +19,9 @@
       collection: BikeHorn
     Weh:
       collection: Weh
+    Hew:
+      collection: Hew
+    Bark: # HardLight - JuiceThatMakesYouBark
+      collection: VulpkaninBarks
   params:
     variation: 0.125

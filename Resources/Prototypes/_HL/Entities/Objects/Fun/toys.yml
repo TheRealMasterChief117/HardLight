@@ -2,7 +2,7 @@
 - type: entity
   id: PlushieStoneRengault
   parent: BasePlushie
-  name: stone rengault
+  name: stone rengault plushie
   description: An adorable stuffed toy that resembles Stone Rengault. Made by ColComm as a token of appreciation for a gentle crewmember. "Arf!"
   components:
   - type: Sprite

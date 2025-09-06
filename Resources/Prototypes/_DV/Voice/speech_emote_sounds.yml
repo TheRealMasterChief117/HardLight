@@ -210,6 +210,10 @@
       collection: VulpkaninHowls
     Awoo:
       collection: VulpkaninHowls
+    Weh: # Dogs need to Weh too
+      collection: Weh
+    Hew:
+      collection: Hew
 
 - type: emoteSounds
   id: MaleRodentia
@@ -238,6 +242,10 @@
       collection: Whistles
     Weh:
       collection: Weh
+    Hew:
+      collection: Hew
+    Bark: # HardLight - JuiceThatMakesYouBark
+      collection: VulpkaninBarks
     Squeak:
       path: /Audio/Animals/mouse_squeak.ogg
 
@@ -268,8 +276,13 @@
       collection: Whistles
     Weh:
       collection: Weh
+    Hew:
+      collection: Hew
+    Bark: # HardLight - JuiceThatMakesYouBark
+      collection: VulpkaninBarks
     Squeak:
       path: /Audio/Animals/mouse_squeak.ogg
+
 - type: emoteSounds
   id: MaleFeroxi
   params:
@@ -291,6 +304,10 @@
       collection: Whistles
     Weh:
       collection: Weh
+    Hew:
+      collection: Hew
+    Bark: # HardLight - JuiceThatMakesYouBark
+      collection: VulpkaninBarks
     Sneeze:
       collection: MaleSneezes
     Cough:
@@ -327,5 +344,9 @@
       collection: Whistles
     Weh:
       collection: Weh
+    Hew:
+      collection: Hew
+    Bark: # HardLight - JuiceThatMakesYouBark
+      collection: VulpkaninBarks
     Gnash:
       collection: FeroxiGnashes

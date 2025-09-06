@@ -1,0 +1,67 @@
+# Plushies!!!!
+- type: entity
+  id: PlushieStoneRengault
+  parent: BasePlushie
+  name: stone rengault plushie
+  description: An adorable stuffed toy that resembles Stone Rengault. Made by ColComm as a token of appreciation for a gentle crewmember. "Arf!"
+  components:
+  - type: Sprite
+    # sprite: Objects/Fun/toys.rsi
+    # state: plushie_lizard
+    sprite: _HL/Objects/Fun/toys.rsi
+    state: plushie_stone_rengault
+  - type: Item
+    heldPrefix: plushie_stone_rengault
+  - type: EmitSoundOnUse
+    sound:
+      collection: VulpkaninBarks
+  - type: EmitSoundOnLand
+    sound:
+      collection: VulpkaninScreams
+  - type: EmitSoundOnActivate
+    sound:
+      collection: VulpkaninHowls
+  - type: EmitSoundOnTrigger
+    sound:
+      collection: VulpkaninGekkers
+  - type: EmitSoundOnCollide
+    sound:
+      collection: VulpkaninWhines
+  - type: Food
+    requiresSpecialDigestion: true
+    useSound:
+      collection: VulpkaninBarks
+  - type: MeleeWeapon
+    wideAnimationRotation: 180
+    soundHit:
+      collection: VulpkaninWhines
+  - type: Extractable
+    juiceSolution:
+      reagents:
+      - ReagentId: JuiceThatMakesYouBark
+        Quantity: 30
+  - type: SolutionContainerManager
+    solutions:
+      food:
+        maxVol: 20
+        reagents:
+        - ReagentId: Fiber
+          Quantity: 10
+        - ReagentId: JuiceThatMakesYouBark
+          Quantity: 10
+  - type: Clothing
+    quickEquip: false
+    sprite: Objects/Fun/toys.rsi
+    equippedPrefix: plushie_stone_rengault
+    slots:
+    - HEAD
+  - type: Speech
+    speechVerb: Vulpkanin # for pais (In the secret stash)
+  - type: Tag
+    tags:
+    - ClothMade
+    - Payload
+    - PlushieStoneRengault
+  # - type: FoodSequenceElement
+    # entries:
+      # CottonBurger: LizardPlushie

@@ -1,0 +1,19 @@
+- type: entity
+  id: MobFoxBarkJuice # this prototype can probably be merged into it's parent
+  parent: MobFox
+  components:
+  - type: ReplacementAccent
+    accent: fox
+  - type: Vocal
+    sounds:
+      Male: UnisexFox
+      Female: UnisexFox
+      Unsexed: UnisexFox
+  - type: Speech
+    speechSounds: Vulpkanin
+    speechVerb: Vulpkanin
+    allowedEmotes: ['Bark', 'Snarl', 'Whine', 'Howl', 'Awoo', 'Growl', 'Yap', 'Gekker']
+  - type: Inventory
+    speciesId: fox
+  - type: Puller
+    needsHands: false

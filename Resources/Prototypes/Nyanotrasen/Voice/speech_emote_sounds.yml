@@ -28,6 +28,8 @@
       collection: Weh
     Hew:
       collection: Hew
+    Bark: # HardLight - JuiceThatMakesYouBark
+      collection: VulpkaninBarks
     Belch: # Frontier
       collection: Belch # Frontier
     Hiss:
@@ -74,6 +76,8 @@
       collection: Weh
     Hew:
       collection: Hew
+    Bark: # HardLight - JuiceThatMakesYouBark
+      collection: VulpkaninBarks
     Belch: # Frontier
       collection: Belch # Frontier
     Hiss:

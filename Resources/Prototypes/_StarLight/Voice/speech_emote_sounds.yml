@@ -19,6 +19,8 @@
       collection: Weh
     Hew:
       collection: Hew
+    Bark: # HardLight - JuiceThatMakesYouBark
+      collection: VulpkaninBarks
     Gasp:
       collection: FemaleGasp
     DefaultDeathgasp:
@@ -91,6 +93,8 @@
       collection: Weh
     Hew:
       collection: Hew
+    Bark: # HardLight - JuiceThatMakesYouBark
+      collection: VulpkaninBarks
 
 - type: emoteSounds
   id: FemaleFelionoid
@@ -137,6 +141,8 @@
       collection: Weh
     Hew:
       collection: Hew
+    Bark: # HardLight - JuiceThatMakesYouBark
+      collection: VulpkaninBarks
 
 - type: emoteSounds
   id: MaleCyclorite
@@ -161,6 +167,8 @@
       collection: Weh
     Hew:
       collection: Hew
+    Bark: # HardLight - JuiceThatMakesYouBark
+      collection: VulpkaninBarks
 
 - type: emoteSounds
   id: FemaleCyclorite
@@ -185,6 +193,8 @@
       collection: Weh
     Hew:
       collection: Hew
+    Bark: # HardLight - JuiceThatMakesYouBark
+      collection: VulpkaninBarks
 
 # Avali Sounds
 - type: emoteSounds
@@ -210,6 +220,8 @@
       collection: Weh
     Hew:
       collection: Hew
+    Bark: # HardLight - JuiceThatMakesYouBark
+      collection: VulpkaninBarks
     Gasp:
       collection: MaleGasp
     DefaultDeathgasp:
@@ -260,6 +272,8 @@
       collection: Weh
     Hew:
       collection: Hew
+    Bark: # HardLight - JuiceThatMakesYouBark
+      collection: VulpkaninBarks
     Gasp:
       collection: FemaleGasp
     DefaultDeathgasp:
@@ -316,6 +330,8 @@
       collection: Weh
     Hew:
       collection: Hew
+    Bark: # HardLight - JuiceThatMakesYouBark
+      collection: VulpkaninBarks
     Gasp:
       collection: MaleGasp
     DefaultDeathgasp:
@@ -360,6 +376,8 @@
       collection: Weh
     Hew:
       collection: Hew
+    Bark: # HardLight - JuiceThatMakesYouBark
+      collection: VulpkaninBarks
     Gasp:
       collection: FemaleGasp
     DefaultDeathgasp:

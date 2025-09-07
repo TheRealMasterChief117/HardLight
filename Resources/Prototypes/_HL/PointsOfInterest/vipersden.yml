@@ -7,14 +7,14 @@
 # Discord: BlueNexa
 
 # Notes:
-# HL replacement for LPB, turning it into a proper station
+# HL replacement for LPB
 
 - type: pointOfInterest
   id: VipersDen
   parent: BasePOI
   name: "Viper's Den"
-  minimumDistance: 5000
-  maximumDistance: 7000
+  minimumDistance: 5500
+  maximumDistance: 7500
   spawnGroup: SyndicateFOB
   gridPath: /Maps/_HL/POI/vipersden.yml
   hideWarp: true

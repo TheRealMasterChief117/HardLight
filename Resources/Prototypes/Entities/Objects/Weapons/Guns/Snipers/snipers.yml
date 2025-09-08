@@ -88,8 +88,9 @@
     sprintModifier: 0.25
   - type: CursorOffsetRequiresWield
   - type: EyeCursorOffset
-    maxOffset: 10
-    pvsIncrease: 1
+    maxOffset: 3
+    pvsIncrease: 0.3
+  # type: Telescope  This is what causing Eye cancer   Hardlight fix
 
 - type: entity
   categories: [ HideSpawnMenu ] # Frontier

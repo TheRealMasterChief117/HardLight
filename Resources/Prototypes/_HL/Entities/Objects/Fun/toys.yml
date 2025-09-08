@@ -92,7 +92,7 @@
       path: /Audio/Voice/Reptilian/reptilian_scream.ogg
   - type: EmitSoundOnActivate
     sound:
-      collection: Weh
+      path: /Audio/Weapons/Xeno/alien_spitacid.ogg
   - type: EmitSoundOnTrigger
     sound:
       collection: Weh

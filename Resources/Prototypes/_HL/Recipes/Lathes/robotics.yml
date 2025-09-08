@@ -14,3 +14,8 @@
   parent: BaseBorgModuleRecipe
   id: BorgModuleRCDShipyard
   result: BorgModuleRCDShipyard
+
+- type: latheRecipe
+  parent: BaseGoldBorgModuleRecipe
+  id: BorgModuleadvancedmeasures
+  result: BorgModuleadvancedmeasures

@@ -5,7 +5,7 @@
         "y": 32
     },
     "license": "CC-BY-SA-3.0",
-    "copyright": "Taken from https://github.com/BeeStation/BeeStation-Hornet/commit/ecf8ff1138fa975fadbc58c98b6ca97241fde850",
+    "copyright": "Taken from https://github.com/BeeStation/BeeStation-Hornet/commit/ecf8ff1138fa975fadbc58c98b6ca97241fde850, Modified by VividPups to fix Errors",
     "states": [
         {
             "name": "moff"
@@ -57,6 +57,12 @@
         },
         {
             "name": "moffbar"
+        },
+        {
+            "name": "moffmusician"
+        },
+        {
+            "name": "moffbartender"
         }
     ]
 }

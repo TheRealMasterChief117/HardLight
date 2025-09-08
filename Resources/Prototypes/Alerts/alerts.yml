@@ -491,3 +491,12 @@
     state: critical
   name: Debug6
   description: Debug
+
+- type: alert
+  id: Mana
+  category: Magic
+  icons:
+    - sprite: /Textures/Interface/Alerts/breathing.rsi
+      state: not_enough_oxy
+  name: Mana
+  description: Indicates your current mana level.

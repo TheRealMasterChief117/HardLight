@@ -2,12 +2,17 @@ using Robust.Shared.GameStates;
 
 namespace Content.Shared.Abilities.Psionics
 {
-    /// <summary>
-    ///     Component that marks an entity as having a broken mind, preventing psionic abilities.
-    /// </summary>
-    [RegisterComponent, NetworkedComponent]
-    public sealed partial class MindbrokenComponent : Component
+    public override void Initialize()
     {
-        // This component is just a marker, no additional data needed
+        base.Initialize();
+        SubscribeLocalEvent<MindbrokenComponent, ExaminedEvent>(OnExamined);
+    }
+
+    private void OnExamined(EntityUid uid, MindbrokenComponent component, ExaminedEvent args)
+    {
+        if (!args.IsInDetailsRange)
+            return;
+
+        args.PushMarkup($"[color=#f89b14]{Loc.GetString(component.MindbrokenExaminationText, ("entity", uid))}[/color]");
     }
 }

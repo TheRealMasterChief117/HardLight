@@ -90,7 +90,7 @@
   - type: EyeCursorOffset
     maxOffset: 3
     pvsIncrease: 0.3
-  # type: Telescope  This is what causing Eye cancer   Hardlight fix
+  # type: Telescope
 
 - type: entity
   categories: [ HideSpawnMenu ] # Frontier

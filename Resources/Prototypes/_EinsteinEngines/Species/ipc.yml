@@ -57,15 +57,15 @@
       required: true
       defaultMarkings: [ MobIPCHeadDefault ]
     Chest:
-      points: 8
+      points: 1
       required: true
       defaultMarkings: [ MobIPCTorsoDefault ]
     Legs:
-      points: 8
+      points: 4
       required: true
       defaultMarkings: [ MobIPCLLegDefault, MobIPCLFootDefault, MobIPCRLegDefault, MobIPCRFootDefault ]
     Arms:
-      points: 8
+      points: 4
       required: true
       defaultMarkings: [ MobIPCLArmDefault, MobIPCLHandDefault, MobIPCRArmDefault, MobIPCRHandDefault ]
     HeadSide:

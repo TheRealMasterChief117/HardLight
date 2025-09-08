@@ -142,7 +142,7 @@
         Piercing: 15
         Slash: 15
   - type: Devourer
-    foodPreference: Humanoid
+    foodPreference: None
     shouldStoreDevoured: true
     chemical: Ichor
     healRate: 15.0

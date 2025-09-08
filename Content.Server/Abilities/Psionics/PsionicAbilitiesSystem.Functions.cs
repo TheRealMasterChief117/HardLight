@@ -31,7 +31,7 @@ public sealed partial class AddPsionicActions : PsionicPowerFunction
         ISharedPlayerManager playerManager,
         ILocalizationManager loc,
         PsionicComponent psionicComponent,
-        PsionicPowerPrototype proto)
+        Content.Shared.Abilities.Psionics.PsionicPowerPrototype proto)
     {
         var actions = entityManager.System<SharedActionsSystem>();
         foreach (var id in Actions)
@@ -60,7 +60,7 @@ public sealed partial class RemovePsionicActions : PsionicPowerFunction
         ISharedPlayerManager playerManager,
         ILocalizationManager loc,
         PsionicComponent psionicComponent,
-        PsionicPowerPrototype proto)
+        Content.Shared.Abilities.Psionics.PsionicPowerPrototype proto)
     {
         var actions = entityManager.System<SharedActionsSystem>();
         if (psionicComponent.Actions is null

@@ -271,6 +271,12 @@
   id: ShellShotgun23x75mmBuckshot
 
 - type: Tag
+  id: MagazineAMR
+
+- type: Tag
+  id: CartridgeAntiMaterielBig
+
+- type: Tag
   id: Abyssal
 
 - type: Tag

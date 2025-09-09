@@ -15,7 +15,7 @@ using Robust.Shared.Player;
 namespace Content.Server.Abilities.Psionics;
 
 [UsedImplicitly]
-public sealed partial class AddPsionicActions : PsionicPowerFunction
+public sealed partial class AddPsionicActions : Content.Shared.Abilities.Psionics.PsionicPowerFunction
 {
     /// <summary>
     ///     The list of each Action that this power adds in the form of ActionId and ActionEntity
@@ -47,7 +47,7 @@ public sealed partial class AddPsionicActions : PsionicPowerFunction
 }
 
 [UsedImplicitly]
-public sealed partial class RemovePsionicActions : PsionicPowerFunction
+public sealed partial class RemovePsionicActions : Content.Shared.Abilities.Psionics.PsionicPowerFunction
 {
     // As a novelty, this does not require any DataFields.
     // This removes all Actions directly associated with a specific power, which works with our current system of record-keeping
@@ -80,7 +80,7 @@ public sealed partial class RemovePsionicActions : PsionicPowerFunction
 }
 
 [UsedImplicitly]
-public sealed partial class AddPsionicPowerComponents : PsionicPowerFunction
+public sealed partial class AddPsionicPowerComponents : Content.Shared.Abilities.Psionics.PsionicPowerFunction
 {
     /// <summary>
     ///     The list of what Components this power adds.
@@ -111,7 +111,7 @@ public sealed partial class AddPsionicPowerComponents : PsionicPowerFunction
 }
 
 [UsedImplicitly]
-public sealed partial class RemovePsionicPowerComponents : PsionicPowerFunction
+public sealed partial class RemovePsionicPowerComponents : Content.Shared.Abilities.Psionics.PsionicPowerFunction
 {
     /// <summary>
     ///     The list of what Components this power removes.
@@ -135,7 +135,7 @@ public sealed partial class RemovePsionicPowerComponents : PsionicPowerFunction
 }
 
 [UsedImplicitly]
-public sealed partial class AddPsionicStatSources : PsionicPowerFunction
+public sealed partial class AddPsionicStatSources : Content.Shared.Abilities.Psionics.PsionicPowerFunction
 {
     /// <summary>
     ///     How much this power will increase or decrease a user's Amplification.
@@ -168,7 +168,7 @@ public sealed partial class AddPsionicStatSources : PsionicPowerFunction
 }
 
 [UsedImplicitly]
-public sealed partial class RemovePsionicStatSources : PsionicPowerFunction
+public sealed partial class RemovePsionicStatSources : Content.Shared.Abilities.Psionics.PsionicPowerFunction
 {
     public override void OnAddPsionic(
         EntityUid uid,
@@ -186,7 +186,7 @@ public sealed partial class RemovePsionicStatSources : PsionicPowerFunction
 }
 
 [UsedImplicitly]
-public sealed partial class PsionicFeedbackPopup : PsionicPowerFunction
+public sealed partial class PsionicFeedbackPopup : Content.Shared.Abilities.Psionics.PsionicPowerFunction
 {
     /// <summary>
     ///     What message will be sent to the player as a Popup.
@@ -219,7 +219,7 @@ public sealed partial class PsionicFeedbackPopup : PsionicPowerFunction
 }
 
 [UsedImplicitly]
-public sealed partial class PsionicFeedbackSelfChat : PsionicPowerFunction
+public sealed partial class PsionicFeedbackSelfChat : Content.Shared.Abilities.Psionics.PsionicPowerFunction
 {
     /// <summary>
     ///     What message will be sent to the player as a Chat message.
@@ -275,7 +275,7 @@ public sealed partial class PsionicFeedbackSelfChat : PsionicPowerFunction
 }
 
 [UsedImplicitly]
-public sealed partial class AddPsionicAssayFeedback : PsionicPowerFunction
+public sealed partial class AddPsionicAssayFeedback : Content.Shared.Abilities.Psionics.PsionicPowerFunction
 {
     /// <summary>
     ///     What message will this power generate when scanned by an Assay user.
@@ -302,7 +302,7 @@ public sealed partial class AddPsionicAssayFeedback : PsionicPowerFunction
 }
 
 [UsedImplicitly]
-public sealed partial class RemoveAssayFeedback : PsionicPowerFunction
+public sealed partial class RemoveAssayFeedback : Content.Shared.Abilities.Psionics.PsionicPowerFunction
 {
     [DataField]
     public string AssayFeedback = "";
@@ -326,7 +326,7 @@ public sealed partial class RemoveAssayFeedback : PsionicPowerFunction
 }
 
 [UsedImplicitly]
-public sealed partial class AddPsionicPsychognomicDescriptors : PsionicPowerFunction
+public sealed partial class AddPsionicPsychognomicDescriptors : Content.Shared.Abilities.Psionics.PsionicPowerFunction
 {
     [DataField]
     public string PsychognomicDescriptor = "";
@@ -351,7 +351,7 @@ public sealed partial class AddPsionicPsychognomicDescriptors : PsionicPowerFunc
 }
 
 [UsedImplicitly]
-public sealed partial class RemovePsionicPsychognomicDescriptors : PsionicPowerFunction
+public sealed partial class RemovePsionicPsychognomicDescriptors : Content.Shared.Abilities.Psionics.PsionicPowerFunction
 {
     [DataField]
     public string PsychognomicDescriptor = "";
@@ -375,7 +375,7 @@ public sealed partial class RemovePsionicPsychognomicDescriptors : PsionicPowerF
 }
 
 [UsedImplicitly]
-public sealed partial class PsionicModifyPowerSlots : PsionicPowerFunction
+public sealed partial class PsionicModifyPowerSlots : Content.Shared.Abilities.Psionics.PsionicPowerFunction
 {
     [DataField]
     public int PowerSlotsModifier;
@@ -394,7 +394,7 @@ public sealed partial class PsionicModifyPowerSlots : PsionicPowerFunction
 }
 
 [UsedImplicitly]
-public sealed partial class PsionicModifyFamiliarLimit : PsionicPowerFunction
+public sealed partial class PsionicModifyFamiliarLimit : Content.Shared.Abilities.Psionics.PsionicPowerFunction
 {
     [DataField]
     public int FamiliarLimitModifier;
@@ -414,7 +414,7 @@ public sealed partial class PsionicModifyFamiliarLimit : PsionicPowerFunction
 }
 
 [UsedImplicitly]
-public sealed partial class PsionicModifyRemovable : PsionicPowerFunction
+public sealed partial class PsionicModifyRemovable : Content.Shared.Abilities.Psionics.PsionicPowerFunction
 {
     [DataField]
     public bool Removable;
@@ -434,7 +434,7 @@ public sealed partial class PsionicModifyRemovable : PsionicPowerFunction
 }
 
 [UsedImplicitly]
-public sealed partial class PsionicModifyMana : PsionicPowerFunction
+public sealed partial class PsionicModifyMana : Content.Shared.Abilities.Psionics.PsionicPowerFunction
 {
     [DataField]
     public float MaxManaModifier;
@@ -462,7 +462,7 @@ public sealed partial class PsionicModifyMana : PsionicPowerFunction
 }
 
 [UsedImplicitly]
-public sealed partial class PsionicModifyGlimmer : PsionicPowerFunction
+public sealed partial class PsionicModifyGlimmer : Content.Shared.Abilities.Psionics.PsionicPowerFunction
 {
     [DataField]
     public int GlimmerModifier;
@@ -483,7 +483,7 @@ public sealed partial class PsionicModifyGlimmer : PsionicPowerFunction
 }
 
 [UsedImplicitly]
-public sealed partial class PsionicChangePowerPool : PsionicPowerFunction
+public sealed partial class PsionicChangePowerPool : Content.Shared.Abilities.Psionics.PsionicPowerFunction
 {
     [DataField]
     public ProtoId<WeightedRandomPrototype> PowerPool = "RandomPsionicPowerPool";
@@ -503,7 +503,7 @@ public sealed partial class PsionicChangePowerPool : PsionicPowerFunction
 }
 
 [UsedImplicitly]
-public sealed partial class PsionicAddAvailablePowers : PsionicPowerFunction
+public sealed partial class PsionicAddAvailablePowers : Content.Shared.Abilities.Psionics.PsionicPowerFunction
 {
     /// <summary>
     ///     I can't validate these using this method. So this is a string.
@@ -534,7 +534,7 @@ public sealed partial class PsionicAddAvailablePowers : PsionicPowerFunction
 }
 
 [UsedImplicitly]
-public sealed partial class PsionicRemoveAvailablePowers : PsionicPowerFunction
+public sealed partial class PsionicRemoveAvailablePowers : Content.Shared.Abilities.Psionics.PsionicPowerFunction
 {
     /// <summary>
     ///     I can't validate these using this method. So this is a string.
@@ -557,7 +557,7 @@ public sealed partial class PsionicRemoveAvailablePowers : PsionicPowerFunction
 }
 
 [UsedImplicitly]
-public sealed partial class PsionicModifyRollChances : PsionicPowerFunction
+public sealed partial class PsionicModifyRollChances : Content.Shared.Abilities.Psionics.PsionicPowerFunction
 {
     [DataField]
     public float BaselinePowerCostModifier;

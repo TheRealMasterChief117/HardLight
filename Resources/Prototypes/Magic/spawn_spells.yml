@@ -477,4 +477,3 @@
     icon:
       sprite: Objects/Magic/magicactions.rsi
       state: spell_default
-    event: !type:InstantActionEvent

@@ -112,7 +112,7 @@ public sealed partial class AntagSelectionSystem
 
         var rawCount = (poolSize - countOffset) / def.PlayerRatio;
         var result = Math.Clamp(rawCount, def.Min, def.Max);
-        
+
         Log.Info($"GetTargetAntagCount Debug - PoolSize: {poolSize}, CountOffset: {countOffset}, RawCount: {rawCount}, Min: {def.Min}, Max: {def.Max}, PlayerRatio: {def.PlayerRatio}, Result: {result}");
 
         return result;

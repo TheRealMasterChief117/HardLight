@@ -1,4 +1,4 @@
-﻿#MARK: Wizard antag spell
+#MARK: Wizard antag spell
 - type: entity
   id: ActionSpawnMagicarpSpell
   name: Summon Magicarp

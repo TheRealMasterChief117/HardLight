@@ -47,7 +47,7 @@
     - Wallmount
 
 - type: entity
-  # abstract: true
+  # abstract: true  Hardlight change 
   parent: WeaponEnergyTurretControlPanelFrame
   id: WeaponEnergyTurretStationControlPanelBase
   name: sentry turret control panel

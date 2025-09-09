@@ -94,10 +94,3 @@
   storage:
     back:
     - WeaponShotgunSawn
-
-#- type: loadout
-#  id: MercenaryVortexLoadout
-#  price: 25000
-#  storage:
-#    back:
-#    - WeaponShotgunVortex

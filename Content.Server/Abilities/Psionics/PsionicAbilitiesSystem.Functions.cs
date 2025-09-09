@@ -31,7 +31,7 @@ public sealed partial class AddPsionicActions : PsionicPowerFunction
         ISharedPlayerManager playerManager,
         ILocalizationManager loc,
         PsionicComponent psionicComponent,
-        Content.Shared.Abilities.Psionics.PsionicPowerPrototype proto)
+        Content.Shared.Abilities.Psionics.Content.Shared.Abilities.Psionics.PsionicPowerPrototype proto)
     {
         var actions = entityManager.System<SharedActionsSystem>();
         foreach (var id in Actions)
@@ -60,7 +60,7 @@ public sealed partial class RemovePsionicActions : PsionicPowerFunction
         ISharedPlayerManager playerManager,
         ILocalizationManager loc,
         PsionicComponent psionicComponent,
-        Content.Shared.Abilities.Psionics.PsionicPowerPrototype proto)
+        Content.Shared.Abilities.Psionics.Content.Shared.Abilities.Psionics.PsionicPowerPrototype proto)
     {
         var actions = entityManager.System<SharedActionsSystem>();
         if (psionicComponent.Actions is null
@@ -96,7 +96,7 @@ public sealed partial class AddPsionicPowerComponents : PsionicPowerFunction
         ISharedPlayerManager playerManager,
         ILocalizationManager loc,
         PsionicComponent psionicComponent,
-        PsionicPowerPrototype proto)
+        Content.Shared.Abilities.Psionics.PsionicPowerPrototype proto)
     {
         foreach (var entry in Components.Values)
         {
@@ -127,7 +127,7 @@ public sealed partial class RemovePsionicPowerComponents : PsionicPowerFunction
         ISharedPlayerManager playerManager,
         ILocalizationManager loc,
         PsionicComponent psionicComponent,
-        PsionicPowerPrototype proto)
+        Content.Shared.Abilities.Psionics.PsionicPowerPrototype proto)
     {
         foreach (var (name, _) in Components)
             entityManager.RemoveComponentDeferred(uid, factory.GetComponent(name).GetType());
@@ -157,7 +157,7 @@ public sealed partial class AddPsionicStatSources : PsionicPowerFunction
         ISharedPlayerManager playerManager,
         ILocalizationManager loc,
         PsionicComponent psionicComponent,
-        PsionicPowerPrototype proto)
+        Content.Shared.Abilities.Psionics.PsionicPowerPrototype proto)
     {
         if (AmplificationModifier != 0)
             psionicComponent.AmplificationSources.Add(proto.Name, AmplificationModifier);
@@ -178,7 +178,7 @@ public sealed partial class RemovePsionicStatSources : PsionicPowerFunction
         ISharedPlayerManager playerManager,
         ILocalizationManager loc,
         PsionicComponent psionicComponent,
-        PsionicPowerPrototype proto)
+        Content.Shared.Abilities.Psionics.PsionicPowerPrototype proto)
     {
         psionicComponent.AmplificationSources.Remove(proto.Name);
         psionicComponent.DampeningSources.Remove(proto.Name);
@@ -206,7 +206,7 @@ public sealed partial class PsionicFeedbackPopup : PsionicPowerFunction
         ISharedPlayerManager playerManager,
         ILocalizationManager loc,
         PsionicComponent psionicComponent,
-        PsionicPowerPrototype proto)
+        Content.Shared.Abilities.Psionics.PsionicPowerPrototype proto)
     {
         var popups = entityManager.System<SharedPopupSystem>();
         if (playerManager.TryGetSessionByEntity(uid, out var session)
@@ -255,7 +255,7 @@ public sealed partial class PsionicFeedbackSelfChat : PsionicPowerFunction
         ISharedPlayerManager playerManager,
         ILocalizationManager loc,
         PsionicComponent psionicComponent,
-        PsionicPowerPrototype proto)
+        Content.Shared.Abilities.Psionics.PsionicPowerPrototype proto)
     {
         var chatManager = IoCManager.Resolve<IChatManager>();
         if (playerManager.TryGetSessionByEntity(uid, out var session)
@@ -292,7 +292,7 @@ public sealed partial class AddPsionicAssayFeedback : PsionicPowerFunction
         ISharedPlayerManager playerManager,
         ILocalizationManager loc,
         PsionicComponent psionicComponent,
-        PsionicPowerPrototype proto)
+        Content.Shared.Abilities.Psionics.PsionicPowerPrototype proto)
     {
         if (AssayFeedback is "")
             return;
@@ -315,7 +315,7 @@ public sealed partial class RemoveAssayFeedback : PsionicPowerFunction
         ISharedPlayerManager playerManager,
         ILocalizationManager loc,
         PsionicComponent psionicComponent,
-        PsionicPowerPrototype proto)
+        Content.Shared.Abilities.Psionics.PsionicPowerPrototype proto)
     {
         if (AssayFeedback is ""
             || !psionicComponent.AssayFeedback.Contains(AssayFeedback))
@@ -339,7 +339,7 @@ public sealed partial class AddPsionicPsychognomicDescriptors : PsionicPowerFunc
         ISharedPlayerManager playerManager,
         ILocalizationManager loc,
         PsionicComponent psionicComponent,
-        PsionicPowerPrototype proto)
+        Content.Shared.Abilities.Psionics.PsionicPowerPrototype proto)
     {
         // It is entirely intended that this doesn't include a Contains check.
         // The descriptors list allows duplicates, and will only ever pick one anyway.
@@ -364,7 +364,7 @@ public sealed partial class RemovePsionicPsychognomicDescriptors : PsionicPowerF
         ISharedPlayerManager playerManager,
         ILocalizationManager loc,
         PsionicComponent psionicComponent,
-        PsionicPowerPrototype proto)
+        Content.Shared.Abilities.Psionics.PsionicPowerPrototype proto)
     {
         if (PsychognomicDescriptor is ""
             || !psionicComponent.PsychognomicDescriptors.Contains(PsychognomicDescriptor))
@@ -387,7 +387,7 @@ public sealed partial class PsionicModifyPowerSlots : PsionicPowerFunction
         ISharedPlayerManager playerManager,
         ILocalizationManager loc,
         PsionicComponent psionicComponent,
-        PsionicPowerPrototype proto)
+        Content.Shared.Abilities.Psionics.PsionicPowerPrototype proto)
     {
         psionicComponent.PowerSlots += PowerSlotsModifier;
     }
@@ -407,7 +407,7 @@ public sealed partial class PsionicModifyFamiliarLimit : PsionicPowerFunction
         ISharedPlayerManager playerManager,
         ILocalizationManager loc,
         PsionicComponent psionicComponent,
-        PsionicPowerPrototype proto)
+        Content.Shared.Abilities.Psionics.PsionicPowerPrototype proto)
     {
         psionicComponent.FamiliarLimit += FamiliarLimitModifier;
     }
@@ -427,7 +427,7 @@ public sealed partial class PsionicModifyRemovable : PsionicPowerFunction
         ISharedPlayerManager playerManager,
         ILocalizationManager loc,
         PsionicComponent psionicComponent,
-        PsionicPowerPrototype proto)
+        Content.Shared.Abilities.Psionics.PsionicPowerPrototype proto)
     {
         psionicComponent.Removable = Removable;
     }
@@ -453,7 +453,7 @@ public sealed partial class PsionicModifyMana : PsionicPowerFunction
         ISharedPlayerManager playerManager,
         ILocalizationManager loc,
         PsionicComponent psionicComponent,
-        PsionicPowerPrototype proto)
+        Content.Shared.Abilities.Psionics.PsionicPowerPrototype proto)
     {
         psionicComponent.MaxMana += MaxManaModifier;
         psionicComponent.ManaGain += ManaGainModifier;
@@ -475,7 +475,7 @@ public sealed partial class PsionicModifyGlimmer : PsionicPowerFunction
         ISharedPlayerManager playerManager,
         ILocalizationManager loc,
         PsionicComponent psionicComponent,
-        PsionicPowerPrototype proto)
+        Content.Shared.Abilities.Psionics.PsionicPowerPrototype proto)
     {
         var glimmerSystem = entityManager.System<GlimmerSystem>();
         glimmerSystem.Glimmer += GlimmerModifier;
@@ -496,7 +496,7 @@ public sealed partial class PsionicChangePowerPool : PsionicPowerFunction
         ISharedPlayerManager playerManager,
         ILocalizationManager loc,
         PsionicComponent psionicComponent,
-        PsionicPowerPrototype proto)
+        Content.Shared.Abilities.Psionics.PsionicPowerPrototype proto)
     {
         psionicComponent.PowerPool = PowerPool;
     }
@@ -522,10 +522,10 @@ public sealed partial class PsionicAddAvailablePowers : PsionicPowerFunction
         ISharedPlayerManager playerManager,
         ILocalizationManager loc,
         PsionicComponent psionicComponent,
-        PsionicPowerPrototype proto)
+        Content.Shared.Abilities.Psionics.PsionicPowerPrototype proto)
     {
         var protoMan = IoCManager.Resolve<IPrototypeManager>();
-        if (!protoMan.HasIndex<PsionicPowerPrototype>(PowerPrototype)
+        if (!protoMan.HasIndex<Content.Shared.Abilities.Psionics.PsionicPowerPrototype>(PowerPrototype)
             || psionicComponent.AvailablePowers.ContainsKey(PowerPrototype))
             return;
 
@@ -550,7 +550,7 @@ public sealed partial class PsionicRemoveAvailablePowers : PsionicPowerFunction
         ISharedPlayerManager playerManager,
         ILocalizationManager loc,
         PsionicComponent psionicComponent,
-        PsionicPowerPrototype proto)
+        Content.Shared.Abilities.Psionics.PsionicPowerPrototype proto)
     {
         psionicComponent.AvailablePowers.Remove(PowerPrototype);
     }
@@ -573,7 +573,7 @@ public sealed partial class PsionicModifyRollChances : PsionicPowerFunction
         ISharedPlayerManager playerManager,
         ILocalizationManager loc,
         PsionicComponent psionicComponent,
-        PsionicPowerPrototype proto)
+        Content.Shared.Abilities.Psionics.PsionicPowerPrototype proto)
     {
         psionicComponent.BaselinePowerCost += BaselinePowerCostModifier;
         psionicComponent.Chance += BaselineChanceModifier;

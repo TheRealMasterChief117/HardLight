@@ -47,7 +47,7 @@
     - Wallmount
 
 - type: entity
-  abstract: true
+  # abstract: true
   parent: WeaponEnergyTurretControlPanelFrame
   id: WeaponEnergyTurretStationControlPanelBase
   name: sentry turret control panel
@@ -169,8 +169,8 @@
     usesApcPower: true
   - type: ContainerFill
     containers:
-      board:
-      - WeaponEnergyTurretStationControlPanelElectronics
+      tag:
+      - TurretControlElectronics
   - type: Construction
     graph: WeaponEnergyTurretControlPanel
     node: finish

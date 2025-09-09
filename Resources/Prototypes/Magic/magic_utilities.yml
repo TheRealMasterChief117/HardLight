@@ -126,7 +126,7 @@
         true
   - type: NpcFactionMember
     factions:
-    - Nanotrasen
+    - NanoTrasen
 
 - type: entity
   name: queen

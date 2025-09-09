@@ -112,7 +112,7 @@ public sealed class PsionicAbilitiesSystem : EntitySystem
         if (psionic.AvailablePowers.Count <= 0)
             return;
         var proto = _random.Pick(psionic.AvailablePowers);
-        if (!_prototypeManager.TryIndex<Content.Shared.Abilities.Psionics.Content.Shared.Abilities.Psionics.Content.Shared.Abilities.Psionics.PsionicPowerPrototype>(proto, out var newPower))
+    if (!_prototypeManager.TryIndex<Content.Shared.Nyanotrasen.Psionics.PsionicPowerPrototype>(proto, out var newPower))
             return;
 
         InitializePsionicPower(uid, newPower);
@@ -123,7 +123,7 @@ public sealed class PsionicAbilitiesSystem : EntitySystem
     /// </summary>
     public void InitializePsionicPower(EntityUid uid, Content.Shared.Abilities.Psionics.Content.Shared.Abilities.Psionics.Content.Shared.Abilities.Psionics.Content.Shared.Abilities.Psionics.PsionicPowerPrototype proto, PsionicComponent psionic, bool playFeedback = true)
     {
-        if (!_prototypeManager.HasIndex<Content.Shared.Abilities.Psionics.Content.Shared.Abilities.Psionics.Content.Shared.Abilities.Psionics.Content.Shared.Abilities.Psionics.PsionicPowerPrototype>(proto.ID)
+        if (!_prototypeManager.HasIndex<Content.Shared.Nyanotrasen.Psionics.PsionicPowerPrototype>(proto.ID)
             || psionic.ActivePowers.Contains(proto))
             return;
 

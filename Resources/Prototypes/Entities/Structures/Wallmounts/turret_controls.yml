@@ -169,7 +169,7 @@
     usesApcPower: true
   - type: ContainerFill
     containers:
-      tag:
+      tag:  # Hardlight change 
       - TurretControlElectronics
   - type: Construction
     graph: WeaponEnergyTurretControlPanel

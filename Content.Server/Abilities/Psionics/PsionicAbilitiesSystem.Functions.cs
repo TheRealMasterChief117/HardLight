@@ -3,7 +3,8 @@ using Robust.Shared.Prototypes;
 using Robust.Shared.Serialization.Manager;
 using Content.Shared.Actions;
 // using Content.Shared.Psionics;
-using Content.Shared.Nyanotrasen.Psionics;
+// using Content.Shared.Nyanotrasen.Abilities.Psionics;
+using Content.Shared.Abilities.Psionics;
 using Content.Shared.Popups;
 using Content.Shared.Chat;
 using Content.Shared.Psionics.Glimmer;
@@ -14,7 +15,7 @@ using Robust.Shared.Player;
 namespace Content.Server.Abilities.Psionics;
 
 [UsedImplicitly]
-public sealed partial class AddPsionicActions : Content.Shared.Nyanotrasen.Psionics.PsionicPowerFunction
+public sealed partial class AddPsionicActions : Content.Shared.Nyanotrasen.Abilities.Psionics.PsionicPowerFunction
 {
     /// <summary>
     ///     The list of each Action that this power adds in the form of ActionId and ActionEntity
@@ -30,7 +31,7 @@ public sealed partial class AddPsionicActions : Content.Shared.Nyanotrasen.Psion
         ISharedPlayerManager playerManager,
         ILocalizationManager loc,
         PsionicComponent psionicComponent,
-    Content.Shared.Nyanotrasen.Psionics.PsionicPowerPrototype proto)
+    Content.Shared.Abilities.Psionics.PsionicPowerPrototype proto)
     {
         var actions = entityManager.System<SharedActionsSystem>();
         foreach (var id in Actions)
@@ -46,7 +47,7 @@ public sealed partial class AddPsionicActions : Content.Shared.Nyanotrasen.Psion
 }
 
 [UsedImplicitly]
-public sealed partial class RemovePsionicActions : Content.Shared.Nyanotrasen.Psionics.PsionicPowerFunction
+public sealed partial class RemovePsionicActions : Content.Shared.Nyanotrasen.Abilities.Psionics.PsionicPowerFunction
 {
     // As a novelty, this does not require any DataFields.
     // This removes all Actions directly associated with a specific power, which works with our current system of record-keeping
@@ -59,7 +60,7 @@ public sealed partial class RemovePsionicActions : Content.Shared.Nyanotrasen.Ps
         ISharedPlayerManager playerManager,
         ILocalizationManager loc,
         PsionicComponent psionicComponent,
-    Content.Shared.Nyanotrasen.Psionics.PsionicPowerPrototype proto)
+    Content.Shared.Abilities.Psionics.PsionicPowerPrototype proto)
     {
         var actions = entityManager.System<SharedActionsSystem>();
         if (psionicComponent.Actions is null
@@ -95,7 +96,7 @@ public sealed partial class AddPsionicPowerComponents : Content.Shared.Nyanotras
         ISharedPlayerManager playerManager,
         ILocalizationManager loc,
         PsionicComponent psionicComponent,
-    Content.Shared.Nyanotrasen.Psionics.PsionicPowerPrototype proto)
+    Content.Shared.Abilities.Psionics.PsionicPowerPrototype proto)
     {
         foreach (var entry in Components.Values)
         {

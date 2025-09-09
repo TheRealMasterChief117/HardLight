@@ -2,7 +2,7 @@ using JetBrains.Annotations;
 using Robust.Shared.Prototypes;
 using Robust.Shared.Serialization.Manager;
 using Content.Shared.Actions;
-using Content.Shared.Psionics;
+// using Content.Shared.Psionics;
 using Content.Shared.Abilities.Psionics;
 using Content.Shared.Nyanotrasen.Abilities.Psionics;
 using Content.Shared.Popups;

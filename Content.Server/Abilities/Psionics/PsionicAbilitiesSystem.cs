@@ -52,7 +52,7 @@ public sealed class PsionicAbilitiesSystem : EntitySystem
 
         foreach (var protoId in comp.PowersToAdd)
         {
-            if (_prototypeManager.TryIndex<Content.Shared.Nyanotrasen.Psionics.PsionicPowerPrototype>(protoId, out var proto))
+            if (_prototypeManager.TryIndex<Content.Shared.Nyanotrasen.Abilities.Psionics.PsionicPowerPrototype>(protoId, out var proto))
             {
                 if (!psionic.ActivePowers.Contains(proto))
                     InitializePsionicPower(uid, proto, psionic, false);
@@ -102,7 +102,7 @@ public sealed class PsionicAbilitiesSystem : EntitySystem
         var copy = _serialization.CreateCopy(psionic.AvailablePowers, notNullableOverride: true);
         foreach (var weight in copy)
         {
-            if (!_prototypeManager.TryIndex<Content.Shared.Nyanotrasen.Psionics.PsionicPowerPrototype>(weight.Key, out var copyPower)
+            if (!_prototypeManager.TryIndex<Content.Shared.Nyanotrasen.Abilities.Psionics.PsionicPowerPrototype>(weight.Key, out var copyPower)
                 || !psionic.ActivePowers.Contains(copyPower))
                 continue;
 
@@ -112,7 +112,7 @@ public sealed class PsionicAbilitiesSystem : EntitySystem
         if (psionic.AvailablePowers.Count <= 0)
             return;
         var proto = _random.Pick(psionic.AvailablePowers);
-    if (!_prototypeManager.TryIndex<Content.Shared.Nyanotrasen.Psionics.PsionicPowerPrototype>(proto, out var newPower))
+    if (!_prototypeManager.TryIndex<Content.Shared.Nyanotrasen.Abilities.Psionics.PsionicPowerPrototype>(proto, out var newPower))
             return;
 
         InitializePsionicPower(uid, newPower);
@@ -121,7 +121,7 @@ public sealed class PsionicAbilitiesSystem : EntitySystem
     /// <summary>
     ///     Initializes a new Psionic Power on a given entity, assuming the entity does not already have said power initialized.
     /// </summary>
-    public void InitializePsionicPower(EntityUid uid, Content.Shared.Nyanotrasen.Psionics.PsionicPowerPrototype proto, PsionicComponent psionic, bool playFeedback = true)
+    public void InitializePsionicPower(EntityUid uid, Content.Shared.Nyanotrasen.Abilities.Psionics.PsionicPowerPrototype proto, PsionicComponent psionic, bool playFeedback = true)
     {
         if (!_prototypeManager.HasIndex<Content.Shared.Nyanotrasen.Psionics.PsionicPowerPrototype>(proto.ID)
             || psionic.ActivePowers.Contains(proto))
@@ -138,7 +138,7 @@ public sealed class PsionicAbilitiesSystem : EntitySystem
     /// <summary>
     ///     Initializes a new Psionic Power on a given entity, assuming the entity does not already have said power initialized.
     /// </summary>
-    public void InitializePsionicPower(EntityUid uid, Content.Shared.Nyanotrasen.Psionics.PsionicPowerPrototype proto, bool playFeedback = true)
+    public void InitializePsionicPower(EntityUid uid, Content.Shared.Nyanotrasen.Abilities.Psionics.PsionicPowerPrototype proto, bool playFeedback = true)
     {
         EnsureComp<PsionicComponent>(uid, out var psionic);
 
@@ -247,7 +247,7 @@ public sealed class PsionicAbilitiesSystem : EntitySystem
         RefreshPsionicModifiers(uid, psionic);
     }
 
-    public void RemovePsionicPower(EntityUid uid, PsionicComponent psionicComponent, Content.Shared.Nyanotrasen.Psionics.PsionicPowerPrototype psionicPower, bool forced = false)
+    public void RemovePsionicPower(EntityUid uid, PsionicComponent psionicComponent, Content.Shared.Nyanotrasen.Abilities.Psionics.PsionicPowerPrototype psionicPower, bool forced = false)
     {
         if (!psionicComponent.ActivePowers.Contains(psionicPower)
             || !psionicComponent.Removable && !forced)
@@ -257,7 +257,7 @@ public sealed class PsionicAbilitiesSystem : EntitySystem
         psionicComponent.ActivePowers.Remove(psionicPower);
     }
 
-    public void RemovePsionicPower(EntityUid uid, Content.Shared.Nyanotrasen.Psionics.PsionicPowerPrototype psionicPower, bool forced = false)
+    public void RemovePsionicPower(EntityUid uid, Content.Shared.Nyanotrasen.Abilities.Psionics.PsionicPowerPrototype psionicPower, bool forced = false)
     {
         if (!TryComp<PsionicComponent>(uid, out var psionicComponent)
             || !psionicComponent.ActivePowers.Contains(psionicPower)

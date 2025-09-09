@@ -389,7 +389,7 @@
       useDelay: 120
       checkCanInteract: false
       event: !type:SummonPsionicFamiliarActionEvent
-        familiarProto: MobPsionicFamiliarImp
+        familiarProto: MobBatRemilia
         powerName: "Summon Imp"
         checkInsulation: true
         doGlimmerEffects: true
@@ -423,7 +423,7 @@
   categories: [ HideSpawnMenu ]
   components:
     - type: EntityTargetAction
-      icon: { sprite: Interface/Actions/psionics.rsi, state: assay }
+      icon: { sprite: Interface/Actions/psionics.rsi, state: telekinetic_pulse }
       useDelay: 45
       checkCanAccess: false
       range: 2

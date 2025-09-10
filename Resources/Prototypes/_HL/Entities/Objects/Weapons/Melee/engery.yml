@@ -14,7 +14,8 @@
     heavyDamageBaseModifier: 1.50
     damage:
       types:
-        Blunt: 6.5 #its still a metal stick
+        Blunt: 6.5
+        Structural: 10 #its still a metal stick
   - type: ItemToggleMeleeWeapon
     activatedSoundOnSwing:
       path: /Audio/Weapons/eblademiss.ogg
@@ -24,8 +25,8 @@
     activatedDamage:
         types:
             Slash: 2
-            Heat: 14
-            Structural: 25
+            Heat: 20
+            Structural: 50
   - type: ItemToggleActiveSound
     activeSound:
       path: /Audio/Weapons/ebladehum.ogg
@@ -56,7 +57,7 @@
       - state: inhand-right-blade
         shader: unshaded
   - type: IgniteOnMeleeHit
-    fireStacks: 1
+    fireStacks: 5
 
 - type: entity
   name: antique energy halberd
@@ -75,3 +76,51 @@
         map: [ "blade" ]
   - type: IgniteOnMeleeHit
     fireStacks: 0
+
+- type: entity
+  name: cartel energy halberd
+  parent: WeaponEnergyHalberd
+  id: WeaponEnergyHalberdC
+  description: A two-handed polarm, also know as a halberd. Servers as a weapon for the cartel seems to be infused with a purple crystal. Designed and produced by SESWC!
+  components:
+  - type: Sprite
+    sprite: _HL/Objects/Weapons/Melee/e_halberd.rsi
+    layers:
+      - state: e_halberd
+      - state: e_halberd_blade-P
+        color: "#140720"
+        visible: false
+        shader: unshaded
+        map: [ "blade" ]
+  - type: ToggleableLightVisuals
+    spriteLayer: blade
+    inhandVisuals:
+      left:
+      - state: inhand-left-blade-P
+        shader: unshaded
+      right:
+      - state: inhand-right-blade-P
+        shader: unshaded
+  - type: IgniteOnMeleeHit
+    fireStacks: 1
+  - type: MeleeWeapon
+    wideAnimationRotation: -135
+    attackRate: 0.75
+    angle: 80
+    heavyStaminaCost: 10
+    heavyDamageBaseModifier: 1.50
+    damage:
+      types:
+        Blunt: 6.5 #its still a metal stick
+        Structural: 10
+  - type: ItemToggleMeleeWeapon
+    activatedSoundOnSwing:
+      path: /Audio/Weapons/eblademiss.ogg
+      params:
+        volume: 3
+        variation: 0.250
+    activatedDamage:
+        types:
+            Caustic: 10
+            Heat: 15
+            Structural: 50

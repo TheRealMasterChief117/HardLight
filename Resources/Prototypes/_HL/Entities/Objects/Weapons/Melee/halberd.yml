@@ -1,0 +1,19 @@
+
+- type: entity
+  name: halberd
+  parent: UnholyHalberd
+  id: WeaponHalberd
+  description: A polarm with an axe blade, topped with a spike, mounted on a long shaft. Produced by SESWC!
+  components:
+  - type: MeleeRequiresWield
+  - type: MeleeWeapon
+    heavyStaminaCost: 10
+  - type: Clothing
+    sprite: _HL/Objects/Weapons/Melee/halberd.rsi
+    quickEquip: false
+    slots:
+    - back
+  - type: Sprite
+    sprite: _HL/Objects/Weapons/Melee/halberd.rsi
+    state: icon
+

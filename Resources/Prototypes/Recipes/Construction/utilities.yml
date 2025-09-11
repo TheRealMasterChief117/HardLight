@@ -885,6 +885,9 @@
   startNode: start # hardlight change
   targetNode: finish
   category: construction-category-utilities
+  icon:
+    sprite: Structures/Wallmounts/signalscreen.rsi
+    state: signalscreen
   objectType: Structure
   canRotate: true
   placementMode: SnapgridCenter

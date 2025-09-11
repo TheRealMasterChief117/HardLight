@@ -350,7 +350,7 @@
       checkCanInteract: false
       event: !type:DarkSwapActionEvent
         manaCost: 100
-        checkInsulation: false
+        #checkInsulation: false
 
 - type: entity
   id: ActionPyrokineticFlare

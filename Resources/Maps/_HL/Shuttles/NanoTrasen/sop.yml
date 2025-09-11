@@ -1,16 +1,16 @@
 meta:
   format: 7
-  category: Map
+  category: Grid
   engineVersion: 255.0.0
   forkId: ""
   forkVersion: ""
-  time: 09/11/2025 01:12:54
-  entityCount: 5553
-maps:
-- 27
+  time: 09/11/2025 16:03:56
+  entityCount: 5547
+maps: []
 grids:
 - 1
-orphans: []
+orphans:
+- 1
 nullspace: []
 tilemap:
   0: Space
@@ -49,7 +49,7 @@ entities:
       name: NSV Shield of Perseus
     - type: Transform
       pos: -0.53125,-0.515625
-      parent: 27
+      parent: invalid
     - type: MapGrid
       chunks:
         0,0:
@@ -1941,7 +1941,8 @@ entities:
           6,-6:
             1: 56797
           6,-9:
-            1: 56735
+            1: 56731
+            3: 4
           7,-8:
             1: 63245
           7,-7:
@@ -1950,9 +1951,11 @@ entities:
             1: 4401
             0: 17600
           7,-9:
-            1: 56719
+            3: 5
+            1: 56714
           8,-8:
-            1: 29441
+            1: 13057
+            3: 16384
           8,-7:
             1: 65535
           8,-6:
@@ -1969,7 +1972,8 @@ entities:
             1: 12
             0: 2048
           1,-8:
-            1: 64015
+            1: 64013
+            3: 2
           1,-7:
             1: 15
             0: 3840
@@ -1993,7 +1997,8 @@ entities:
           -1,-9:
             2: 32768
           8,-9:
-            1: 4353
+            3: 1
+            1: 4352
           9,-6:
             0: 240
           9,-7:
@@ -2013,10 +2018,12 @@ entities:
           7,-11:
             1: 56591
           8,-10:
-            1: 4353
+            1: 4097
+            3: 256
             2: 136
           7,-10:
-            1: 65421
+            1: 64141
+            3: 1280
           9,-12:
             2: 13889
           9,-11:
@@ -2050,10 +2057,11 @@ entities:
           6,-11:
             1: 56589
           6,-10:
-            1: 65437
+            1: 64413
+            3: 1024
           6,-13:
-            3: 24576
-            4: 96
+            4: 24576
+            5: 96
           7,-13:
             1: 8736
             2: 14
@@ -2176,6 +2184,21 @@ entities:
         - volume: 2500
           temperature: 293.15
           moles:
+          - 21.6852
+          - 81.57766
+          - 0
+          - 0
+          - 0
+          - 0
+          - 0
+          - 0
+          - 0
+          - 0
+          - 0
+          - 0
+        - volume: 2500
+          temperature: 293.15
+          moles:
           - 0
           - 6666.982
           - 0
@@ -2212,18 +2235,6 @@ entities:
       color: '#1B67A5FF'
     - type: TradeStation
     - type: NavMap
-  - uid: 27
-    components:
-    - type: MetaData
-      name: Map Entity
-    - type: Transform
-    - type: Map
-      mapPaused: True
-    - type: PhysicsMap
-    - type: GridTree
-    - type: MovedGrids
-    - type: Broadphase
-    - type: OccluderTree
   - uid: 5407
     mapInit: true
     paused: true
@@ -2254,6 +2265,62 @@ entities:
     - type: InstantAction
       originalIconColor: '#FFFFFFFF'
       container: 5495
+  - uid: 3284
+    mapInit: true
+    paused: true
+    components:
+    - type: Transform
+      parent: 5496
+    - type: InstantAction
+      originalIconColor: '#FFFFFFFF'
+      container: 5496
+  - uid: 3285
+    mapInit: true
+    paused: true
+    components:
+    - type: Transform
+      parent: 5485
+    - type: InstantAction
+      originalIconColor: '#FFFFFFFF'
+      container: 5485
+  - uid: 3288
+    mapInit: true
+    paused: true
+    components:
+    - type: Transform
+      parent: 5490
+    - type: InstantAction
+      originalIconColor: '#FFFFFFFF'
+      container: 5490
+  - uid: 3289
+    mapInit: true
+    paused: true
+    components:
+    - type: Transform
+      parent: 5538
+    - type: InstantAction
+      originalIconColor: '#FFFFFFFF'
+      container: 5538
+- proto: ActionToggleJetpack
+  entities:
+  - uid: 27
+    mapInit: true
+    paused: true
+    components:
+    - type: Transform
+      parent: 5496
+    - type: InstantAction
+      originalIconColor: '#FFFFFFFF'
+      container: 5496
+  - uid: 3287
+    mapInit: true
+    paused: true
+    components:
+    - type: Transform
+      parent: 5490
+    - type: InstantAction
+      originalIconColor: '#FFFFFFFF'
+      container: 5490
 - proto: ActionToggleLight
   entities:
   - uid: 2594
@@ -2779,7 +2846,7 @@ entities:
       pos: 30.5,-16.5
       parent: 1
     - type: Door
-      secondsUntilStateChange: -41269.996
+      secondsUntilStateChange: -42010.406
       state: Opening
     - type: DeviceLinkSource
       lastSignals:
@@ -13512,112 +13579,6 @@ entities:
           priority: 0
           component: ClothingSpeedModifier
         title: null
-- proto: ClothingOuterHardsuitNT
-  entities:
-  - uid: 5025
-    components:
-    - type: Transform
-      parent: 4868
-    - type: GroupExamine
-      group:
-      - hoverMessage: ""
-        contextText: verb-examine-group-other
-        icon: /Textures/Interface/examine-star.png
-        components:
-        - Armor
-        - ClothingSpeedModifier
-        entries:
-        - message: >-
-            It provides the following protection:
-
-            - [color=yellow]Blunt[/color] damage reduced by [color=lightblue]50%[/color].
-
-            - [color=yellow]Slash[/color] damage reduced by [color=lightblue]50%[/color].
-
-            - [color=yellow]Piercing[/color] damage reduced by [color=lightblue]50%[/color].
-
-            - [color=yellow]Heat[/color] damage reduced by [color=lightblue]50%[/color].
-
-            - [color=yellow]Cold[/color] damage reduced by [color=lightblue]50%[/color].
-
-            - [color=yellow]Shock[/color] damage reduced by [color=lightblue]50%[/color].
-
-            - [color=yellow]Radiation[/color] damage reduced by [color=lightblue]50%[/color].
-
-            - [color=yellow]Caustic[/color] damage reduced by [color=lightblue]50%[/color].
-
-            - [color=violet]Infection[/color] chance reduced by [color=lightblue]75%[/color].
-
-            - [color=orange]Explosion[/color] damage reduced by [color=lightblue]50%[/color].
-          priority: 0
-          component: Armor
-        title: null
-    - type: Physics
-      canCollide: False
-    - type: InsideEntityStorage
-  - uid: 5450
-    components:
-    - type: Transform
-      parent: 5446
-    - type: Physics
-      canCollide: False
-    - type: InsideEntityStorage
-  - uid: 5486
-    components:
-    - type: Transform
-      parent: 5482
-    - type: Physics
-      canCollide: False
-    - type: InsideEntityStorage
-  - uid: 5492
-    components:
-    - type: Transform
-      parent: 5488
-    - type: Physics
-      canCollide: False
-    - type: InsideEntityStorage
-  - uid: 5498
-    components:
-    - type: Transform
-      parent: 5494
-    - type: Physics
-      canCollide: False
-    - type: InsideEntityStorage
-  - uid: 5503
-    components:
-    - type: Transform
-      parent: 5499
-    - type: Physics
-      canCollide: False
-    - type: InsideEntityStorage
-  - uid: 5509
-    components:
-    - type: Transform
-      parent: 5505
-    - type: Physics
-      canCollide: False
-    - type: InsideEntityStorage
-  - uid: 5516
-    components:
-    - type: Transform
-      parent: 5512
-    - type: Physics
-      canCollide: False
-    - type: InsideEntityStorage
-  - uid: 5521
-    components:
-    - type: Transform
-      parent: 5517
-    - type: Physics
-      canCollide: False
-    - type: InsideEntityStorage
-  - uid: 5536
-    components:
-    - type: Transform
-      parent: 5535
-    - type: Physics
-      canCollide: False
-    - type: InsideEntityStorage
 - proto: ClothingShoesBootsMag
   entities:
   - uid: 5026
@@ -13680,15 +13641,6 @@ entities:
     components:
     - type: Transform
       parent: 5517
-    - type: Physics
-      canCollide: False
-    - type: InsideEntityStorage
-- proto: ClothingShoesBootsMagAdv
-  entities:
-  - uid: 5539
-    components:
-    - type: Transform
-      parent: 5535
     - type: Physics
       canCollide: False
     - type: InsideEntityStorage
@@ -14095,7 +14047,7 @@ entities:
       pos: 26.5,-41.5
       parent: 1
     - type: Door
-      secondsUntilStateChange: -26675.938
+      secondsUntilStateChange: -27416.348
       state: Opening
   - uid: 5231
     components:
@@ -14103,7 +14055,7 @@ entities:
       pos: 28.5,-41.5
       parent: 1
     - type: Door
-      secondsUntilStateChange: -26673.97
+      secondsUntilStateChange: -27414.38
       state: Opening
   - uid: 5232
     components:
@@ -17491,7 +17443,7 @@ entities:
       pos: 22.5,-38.5
       parent: 1
     - type: Door
-      secondsUntilStateChange: -12569.509
+      secondsUntilStateChange: -13309.919
       state: Closing
     - type: DeviceNetwork
       deviceLists:
@@ -18141,7 +18093,7 @@ entities:
       pos: 27.5,-5.5
       parent: 1
     - type: Door
-      secondsUntilStateChange: -26331.242
+      secondsUntilStateChange: -27071.652
       state: Closing
     - type: Firelock
       emergencyCloseCooldown: 503.8661648
@@ -18316,7 +18268,7 @@ entities:
       pos: 25.5,-14.5
       parent: 1
     - type: Door
-      secondsUntilStateChange: -38573.633
+      secondsUntilStateChange: -39314.043
       state: Closing
     - type: DeviceNetwork
       deviceLists:
@@ -18332,7 +18284,7 @@ entities:
       pos: 25.5,-13.5
       parent: 1
     - type: Door
-      secondsUntilStateChange: -38709.332
+      secondsUntilStateChange: -39449.742
       state: Closing
     - type: DeviceNetwork
       deviceLists:
@@ -18368,7 +18320,7 @@ entities:
       pos: 25.5,-10.5
       parent: 1
     - type: Door
-      secondsUntilStateChange: -14613.055
+      secondsUntilStateChange: -15353.465
       state: Closing
     - type: DeviceNetwork
       deviceLists:
@@ -28798,15 +28750,37 @@ entities:
     components:
     - type: Transform
       parent: 5488
+    - type: GasTank
+      toggleActionEntity: 3288
+    - type: Jetpack
+      toggleActionEntity: 3287
     - type: Physics
       canCollide: False
+    - type: ActionsContainer
+    - type: ContainerContainer
+      containers:
+        actions: !type:Container
+          ents:
+          - 3287
+          - 3288
     - type: InsideEntityStorage
   - uid: 5496
     components:
     - type: Transform
       parent: 5494
+    - type: GasTank
+      toggleActionEntity: 3284
+    - type: Jetpack
+      toggleActionEntity: 27
     - type: Physics
       canCollide: False
+    - type: ActionsContainer
+    - type: ContainerContainer
+      containers:
+        actions: !type:Container
+          ents:
+          - 27
+          - 3284
     - type: InsideEntityStorage
   - uid: 5502
     components:
@@ -29289,8 +29263,16 @@ entities:
     components:
     - type: Transform
       parent: 5482
+    - type: GasTank
+      toggleActionEntity: 3285
     - type: Physics
       canCollide: False
+    - type: ActionsContainer
+    - type: ContainerContainer
+      containers:
+        actions: !type:Container
+          ents:
+          - 3285
     - type: InsideEntityStorage
   - uid: 5491
     components:
@@ -29346,8 +29328,16 @@ entities:
     components:
     - type: Transform
       parent: 5535
+    - type: GasTank
+      toggleActionEntity: 3289
     - type: Physics
       canCollide: False
+    - type: ActionsContainer
+    - type: ContainerContainer
+      containers:
+        actions: !type:Container
+          ents:
+          - 3289
     - type: InsideEntityStorage
 - proto: NTAirlock
   entities:
@@ -29490,7 +29480,7 @@ entities:
       pos: 31.5,-28.5
       parent: 1
     - type: Door
-      secondsUntilStateChange: -24093.346
+      secondsUntilStateChange: -24833.756
       state: Opening
     - type: DeviceLinkSource
       lastSignals:
@@ -29526,7 +29516,7 @@ entities:
       pos: 13.5,-8.5
       parent: 1
     - type: Door
-      secondsUntilStateChange: -25480.377
+      secondsUntilStateChange: -26220.787
       state: Opening
     - type: DeviceLinkSource
       lastSignals:
@@ -29658,7 +29648,7 @@ entities:
       pos: 25.5,-44.5
       parent: 1
     - type: Door
-      secondsUntilStateChange: -27787.404
+      secondsUntilStateChange: -28527.814
       state: Opening
     - type: DeviceLinkSource
       lastSignals:
@@ -32582,8 +32572,8 @@ entities:
         immutable: False
         temperature: 293.14923
         moles:
-        - 1.7459903
-        - 6.568249
+        - 1.8856695
+        - 7.0937095
         - 0
         - 0
         - 0
@@ -32600,10 +32590,9 @@ entities:
           showEnts: False
           occludes: True
           ents:
-          - 5024
           - 5026
-          - 5025
           - 5021
+          - 5024
   - uid: 5446
     components:
     - type: Transform
@@ -32615,8 +32604,8 @@ entities:
         immutable: False
         temperature: 293.14923
         moles:
-        - 1.7459903
-        - 6.568249
+        - 1.8856695
+        - 7.0937095
         - 0
         - 0
         - 0
@@ -32633,10 +32622,9 @@ entities:
           showEnts: False
           occludes: True
           ents:
-          - 5448
-          - 5450
-          - 5449
           - 5447
+          - 5449
+          - 5448
   - uid: 5482
     components:
     - type: Transform
@@ -32648,8 +32636,8 @@ entities:
         immutable: False
         temperature: 293.14923
         moles:
-        - 1.7459903
-        - 6.568249
+        - 1.8856695
+        - 7.0937095
         - 0
         - 0
         - 0
@@ -32666,10 +32654,9 @@ entities:
           showEnts: False
           occludes: True
           ents:
-          - 5484
-          - 5486
           - 5485
           - 5483
+          - 5484
   - uid: 5488
     components:
     - type: Transform
@@ -32681,8 +32668,8 @@ entities:
         immutable: False
         temperature: 293.14923
         moles:
-        - 1.7459903
-        - 6.568249
+        - 1.8856695
+        - 7.0937095
         - 0
         - 0
         - 0
@@ -32700,9 +32687,8 @@ entities:
           occludes: True
           ents:
           - 5490
-          - 5492
-          - 5491
           - 5489
+          - 5491
   - uid: 5494
     components:
     - type: Transform
@@ -32714,8 +32700,8 @@ entities:
         immutable: False
         temperature: 293.14923
         moles:
-        - 1.7459903
-        - 6.568249
+        - 1.8856695
+        - 7.0937095
         - 0
         - 0
         - 0
@@ -32732,10 +32718,9 @@ entities:
           showEnts: False
           occludes: True
           ents:
-          - 5495
           - 5496
-          - 5498
           - 5497
+          - 5495
   - uid: 5499
     components:
     - type: Transform
@@ -32747,8 +32732,8 @@ entities:
         immutable: False
         temperature: 293.14923
         moles:
-        - 1.7459903
-        - 6.568249
+        - 1.8856695
+        - 7.0937095
         - 0
         - 0
         - 0
@@ -32765,10 +32750,9 @@ entities:
           showEnts: False
           occludes: True
           ents:
-          - 5503
           - 5500
-          - 5502
           - 5501
+          - 5502
   - uid: 5505
     components:
     - type: Transform
@@ -32780,8 +32764,8 @@ entities:
         immutable: False
         temperature: 293.14923
         moles:
-        - 1.7459903
-        - 6.568249
+        - 1.8856695
+        - 7.0937095
         - 0
         - 0
         - 0
@@ -32798,10 +32782,9 @@ entities:
           showEnts: False
           occludes: True
           ents:
-          - 5507
-          - 5509
-          - 5508
           - 5506
+          - 5508
+          - 5507
   - uid: 5512
     components:
     - type: Transform
@@ -32813,8 +32796,8 @@ entities:
         immutable: False
         temperature: 293.14923
         moles:
-        - 1.7459903
-        - 6.568249
+        - 1.8856695
+        - 7.0937095
         - 0
         - 0
         - 0
@@ -32831,10 +32814,9 @@ entities:
           showEnts: False
           occludes: True
           ents:
-          - 5514
-          - 5516
-          - 5515
           - 5513
+          - 5515
+          - 5514
   - uid: 5517
     components:
     - type: Transform
@@ -32846,8 +32828,8 @@ entities:
         immutable: False
         temperature: 293.14923
         moles:
-        - 1.7459903
-        - 6.568249
+        - 1.8856695
+        - 7.0937095
         - 0
         - 0
         - 0
@@ -32864,25 +32846,22 @@ entities:
           showEnts: False
           occludes: True
           ents:
-          - 5519
-          - 5521
-          - 5520
           - 5518
+          - 5520
+          - 5519
   - uid: 5535
     components:
     - type: Transform
       pos: 34.5,-28.5
       parent: 1
-    - type: Lock
-      locked: False
     - type: EntityStorage
       air:
         volume: 200
         immutable: False
         temperature: 293.14923
         moles:
-        - 1.7459903
-        - 6.568249
+        - 1.8856695
+        - 7.0937095
         - 0
         - 0
         - 0
@@ -32899,10 +32878,8 @@ entities:
           showEnts: False
           occludes: True
           ents:
-          - 5537
-          - 5539
-          - 5536
           - 5538
+          - 5537
 - proto: SuitStorageWallmountEVAEmergency
   entities:
   - uid: 5605
@@ -38403,7 +38380,7 @@ entities:
       lastSignals:
         DoorStatus: True
     - type: Door
-      secondsUntilStateChange: -13335.309
+      secondsUntilStateChange: -14075.719
       state: Opening
     - type: Airlock
       autoClose: False

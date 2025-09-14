@@ -98,17 +98,13 @@
         state: SyndQuad
   - type: IntrinsicRadioTransmitter
     channels:
-    - Security
     - Binary
     - Common
-    - Science
     - Syndicate
   - type: ActiveRadio
     channels:
-    - Security
     - Binary
     - Common
-    - Science
     - Syndicate
   - type: NpcFactionMember
     factions:
@@ -124,7 +120,7 @@
     hasMindState: SyndQuadl
     noMindState: SyndQuadr
   - type: AccessReader
-    access: [["NuclearOperative"], ["SyndicateAgent"], ["Security"], ["Armory"], ["Command"], ["Mercenary"]]
+    access: [["NuclearOperative"], ["SyndicateAgent"], ["Science"], ["Mercenary"]]
   - type: BorgTransponder
     sprite:
       sprite: Floof/Mobs/Silicon/quad.rsi

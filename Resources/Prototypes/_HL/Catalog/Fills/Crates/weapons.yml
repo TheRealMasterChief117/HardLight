@@ -2,7 +2,7 @@
   id: CrateArmoryShotgunVortex
   parent: CrateFirearmsSecure
   name: vortex-12 shotgun crate
-  description: Contains two loss or stolen Vortex-12 shotguns. Probably was already wrote off in taxs. Requires Armory access to open.
+  description: Contains two loss or stolen Vortex-12 shotguns. Probably was already wrote off in taxes. Requires Armory access to open.
   components:
   - type: StorageFill
     contents:

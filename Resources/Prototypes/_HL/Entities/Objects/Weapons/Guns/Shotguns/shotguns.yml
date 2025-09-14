@@ -21,7 +21,7 @@
         Blunt: 8
 
 - type: entity
-  name: SESWC Vortex-12
+  name: Vortex-12
   parent: WeaponShotgunBulldog
   id: WeaponShotgunVortex
   description: Designed by SESWC. An automatic magazine-fed shotgun for close-quarters combat #with an auto magazine ejector

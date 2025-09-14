@@ -66,38 +66,6 @@
         {
             "name": "double_right_broke_curved",
             "directions": 4
-        },
-        {
-            "name": "horns_angular",
-            "directions": 4
-        },
-        {
-            "name": "horns_curled",
-            "directions": 4
-        },
-        {
-            "name": "horns_ram",
-            "directions": 4
-        },
-        {
-            "name": "horns_short",
-            "directions": 4
-        },
-        {
-            "name": "horns_simple",
-            "directions": 4
-        },
-        {
-            "name": "tail_oni_behind",
-            "directions": 4
-        },
-        {
-            "name": "tail_oni_front",
-            "directions": 4
-        },
-        {
-            "name": "tail_oni",
-            "directions": 4
         }
     ]
 }

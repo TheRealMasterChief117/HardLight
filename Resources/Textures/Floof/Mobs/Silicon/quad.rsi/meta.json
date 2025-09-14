@@ -11,6 +11,48 @@
       "name": "quadsprite",
       "directions": 4
     },
+	{
+      "name": "engieborg",
+      "directions": 4
+    },
+	{
+      "name": "engieborgl",
+      "directions": 4
+    },
+	{
+      "name": "engieborgr",
+      "directions": 4
+    },
+	{
+      "name": "engieborg_moving",
+      "directions": 4,
+	  "delays": [
+        [
+          0.2,
+          0.2,
+          0.2,
+          0.2
+        ],
+        [
+          0.2,
+          0.2,
+          0.2,
+          0.2
+        ],
+        [
+          0.2,
+          0.2,
+          0.2,
+          0.2
+        ],
+        [
+          0.2,
+          0.2,
+          0.2,
+          0.2
+        ]
+	  ]
+    },
     {
       "name": "quadspritel",
       "directions": 4

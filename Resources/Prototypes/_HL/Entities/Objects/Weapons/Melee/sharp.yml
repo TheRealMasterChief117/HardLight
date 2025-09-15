@@ -97,3 +97,5 @@
       types:
         Slash: 20
         Structural: 10
+  - type: NFWeaponDetails
+    manufacturer: weapon-details-manufacturer-SESWC-consortium

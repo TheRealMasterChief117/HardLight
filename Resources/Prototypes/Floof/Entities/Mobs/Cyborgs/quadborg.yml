@@ -70,7 +70,6 @@
     interactFailureString: petting-failure-generic-cyborg
     interactSuccessSound:
       path: /Audio/Ambience/Objects/periodic_beep.ogg
-
 - type: entity
   id: SyndiQuad
   parent: [BorgChassisQuad, BaseBorgChassisSyndicate]

@@ -22,7 +22,7 @@
 
 - type: entity
   name: Vortex-12
-  parent: WeaponShotgunBulldog
+  parent: [ WeaponShotgunBulldog, BaseGunMeleeBlunt ]
   id: WeaponShotgunVortex
   description: Designed by SESWC. An automatic magazine-fed shotgun for close-quarters combat #with an auto magazine ejector
   components:
@@ -47,17 +47,16 @@
   - type: AltFireMelee # Not using the gun melee based because this is a different damage type and need different rotation
     attackType: Light
   - type: MeleeRequiresWield
-  - type: MeleeWeapon
-    attackRate: .85
-    damage:
-      types:
-       Blunt: 20
-    angle: 0
-    wideAnimationRotation: 90
-    animation: WeaponArcThrust
-    soundHit:
-      collection: MetalThud
-  - type: DisarmMalus
-    malus: 0.225
+  - type: AmmoCounter
+  - type: GunRequiresWield #remove when inaccuracy on spreads is fixed
+  - type: Gun  # Have to do this to reduce the firerate
+    fireRate: 1.5
+    selectedMode: SemiAuto #bulldog is full auto
+    availableModes:
+    - SemiAuto
+    soundGunshot:
+      path: /Audio/Weapons/Guns/Gunshots/shotgun.ogg
+    soundEmpty:
+      path: /Audio/Weapons/Guns/Empty/empty.ogg
   #- type: ChamberMagazineAmmoProvider
   #  autoEject: true

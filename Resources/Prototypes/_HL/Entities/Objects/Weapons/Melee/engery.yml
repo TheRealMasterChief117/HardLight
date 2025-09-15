@@ -2,7 +2,7 @@
   name: energy halberd
   parent: EnergySwordDouble
   id: WeaponEnergyHalberd
-  description: A polarm handle with an energy-based axe head to it. Produced by SESWC!
+  description: A polarm with an energy-based axe head and spike. Produced by SESWC.
   components:
   - type: ItemToggleSize
     activatedSize: Huge

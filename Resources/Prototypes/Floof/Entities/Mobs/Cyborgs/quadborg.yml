@@ -76,7 +76,6 @@
     stateOn: quadspriteballz
     movementStateOff: quadsprite_moving
     movementStateOn: quadsprite_movingballz
-
 - type: entity
   id: SyndiQuad
   parent: [BorgChassisQuad, BaseBorgChassisSyndicate]
@@ -104,16 +103,14 @@
         state: SyndQuad
   - type: IntrinsicRadioTransmitter
     channels:
-    - Security
+    - Syndicate
     - Binary
     - Common
-    - Science
   - type: ActiveRadio
     channels:
-    - Security
+    - Syndicate
     - Binary
     - Common
-    - Science
   - type: NpcFactionMember
     factions:
     - Syndicate
@@ -123,12 +120,13 @@
       tags:
       - BorgModuleGeneric
       - BorgModuleSecurity
+      - BorgModuleMedical
       - BorgModuleSyndicate
       - BorgModuleSyndicateAssault
     hasMindState: SyndQuadl
     noMindState: SyndQuadr
   - type: AccessReader
-    access: [["NuclearOperative"], ["SyndicateAgent"], ["Security"], ["Armory"], ["Command"], ["Mercenary"]]
+    access: [["NuclearOperative"], ["SyndicateAgent"], ["Mercenary"]]
   - type: BorgTransponder
     sprite:
       sprite: Floof/Mobs/Silicon/quad.rsi
@@ -329,6 +327,7 @@
     stateOn: quadspriteservballz
     movementStateOff: quadspriteserv_moving
     movementStateOn: quadspriteserv_movingballz
+
 
 - type: entity
   id: BorgChassisQuadEngineer

@@ -85,7 +85,7 @@
   name: cartel energy halberd
   parent: WeaponEnergyHalberd
   id: WeaponEnergyHalberdC
-  description: A two-handed polarm, also know as a halberd. Servers as a weapon for the cartel seems to be infused with a purple crystal. Designed and produced by SESWC!
+  description: A two-handed polarm, also know as a halberd. This variant uses a purple focusing crystal, and the branding has been painted over.
   components:
   - type: Sprite
     sprite: _HL/Objects/Weapons/Melee/e_halberd.rsi

@@ -12,7 +12,6 @@
   id: ActionHairball
   name: action-name-hairball
   description: action-description-hairball
-  abstract: true
   components:
   - type: InstantAction
     icon: { sprite: Nyanotrasen/Objects/Specific/Species/felinid.rsi, state: icon }

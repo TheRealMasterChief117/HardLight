@@ -81,6 +81,3 @@ reagent-desc-lipolicide = A powerful toxin that will destroy fat cells, massivel
 
 reagent-name-mechanotoxin = mechanotoxin
 reagent-desc-mechanotoxin = A neurotoxin used as venom by some species of spider. Degrades movement when built up.
-
-reagent-name-ectoplasm = ectoplasm
-reagent-desc-ectoplasm = A viscous, paranormal substance secreted by spirits and ghosts. Highly toxic to the living.

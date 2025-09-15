@@ -76,6 +76,10 @@
         map: [ "blade" ]
   - type: IgniteOnMeleeHit
     fireStacks: 0
+  - type: Reflect # placeholder until I give them a speical thing like Syndicates have and Cartels have
+    reflectProb: .50
+    minReflectProb: .10
+    spread: 75
 
 - type: entity
   name: cartel energy halberd
@@ -102,7 +106,7 @@
       - state: inhand-right-blade-P
         shader: unshaded
   - type: IgniteOnMeleeHit
-    fireStacks: 1
+    fireStacks: 0
   - type: MeleeWeapon
     wideAnimationRotation: -135
     attackRate: 0.75
@@ -121,6 +125,18 @@
         variation: 0.250
     activatedDamage:
         types:
-            Caustic: 10
-            Heat: 15
+            Caustic: 20
             Structural: 50
+  - type: MeleeChemicalInjector
+    solution: Ruin
+    transferAmount: 1.7
+  - type: SolutionContainerManager
+    solutions:
+      Ruin:
+        maxVol: 10
+  - type: SolutionRegeneration
+    solution: Ruin
+    generated:
+      reagents:
+      - ReagentId: Ruin
+        Quantity: 5

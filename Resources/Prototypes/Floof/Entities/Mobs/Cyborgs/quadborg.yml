@@ -70,7 +70,7 @@
     interactFailureString: petting-failure-generic-cyborg
     interactSuccessSound:
       path: /Audio/Ambience/Objects/periodic_beep.ogg
-  
+
 - type: entity
   id: SyndiQuad
   parent: [BorgChassisQuad, BaseBorgChassisSyndicate]
@@ -98,14 +98,14 @@
         state: SyndQuad
   - type: IntrinsicRadioTransmitter
     channels:
+    - Syndicate
     - Binary
     - Common
-    - Syndicate
   - type: ActiveRadio
     channels:
+    - Syndicate
     - Binary
     - Common
-    - Syndicate
   - type: NpcFactionMember
     factions:
     - Syndicate
@@ -115,12 +115,13 @@
       tags:
       - BorgModuleGeneric
       - BorgModuleSecurity
+      - BorgModuleMedical
       - BorgModuleSyndicate
       - BorgModuleSyndicateAssault
     hasMindState: SyndQuadl
     noMindState: SyndQuadr
   - type: AccessReader
-    access: [["NuclearOperative"], ["SyndicateAgent"], ["Science"], ["Mercenary"]]
+    access: [["NuclearOperative"], ["SyndicateAgent"], ["Mercenary"]]
   - type: BorgTransponder
     sprite:
       sprite: Floof/Mobs/Silicon/quad.rsi
@@ -296,7 +297,7 @@
     access: [["Cargo"], ["Service"], ["Command"], ["Research"], ["Maintenance"]]
   - type: SiliconLawProvider
     laws: StationEfficiency
-    
+
 - type: entity
   id: BorgChassisQuadEngineer
   parent: BorgChassisQuad

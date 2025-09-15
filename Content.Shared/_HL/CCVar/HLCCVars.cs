@@ -54,5 +54,5 @@ public sealed class HLCCVars
     /// Enable verbose logging for the persistence system
     /// </summary>
     public static readonly CVarDef<bool> RoundPersistenceDebugLogging =
-        CVarDef.Create("hardlight.round_persistence.debug_logging", true, CVar.SERVERONLY);
+        CVarDef.Create("hardlight.round_persistence.debug_logging", false, CVar.SERVERONLY);
 }

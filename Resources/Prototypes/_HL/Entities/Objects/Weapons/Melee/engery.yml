@@ -58,6 +58,8 @@
         shader: unshaded
   - type: IgniteOnMeleeHit
     fireStacks: 5
+  - type: NFWeaponDetails
+    manufacturer: weapon-details-manufacturer-SESWC-consortium
 
 - type: entity
   name: antique energy halberd

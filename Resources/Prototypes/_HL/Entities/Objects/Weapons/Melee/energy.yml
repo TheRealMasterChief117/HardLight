@@ -9,7 +9,7 @@
   - type: MeleeWeapon
     range: 2
     wideAnimationRotation: -135
-    attackRate: 0.25
+    attackRate: 0.70
     angle: 80
     damage:
       types:
@@ -109,7 +109,7 @@
   - type: MeleeWeapon
     range: 2
     wideAnimationRotation: -135
-    attackRate: 0.25
+    attackRate: 0.70
     angle: 80
     damage:
       types:

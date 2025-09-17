@@ -31,7 +31,8 @@
       params:
         volume: 3
   - type: Reflect # so it doenst inherit the reflect from the Dsword
-    reflectProb: .00
+    reflectProb: .50
+    spread: 75
   - type: Item
     size: Huge
     sprite: _HL/Objects/Weapons/Melee/e_halberd-inhands.rsi
@@ -53,8 +54,8 @@
       right:
       - state: inhand-right-blade
         shader: unshaded
-  - type: IgniteOnMeleeHit
-    fireStacks: 5
+  # - type: IgniteOnMeleeHit
+  #   fireStacks: 0
   - type: NFWeaponDetails
     manufacturer: weapon-details-manufacturer-SESWC-consortium
 
@@ -73,8 +74,8 @@
         visible: false
         shader: unshaded
         map: [ "blade" ]
-  - type: IgniteOnMeleeHit
-    fireStacks: 0
+  # - type: IgniteOnMeleeHit
+  #   fireStacks: 0
   - type: Reflect # placeholder until I give them a speical thing like Syndicates have and Cartels have
     reflectProb: .50
     spread: 75
@@ -103,8 +104,8 @@
       right:
       - state: inhand-right-blade-P
         shader: unshaded
-  - type: IgniteOnMeleeHit
-    fireStacks: 0
+  # - type: IgniteOnMeleeHit
+  #   fireStacks: 0
   - type: MeleeWeapon
     wideAnimationRotation: -135
     attackRate: 0.75
@@ -121,11 +122,12 @@
         variation: 0.250
     activatedDamage:
         types:
-            Caustic: 20
+            Heat: 10
+            Caustic: 5
             Structural: 50
   - type: MeleeChemicalInjector
     solution: Ruin
-    transferAmount: 1.7
+    transferAmount: 0.5
   - type: SolutionContainerManager
     solutions:
       Ruin:

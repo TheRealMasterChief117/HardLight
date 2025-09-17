@@ -423,6 +423,9 @@
   id: ConveyorAssembly
 
 - type: Tag
+  id: CoreTattoo
+
+- type: Tag
   id: CoordinatesDisk
 
 - type: Tag #Ohioans die happy

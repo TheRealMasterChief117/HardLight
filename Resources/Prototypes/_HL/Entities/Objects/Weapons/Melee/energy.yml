@@ -123,7 +123,7 @@
     activatedDamage:
         types:
             Heat: 10
-            Caustic: 5
+            Caustic: 7
             Structural: 50
   - type: MeleeChemicalInjector
     solution: Ruin

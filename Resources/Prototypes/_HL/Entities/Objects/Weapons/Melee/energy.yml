@@ -7,8 +7,9 @@
   - type: ItemToggleSize
     activatedSize: Huge
   - type: MeleeWeapon
+    range: 2
     wideAnimationRotation: -135
-    attackRate: 0.75
+    attackRate: 0.25
     angle: 80
     damage:
       types:
@@ -22,8 +23,7 @@
         variation: 0.250
     activatedDamage:
         types:
-            Slash: 2
-            Heat: 20
+            Heat: 42
             Structural: 50
   - type: ItemToggleActiveSound
     activeSound:
@@ -31,7 +31,7 @@
       params:
         volume: 3
   - type: Reflect # so it doenst inherit the reflect from the Dsword
-    reflectProb: .50
+    reflectProb: .1
     spread: 75
   - type: Item
     size: Huge
@@ -76,9 +76,9 @@
         map: [ "blade" ]
   # - type: IgniteOnMeleeHit
   #   fireStacks: 0
-  - type: Reflect # placeholder until I give them a speical thing like Syndicates have and Cartels have
-    reflectProb: .50
-    spread: 75
+  # - type: Reflect # placeholder until I give them a speical thing like Syndicates have and Cartels have
+  #   reflectProb: .1
+  #   spread: 75
 
 - type: entity
   name: cartel energy halberd
@@ -107,8 +107,9 @@
   # - type: IgniteOnMeleeHit
   #   fireStacks: 0
   - type: MeleeWeapon
+    range: 2
     wideAnimationRotation: -135
-    attackRate: 0.75
+    attackRate: 0.25
     angle: 80
     damage:
       types:
@@ -122,19 +123,5 @@
         variation: 0.250
     activatedDamage:
         types:
-            Heat: 10
-            Caustic: 7
+            Heat: 42
             Structural: 50
-  - type: MeleeChemicalInjector
-    solution: Ruin
-    transferAmount: 0.5
-  - type: SolutionContainerManager
-    solutions:
-      Ruin:
-        maxVol: 10
-  - type: SolutionRegeneration
-    solution: Ruin
-    generated:
-      reagents:
-      - ReagentId: Ruin
-        Quantity: 5

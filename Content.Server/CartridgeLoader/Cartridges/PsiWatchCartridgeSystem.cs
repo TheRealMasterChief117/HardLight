@@ -33,7 +33,7 @@ public sealed class PsiWatchCartridgeSystem : EntitySystem
         var query = EntityQueryEnumerator<PsiWatchCartridgeComponent, CartridgeComponent>();
         while (query.MoveNext(out var uid, out var comp, out var cartridge))
         {
-            if (cartridge.LoaderUid is not {} loader || comp.Station != args.Station)
+            if (cartridge.LoaderUid is not { } loader || comp.Station != args.Station)
                 continue;
 
             UpdateUI((uid, comp), loader);
@@ -49,7 +49,7 @@ public sealed class PsiWatchCartridgeSystem : EntitySystem
     {
         // if the loader is on a grid, update the station
         // if it is off grid use the cached station
-        if (_station.GetOwningStation(loader) is {} station)
+        if (_station.GetOwningStation(loader) is { } station)
             ent.Comp.Station = station;
 
         if (!TryComp<StationRecordsComponent>(ent.Comp.Station, out var records))

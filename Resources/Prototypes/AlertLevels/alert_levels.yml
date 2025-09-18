@@ -26,7 +26,6 @@
       sound: /Audio/Misc/redalert.ogg
       emergencyLightColor: "#F6CCF6"
       color: White
-      emergencyLightColor: White
       forceEnableEmergencyLights: true
       shuttleTime: 600
     yellow:

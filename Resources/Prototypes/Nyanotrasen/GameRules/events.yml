@@ -51,7 +51,7 @@
 - type: entity
   id: NoosphericZap
   parent: BaseGlimmerEvent
-  $ abstract: true
+  # abstract: true
   components:
     - type: GlimmerEvent
     - type: NoosphericZapRule

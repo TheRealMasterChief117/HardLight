@@ -54,6 +54,8 @@ using Robust.Shared.Audio.Systems; // For SharedAudioSystem
 using Content.Server.Administration.Logs; // For IAdminLogManager
 using Content.Shared.Database; // For LogType
 
+// Suppress naming rule for _NF namespace prefix (modding convention)
+#pragma warning disable IDE1006
 namespace Content.Server._NF.Shipyard.Systems;
 
 /// <summary>
@@ -122,8 +124,8 @@ public sealed partial class ShipyardSystem : SharedShipyardSystem
         SubscribeLocalEvent<ShipyardConsoleComponent, BoundUIOpenedEvent>(OnConsoleUIOpened);
         SubscribeLocalEvent<ShipyardConsoleComponent, ShipyardConsoleSellMessage>(OnSellMessage);
         SubscribeLocalEvent<ShipyardConsoleComponent, ShipyardConsolePurchaseMessage>(OnPurchaseMessage);
-        // Ship saving/loading functionality commented out
-        // SubscribeLocalEvent<ShipyardConsoleComponent, ShipyardConsoleLoadMessage>(OnLoadMessage);
+        // Ship saving/loading functionality
+        SubscribeLocalEvent<ShipyardConsoleComponent, ShipyardConsoleLoadMessage>(OnLoadMessage);
         SubscribeLocalEvent<ShipyardConsoleComponent, EntInsertedIntoContainerMessage>(OnItemSlotChanged);
         SubscribeLocalEvent<ShipyardConsoleComponent, EntRemovedFromContainerMessage>(OnItemSlotChanged);
         SubscribeLocalEvent<RoundRestartCleanupEvent>(OnRoundRestart);
@@ -143,9 +145,9 @@ public sealed partial class ShipyardSystem : SharedShipyardSystem
     }
 
     private void OnRoundRestart(RoundRestartCleanupEvent ev)
-        {
-            CleanupShipyard();
-        }
+    {
+        CleanupShipyard();
+    }
 
     private void SetShipyardEnabled(bool value)
     {
@@ -413,8 +415,10 @@ public sealed partial class ShipyardSystem : SharedShipyardSystem
     /// </summary>
     private void MergeMaps(EntityDeserializer deserializer, MapLoadOptions opts, HashSet<EntityUid> merged)
     {
-        if (opts.MergeMap is not {} targetId)
+        if (opts.MergeMap == null)
             return;
+
+        var targetId = opts.MergeMap.Value;
 
         if (!_map.TryGetMap(targetId, out var targetUid))
             throw new Exception($"Target map {targetId} does not exist");
@@ -979,6 +983,20 @@ public sealed partial class ShipyardSystem : SharedShipyardSystem
             };
             RaiseLocalEvent(shipLoadedEvent);
             _sawmill.Info($"Fired ShipLoadedEvent for ship '{shipName}'");
+
+            // If this load originated from a client-side file, notify the client to delete it now
+            if (!string.IsNullOrEmpty(filePath) && playerSession != null)
+            {
+                try
+                {
+                    RaiseNetworkEvent(new Content.Shared.Shuttles.Save.DeleteLocalShipFileMessage(filePath!), playerSession);
+                    _sawmill.Info($"Requested client to delete local ship file '{filePath}' after successful load");
+                }
+                catch (Exception ex)
+                {
+                    _sawmill.Warning($"Failed to send delete local ship file message: {ex}");
+                }
+            }
 
             // Console updates are handled by the calling method (UI feedback)
             // Additional console-specific updates could go here if needed

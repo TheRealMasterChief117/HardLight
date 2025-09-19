@@ -6,10 +6,10 @@
   requirements:
     - !type:RoleTimeRequirement
       role: JobScientist
-      time: 9000 
+      time: 9000
     - !type:DepartmentTimeRequirement
       department: Science
-      time: 12000 
+      time: 12000
     # - !type:CharacterLogicOrRequirement
     #   requirements:
     #     - !type:CharacterSpeciesRequirement
@@ -46,13 +46,15 @@
         baselinePowerCost: 75
         nextPowerCost: 75
         removable: false
-        powerPool: PsychoHistorianPowerPool
+        # powerPool: PsychoHistorianPowerPool
       - type: InnatePsionicPowers
         powersToAdd:
           - MetapsionicPower
           - TelepathyPower
           - MantisSummonBlackBlade
 
+- type: playTimeTracker
+  id: JobForensicMantis
 
 - type: startingGear
   id: ForensicMantisGear

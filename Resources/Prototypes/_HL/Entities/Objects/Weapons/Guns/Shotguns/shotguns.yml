@@ -24,7 +24,7 @@
   name: Vortex-12
   parent: [ WeaponShotgunBulldog, BaseGunMeleeBlunt ]
   id: WeaponShotgunVortex
-  description: Designed by SESWC. An semi-automatic magazine-fed shotgun for close-quarters combat #with an auto magazine ejector
+  description: Designed by SESWC. A semi-automatic magazine-fed shotgun for close-quarters combat #with an auto magazine ejector
   components:
   - type: NFWeaponDetails
     manufacturer: weapon-details-manufacturer-SESWC-consortium

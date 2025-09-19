@@ -83,6 +83,7 @@ public sealed partial class ShipyardSystem : SharedShipyardSystem
     [Dependency] private readonly ITaskManager _taskManager = default!;
     [Dependency] private readonly IResourceManager _resources = default!;
     [Dependency] private readonly IDependencyCollection _dependency = default!; // For EntityDeserializer
+    [Dependency] private readonly Content.Server.Shuttles.Save.ShipSerializationSystem _shipSerialization = default!; // For loading saved ships
 
     public MapId? ShipyardMap { get; private set; }
     private float _shuttleIndex;
@@ -317,7 +318,39 @@ public sealed partial class ShipyardSystem : SharedShipyardSystem
 
         try
         {
-            // Parse YAML data directly (same approach as MapLoaderSystem.TryReadFile)
+            _sawmill.Info($"Step 1: Loading ship 'Wisp' from YAML data");
+
+            // First, try to load using the custom ship serialization system
+            // This handles the ship-specific YAML format that was created by ShipSerializationSystem
+            try
+            {
+                // Try to deserialize as ship data first
+                var shipGridData = _shipSerialization.DeserializeShipGridDataFromYaml(yamlData, Guid.Empty);
+                if (shipGridData != null)
+                {
+                    _sawmill.Info("Successfully parsed YAML as custom ship format");
+                    
+                    // Use the ship serialization system to reconstruct the ship
+                    var shipGridUid = _shipSerialization.ReconstructShipOnMap(shipGridData, map, new System.Numerics.Vector2(offset.X, offset.Y));
+                    
+                    if (EntityManager.TryGetComponent<MapGridComponent>(shipGridUid, out var shipGrid))
+                    {
+                        grid = new Entity<MapGridComponent>(shipGridUid, shipGrid);
+                        _sawmill.Info($"Successfully loaded ship using custom deserializer: {shipGridUid}");
+                        return true;
+                    }
+                }
+            }
+            catch (Exception shipEx)
+            {
+                _sawmill.Error($"Failed to load as custom ship format: {shipEx.Message}");
+                // Fall through to try standard format
+            }
+
+            _sawmill.Error("Failed to load ship from YAML data using existing system");
+            _sawmill.Error("Step 1 failed: Could not load ship from YAML data");
+
+            // Fallback: Parse YAML data directly (same approach as MapLoaderSystem.TryReadFile)
             using var textReader = new StringReader(yamlData);
             var documents = DataNodeParser.ParseYamlStream(textReader).ToArray();
 

@@ -37,7 +37,6 @@ using Robust.Shared.Timing;
 using Robust.Shared.Configuration;
 using Robust.Shared.Utility;
 using System.Numerics;
-using System.Threading;
 
 namespace Content.Server._HL.RoundPersistence.Systems;
 
@@ -68,11 +67,6 @@ public sealed class RoundPersistenceSystem : EntitySystem
     /// </summary>
     private EntityUid? _persistentEntity;
 
-    /// <summary>
-    /// Cancellation for all timers started by this system so we don't fire during teardown/tests.
-    /// </summary>
-    private CancellationTokenSource _timerCts = new();
-
     public override void Initialize()
     {
         base.Initialize();
@@ -102,13 +96,13 @@ public sealed class RoundPersistenceSystem : EntitySystem
         SubscribeLocalEvent<StationRecordsComponent, ComponentShutdown>(OnStationRecordsRemoved);
 
         // Set up periodic UI updates for expeditions to ensure timers work correctly
-    RobustTimer.SpawnRepeating(TimeSpan.FromSeconds(1), () =>
+        RobustTimer.SpawnRepeating(TimeSpan.FromSeconds(1), () =>
         {
             if (!_cfg.GetCVar(HLCCVars.RoundPersistenceEnabled) || !_cfg.GetCVar(HLCCVars.RoundPersistenceExpeditions))
                 return;
 
             UpdateExpeditionUIs();
-    }, _timerCts.Token);
+        }, System.Threading.CancellationToken.None);
 
         _sawmill.Info("Round persistence system initialized");
     }
@@ -144,19 +138,7 @@ public sealed class RoundPersistenceSystem : EntitySystem
     private void OnStationCreated(EntityUid uid, StationDataComponent component, ComponentInit args)
     {
         // Small delay to ensure the station is fully initialized
-        RobustTimer.Spawn(TimeSpan.FromSeconds(1), () =>
-        {
-            if (_timerCts.IsCancellationRequested)
-                return;
-            if (!_cfg.GetCVar(HLCCVars.RoundPersistenceEnabled))
-                return;
-
-            // Guard: station may have been deleted during cleanup/restart
-            if (!EntityManager.EntityExists(uid) || TerminatingOrDeleted(uid) || !HasComp<MetaDataComponent>(uid))
-                return;
-
-            RestoreStationData(uid, component);
-        }, _timerCts.Token);
+        RobustTimer.Spawn(TimeSpan.FromSeconds(1), () => RestoreStationData(uid, component));
     }
 
     /// <summary>
@@ -164,19 +146,7 @@ public sealed class RoundPersistenceSystem : EntitySystem
     /// </summary>
     private void OnShuttleCreated(EntityUid uid, ShuttleComponent component, ComponentInit args)
     {
-        RobustTimer.Spawn(TimeSpan.FromSeconds(0.5f), () =>
-        {
-            if (_timerCts.IsCancellationRequested)
-                return;
-            if (!_cfg.GetCVar(HLCCVars.RoundPersistenceEnabled))
-                return;
-
-            // Guard: shuttle may have been deleted by the time the timer fires
-            if (!EntityManager.EntityExists(uid) || TerminatingOrDeleted(uid) || !HasComp<MetaDataComponent>(uid))
-                return;
-
-            RestoreShuttleData(uid, component);
-        }, _timerCts.Token);
+        RobustTimer.Spawn(TimeSpan.FromSeconds(0.5f), () => RestoreShuttleData(uid, component));
     }
 
     /// <summary>
@@ -199,11 +169,9 @@ public sealed class RoundPersistenceSystem : EntitySystem
         // Station restoration happens after 1000ms, shuttle docking happens during station restoration, so console restoration must happen well after that
         RobustTimer.Spawn(TimeSpan.FromMilliseconds(2000), () =>
         {
-            if (_timerCts.IsCancellationRequested)
-                return;
             Log.Info($"Starting console restoration for {ToPrettyString(uid)}");
             RestoreConsoleExpeditionData(uid, component);
-        }, _timerCts.Token);
+        });
     }    /// <summary>
     /// HARDLIGHT: Restore expedition data directly to console from persistence storage
     /// This method now properly works with station-based expedition data
@@ -491,11 +459,7 @@ public sealed class RoundPersistenceSystem : EntitySystem
         if (_persistentEntity == null || !TryComp<RoundPersistenceComponent>(_persistentEntity.Value, out var persistence))
             return;
 
-        // Guard: Station may already be gone due to round transitions
-        if (!EntityManager.EntityExists(stationUid) || TerminatingOrDeleted(stationUid) || !TryComp<MetaDataComponent>(stationUid, out var stationMeta))
-            return;
-
-        var stationName = stationMeta.EntityName;
+        var stationName = MetaData(stationUid).EntityName;
         _sawmill.Info($"Restoring data for station: {stationName}");
 
         // Restore expedition data
@@ -554,12 +518,7 @@ public sealed class RoundPersistenceSystem : EntitySystem
             // Use a slight delay to ensure the station is fully initialized, then force console updates
             RobustTimer.Spawn(TimeSpan.FromMilliseconds(500), () =>
             {
-                if (_timerCts.IsCancellationRequested)
-                    return;
-                // Guard: station may have been deleted or recycled by now
-                if (!EntityManager.EntityExists(stationUid) || TerminatingOrDeleted(stationUid) || !HasComp<MetaDataComponent>(stationUid))
-                    return;
-
+                // Update expedition consoles directly since UpdateConsoles is private
                 var consoleQuery = AllEntityQuery<SalvageExpeditionConsoleComponent, UserInterfaceComponent, TransformComponent>();
                 var consolesUpdated = 0;
                 while (consoleQuery.MoveNext(out var consoleUid, out var consoleComp, out var uiComp, out var xform))
@@ -571,9 +530,9 @@ public sealed class RoundPersistenceSystem : EntitySystem
                     {
                         _sawmill.Info($"Updating console {ToPrettyString(consoleUid)} for station {stationName}");
                         // Force UI update by triggering console update logic
-                        if (TryComp<SalvageExpeditionDataComponent>(stationUid, out var stationDataComp))
+                        if (TryComp<SalvageExpeditionDataComponent>(stationUid, out var stationData))
                         {
-                            var state = GetExpeditionState((stationUid, stationDataComp));
+                            var state = GetExpeditionState((stationUid, stationData));
                             _ui.SetUiState((consoleUid, uiComp), SalvageConsoleUiKey.Expedition, state);
                             consolesUpdated++;
                         }
@@ -590,7 +549,7 @@ public sealed class RoundPersistenceSystem : EntitySystem
                     }
                 }
                 _sawmill.Info($"Updated expedition console UIs for station {stationName} and associated shuttles ({consolesUpdated} consoles updated)");
-            }, _timerCts.Token);
+            });
 
             _sawmill.Info($"Restored expedition data with {expeditionData.Missions.Count} missions, NextOffer: {expeditionComp.NextOffer}, Claimed: {expeditionComp.Claimed}");
         }
@@ -640,30 +599,17 @@ public sealed class RoundPersistenceSystem : EntitySystem
         if (_persistentEntity == null || !TryComp<RoundPersistenceComponent>(_persistentEntity.Value, out var persistence))
             return;
 
-        // Guard: shuttle may already be gone
-        if (!EntityManager.EntityExists(shuttleUid) || TerminatingOrDeleted(shuttleUid) || !HasComp<MetaDataComponent>(shuttleUid))
-            return;
+        var netEntity = GetNetEntity(shuttleUid);
 
-        // Use safe net entity resolution; can fail during teardown/cleanup
-        if (!EntityManager.TryGetNetEntity(shuttleUid, out var netEntity))
-            return;
-
-        // Unwrap nullable NetEntity before lookup
-        if (!netEntity.HasValue)
-            return;
-
-        if (persistence.ShipData.TryGetValue(netEntity.Value, out var shipData))
+        if (persistence.ShipData.TryGetValue(netEntity, out var shipData))
         {
             // TODO: Restore IFF data - requires ShuttleSystem access
             // var iffComp = EnsureComp<IFFComponent>(shuttleUid);
             // iffComp.Flags = shipData.IFFFlags;  // Access violation - need ShuttleSystem
             // iffComp.Color = shipData.IFFColor;  // Access violation - need ShuttleSystem
 
-            // Update metadata safely (avoid resolving MetaData during teardown)
-            if (TryComp<MetaDataComponent>(shuttleUid, out var meta))
-            {
-                _metaDataSystem.SetEntityName(shuttleUid, shipData.ShipName, meta);
-            }
+            // Update metadata
+            _metaDataSystem.SetEntityName(shuttleUid, shipData.ShipName);
 
             _sawmill.Info($"Restored metadata for ship: {shipData.ShipName}");
         }
@@ -892,37 +838,5 @@ public sealed class RoundPersistenceSystem : EntitySystem
             component.CanFinish,
             component.CooldownTime
         );
-    }
-
-    /// <summary>
-    /// Safely get entity name with fallback to entity ID if MetaDataComponent is missing or invalid
-    /// </summary>
-    private string GetSafeEntityName(EntityUid entityUid)
-    {
-        if (!EntityManager.EntityExists(entityUid) || TerminatingOrDeleted(entityUid))
-            return $"InvalidEntity({entityUid})";
-
-        if (TryComp<MetaDataComponent>(entityUid, out var meta))
-            return meta.EntityName;
-
-        return entityUid.ToString();
-    }
-
-    public override void Shutdown()
-    {
-        base.Shutdown();
-        try
-        {
-            _timerCts.Cancel();
-        }
-        catch
-        {
-            // ignore
-        }
-        finally
-        {
-            _timerCts.Dispose();
-            // Do not re-create a new CTS here; the system is shutting down.
-        }
     }
 }

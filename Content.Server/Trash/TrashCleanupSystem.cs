@@ -1,5 +1,4 @@
 using Content.Server.Station.Components;
-using System.Linq;
 using Content.Server.Worldgen.Components;
 using Content.Shared.Ghost;
 using Content.Shared.Mind.Components;
@@ -55,11 +54,6 @@ public sealed class TrashCleanupSystem : EntitySystem
     public override void Update(float frameTime)
     {
         var currentTime = _timing.CurTime;
-
-        // In integration tests there are no real players; avoid interfering by deleting test grids.
-        // Skip cleanup if no sessions are connected and it's likely a headless/test context.
-    if (!_playerManager.Sessions.Any())
-            return;
 
         if (currentTime - _lastCleanup < CleanupInterval)
             return;

@@ -108,10 +108,6 @@ public static partial class PoolManager
         lock (PairLock)
         {
             var builder = new StringBuilder();
-            if (_poolFailureReason != null)
-            {
-                builder.AppendLine($"Pool Failure Reason: {_poolFailureReason}");
-            }
             var pairs = Pairs.Keys.OrderBy(pair => pair.Id);
             foreach (var pair in pairs)
             {
@@ -198,18 +194,8 @@ public static partial class PoolManager
 
     private static async Task<TestPair> GetServerClientPair(PoolSettings poolSettings)
     {
-        // Ensure the pool is initialized even if the test runner didn't execute our SetUpFixture.
-        // This avoids brittle reliance on fixture discovery and makes tests self-sufficient.
         if (!_initialized)
-        {
-            lock (PairLock)
-            {
-                if (!_initialized)
-                {
-                    Startup();
-                }
-            }
-        }
+            throw new InvalidOperationException($"Pool manager has not been initialized");
 
         // Trust issues with the AsyncLocal that backs this.
         var testContext = TestContext.CurrentContext;

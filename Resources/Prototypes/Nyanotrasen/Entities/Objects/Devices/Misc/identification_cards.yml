@@ -59,10 +59,6 @@
   - type: Sprite
     layers:
     - state: default
-    - state: department
-      color: "#C96DBF"
-    - state: subdepartment
-      color: "#C96DBF"
-    - state: detective
+    - state: idscientists
   - type: PresetIdCard
     job: ForensicMantis

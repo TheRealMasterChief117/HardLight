@@ -59,6 +59,6 @@
   - type: Sprite
     layers:
     - state: default
-    - state: idscientists
+    - state: idscientist
   - type: PresetIdCard
     job: ForensicMantis

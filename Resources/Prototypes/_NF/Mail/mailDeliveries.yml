@@ -101,8 +101,6 @@
       MailSecurityNFSpaceLaw: 1
       MailSecurityNFMusket: 1
       MailNFMedkit: 0.5 # 1 weight total
-      HLMailSecurityFuc: 6
-
 
   jobs:
     StationRepresentative:

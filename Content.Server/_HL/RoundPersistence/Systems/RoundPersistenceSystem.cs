@@ -762,27 +762,15 @@ public sealed class RoundPersistenceSystem : EntitySystem
     /// </summary>
     private void OnExpeditionDataRemoved(EntityUid uid, SalvageExpeditionDataComponent component, ComponentShutdown args)
     {
-        // Save the data before it's lost, but only if the required components still exist.
-        // During teardown, components may be removed in any order, so avoid hard Comp<> calls.
-        if (_persistentEntity == null)
-            return;
-
-        if (!TryComp<RoundPersistenceComponent>(_persistentEntity.Value, out var persistence))
-            return;
-
-        // Ensure the entity still has metadata and station data components before accessing them.
-        if (!TryComp<MetaDataComponent>(uid, out var meta))
-            return;
-
-        if (!HasComp<StationDataComponent>(uid))
-            return;
-
-        var stationName = meta.EntityName;
-        if (component.Missions.Count > 0 || component.ActiveMission != 0)
+        // Save the data before it's lost
+        if (_persistentEntity != null && TryComp<RoundPersistenceComponent>(_persistentEntity.Value, out var persistence))
         {
-            // Safe: we checked HasComp above, so Comp should not throw.
-            SaveStationData(uid, Comp<StationDataComponent>(uid), stationName, persistence);
-            _sawmill.Info($"Emergency save of expedition data for {stationName}");
+            var stationName = MetaData(uid).EntityName;
+            if (component.Missions.Count > 0 || component.ActiveMission != 0)
+            {
+                SaveStationData(uid, Comp<StationDataComponent>(uid), stationName, persistence);
+                _sawmill.Info($"Emergency save of expedition data for {stationName}");
+            }
         }
     }
 
@@ -922,7 +910,7 @@ public sealed class RoundPersistenceSystem : EntitySystem
         finally
         {
             _timerCts.Dispose();
-            // Do not re-create a new CTS here; the system is shutting down.
+            _timerCts = new();
         }
     }
 }

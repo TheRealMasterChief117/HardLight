@@ -329,7 +329,7 @@
               maxAmount: 10
               maxRange: 2.5
             spawns:
-              - ShadowkinShadow
+              - ShadowKudzu
           - settings:
               spawnOnPulse: true
               minAmount: 1

@@ -279,5 +279,3 @@
     pvsIncrease: 0.15
   - type: AltFireMelee
     attackType: Light
-  - type: NFWeaponDetails  # Hardlight change
-    manufacturer: weapon-details-manufacturer-SESWC-consortium

@@ -17,7 +17,7 @@ using Robust.Shared.Log;
 using Robust.Shared.Player;
 using Robust.Shared.Timing;
 
-namespace Content.Server._HL.RoundPersistence.Systems;
+namespace Content.Server.HL.RoundPersistence.Systems;
 
 /// <summary>
 /// Handles persistence of player payment/autopay data across round restarts

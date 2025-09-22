@@ -22,7 +22,7 @@ using Content.Shared._NF.ShuttleRecords;
 using RobustTimer = Robust.Shared.Timing.Timer;
 using Content.Shared.StationRecords;
 using Content.Shared.CrewManifest;
-using Content.Shared._HL.CCVar;
+using Content.Shared.HL.CCVar;
 using Content.Shared.GameTicking;
 using Content.Shared.Shuttles.Components;
 using Content.Shared.Station.Components;
@@ -39,7 +39,7 @@ using Robust.Shared.Utility;
 using System.Numerics;
 using System.Threading;
 
-namespace Content.Server._HL.RoundPersistence.Systems;
+namespace Content.Server.HL.RoundPersistence.Systems;
 
 /// <summary>
 /// System that handles saving and restoring critical game data across round restarts.
@@ -102,13 +102,12 @@ public sealed class RoundPersistenceSystem : EntitySystem
         SubscribeLocalEvent<StationRecordsComponent, ComponentShutdown>(OnStationRecordsRemoved);
 
         // Set up periodic UI updates for expeditions to ensure timers work correctly
-    RobustTimer.SpawnRepeating(TimeSpan.FromSeconds(1), () =>
+        RobustTimer.SpawnRepeating(TimeSpan.FromSeconds(1), () =>
         {
             if (!_cfg.GetCVar(HLCCVars.RoundPersistenceEnabled) || !_cfg.GetCVar(HLCCVars.RoundPersistenceExpeditions))
                 return;
-
             UpdateExpeditionUIs();
-    }, _timerCts.Token);
+        }, _timerCts.Token);
 
         _sawmill.Info("Round persistence system initialized");
     }
@@ -204,7 +203,9 @@ public sealed class RoundPersistenceSystem : EntitySystem
             Log.Info($"Starting console restoration for {ToPrettyString(uid)}");
             RestoreConsoleExpeditionData(uid, component);
         }, _timerCts.Token);
-    }    /// <summary>
+    }
+
+    /// <summary>
     /// HARDLIGHT: Restore expedition data directly to console from persistence storage
     /// This method now properly works with station-based expedition data
     /// </summary>
@@ -910,7 +911,7 @@ public sealed class RoundPersistenceSystem : EntitySystem
         finally
         {
             _timerCts.Dispose();
-            _timerCts = new();
+            // Do not reassign timer CTS here; system is shutting down.
         }
     }
 }

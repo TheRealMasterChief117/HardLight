@@ -1,6 +1,6 @@
 using Robust.Shared.Configuration;
 
-namespace Content.Shared._HL.CCVar;
+namespace Content.Shared.HL.CCVar;
 
 /// <summary>
 /// Configuration variables for HardLight-specific features

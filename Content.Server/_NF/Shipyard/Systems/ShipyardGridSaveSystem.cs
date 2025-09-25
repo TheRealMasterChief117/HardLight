@@ -38,6 +38,8 @@ using System.IO;
 using System.Linq;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using Robust.Shared.Configuration;
+using Content.Shared.HL.CCVar;
 
 // Suppress RA0004 for this file. There is no Task<Result> usage here, but the analyzer
 // occasionally reports a false positive during Release/integration builds.
@@ -62,6 +64,7 @@ public sealed class ShipyardGridSaveSystem : EntitySystem
     [Dependency] private readonly IResourceManager _resourceManager = default!;
     [Dependency] private readonly SharedContainerSystem _containerSystem = default!;
     [Dependency] private readonly Content.Server.Shuttles.Save.ShipSerializationSystem _shipSerialization = default!;
+    [Dependency] private readonly IConfigurationManager _configManager = default!;
 
     private ISawmill _sawmill = default!;
     private MapLoaderSystem _mapLoader = default!;
@@ -179,16 +182,56 @@ public sealed class ShipyardGridSaveSystem : EntitySystem
 
         try
         {
-            _sawmill.Info($"Serializing ship grid {gridUid} as '{shipName}' (non-destructive save)");
+            _sawmill.Info($"Serializing ship grid {gridUid} as '{shipName}' using standard grid format (non-destructive save)");
 
-            // Use the dedicated serializer which normalizes rotation and skips problematic entities (e.g., vending machines).
-            var data = _shipSerialization.SerializeShip(gridUid, playerSession.UserId, shipName);
-            var yaml = _shipSerialization.SerializeShipGridDataToYaml(data);
+            // Use MapLoaderSystem to save directly to a temporary file in user data.
+            // Attach a temporary filter to optionally exclude vending machines from the save to avoid load-time spikes.
+            var excludeVending = _configManager.GetCVar(HLCCVars.ExcludeVendingInShipSave);
+            EntitySerializer.IsSerializableDelegate? veto = null;
+            if (excludeVending)
+            {
+                veto = (Entity<MetaDataComponent> ent, ref bool serializable) =>
+                {
+                    if (_entityManager.HasComponent<VendingMachineComponent>(ent))
+                        serializable = false;
+                };
+            }
 
-            // Send YAML to client for local saving.
+            var timestamp = DateTime.UtcNow.ToString("yyyyMMdd_HHmmss");
+            var fileName = $"{shipName}_{timestamp}.yml";
+            var tempFilePath = new ResPath("/") / "UserData" / fileName;
+
+            if (veto != null)
+                _mapLoader.OnIsSerializable += veto;
+            try
+            {
+                var saved = _mapLoader.TrySaveGrid(gridUid, tempFilePath);
+                if (!saved)
+                {
+                    _sawmill.Error($"Failed to save grid {gridUid} to {fileName}");
+                    return false;
+                }
+            }
+            finally
+            {
+                if (veto != null)
+                    _mapLoader.OnIsSerializable -= veto;
+            }
+
+            // Read the YAML we just wrote and send to the client for local saving.
+            string yaml;
+            using (var fileStream = _resourceManager.UserData.OpenRead(tempFilePath))
+            using (var reader = new StreamReader(fileStream))
+            {
+                yaml = reader.ReadToEnd();
+            }
+
             var saveMessage = new SendShipSaveDataClientMessage(shipName, yaml);
             RaiseNetworkEvent(saveMessage, playerSession);
             _sawmill.Info($"Sent ship data '{shipName}' to client {playerSession.Name} for local saving");
+
+            // Clean up the temporary file (best-effort).
+            _ = TryDeleteFileWithRetry(tempFilePath);
 
             // Fire ShipSavedEvent for bookkeeping; DO NOT delete the grid or maps here.
             var gridSavedEvent = new ShipSavedEvent

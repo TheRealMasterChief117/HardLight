@@ -1,3 +1,6 @@
+using Content.Shared.Maps; // For tile GetContentTileDefinition extension
+using Content.Server.Shuttles.Systems;
+using Content.Server.Shuttles.Components;
 using Content.Server.Shuttles.Systems;
 using Content.Server.Shuttles.Components;
 using Content.Server.Station.Components;
@@ -53,6 +56,11 @@ using Content.Shared.Popups; // For PopupSystem
 using Robust.Shared.Audio.Systems; // For SharedAudioSystem
 using Content.Server.Administration.Logs; // For IAdminLogManager
 using Content.Shared.Database; // For LogType
+using Robust.Shared.Physics.Components; // FixturesComponent
+using Robust.Shared.Physics.Collision.Shapes; // PolygonShape
+using Robust.Shared.Physics; // Physics Transform
+using Robust.Shared.Utility; // Box2 helpers
+using Robust.Shared.Map.Events; // For BeforeEntityReadEvent
 
 // Suppress naming rule for _NF namespace prefix (modding convention)
 #pragma warning disable IDE1006
@@ -84,6 +92,8 @@ public sealed partial class ShipyardSystem : SharedShipyardSystem
     [Dependency] private readonly IResourceManager _resources = default!;
     [Dependency] private readonly IDependencyCollection _dependency = default!; // For EntityDeserializer
     [Dependency] private readonly Content.Server.Shuttles.Save.ShipSerializationSystem _shipSerialization = default!; // For loading saved ships
+    [Dependency] private readonly ITileDefinitionManager _tileDefManager = default!; // For tile lookups in clipping resolver
+    [Dependency] private readonly EntityLookupSystem _lookup = default!; // For physics overlap checks
 
     public MapId? ShipyardMap { get; private set; }
     private float _shuttleIndex;
@@ -183,21 +193,32 @@ public sealed partial class ShipyardSystem : SharedShipyardSystem
     public bool TryPurchaseShuttle(EntityUid consoleUid, ResPath shuttlePath, [NotNullWhen(true)] out EntityUid? shuttleEntityUid)
     {
         // Get the grid the console is on
-        if (!TryComp<TransformComponent>(consoleUid, out var consoleXform)
-            || consoleXform.GridUid == null
-            || !TryAddShuttle(shuttlePath, out var shuttleGrid)
-            || !TryComp<ShuttleComponent>(shuttleGrid, out var shuttleComponent))
+        if (!TryComp<TransformComponent>(consoleUid, out var consoleXform) || consoleXform.GridUid == null)
         {
             shuttleEntityUid = null;
             return false;
         }
 
-        var price = _pricing.AppraiseGrid(shuttleGrid.Value, null);
+        if (!TryAddShuttle(shuttlePath, out var shuttleGrid))
+        {
+            shuttleEntityUid = null;
+            return false;
+        }
+
+        var grid = shuttleGrid.Value;
+
+        if (!TryComp<ShuttleComponent>(grid, out var shuttleComponent))
+        {
+            shuttleEntityUid = null;
+            return false;
+        }
+
+        var price = _pricing.AppraiseGrid(grid, null);
         var targetGrid = consoleXform.GridUid.Value;
 
         _sawmill.Info($"Shuttle {shuttlePath} was purchased at {ToPrettyString(consoleUid)} for {price:f2}");
-        _shuttle.TryFTLDock(shuttleGrid.Value, shuttleComponent, targetGrid);
-        shuttleEntityUid = shuttleGrid;
+        _shuttle.TryFTLDock(grid, shuttleComponent, targetGrid);
+        shuttleEntityUid = grid;
         return true;
     }
 
@@ -211,10 +232,21 @@ public sealed partial class ShipyardSystem : SharedShipyardSystem
     public bool TryPurchaseShuttleFromFile(EntityUid consoleUid, ResPath shuttlePath, [NotNullWhen(true)] out EntityUid? shuttleEntityUid)
     {
         // Get the grid the console is on
-        if (!TryComp<TransformComponent>(consoleUid, out var consoleXform)
-            || consoleXform.GridUid == null
-            || !TryAddShuttle(shuttlePath, out var shuttleGrid)
-            || !TryComp<ShuttleComponent>(shuttleGrid, out var shuttleComponent))
+        if (!TryComp<TransformComponent>(consoleUid, out var consoleXform) || consoleXform.GridUid == null)
+        {
+            shuttleEntityUid = null;
+            return false;
+        }
+
+        if (!TryAddShuttle(shuttlePath, out var shuttleGrid))
+        {
+            shuttleEntityUid = null;
+            return false;
+        }
+
+        var grid = shuttleGrid.Value;
+
+        if (!TryComp<ShuttleComponent>(grid, out var shuttleComponent))
         {
             shuttleEntityUid = null;
             return false;
@@ -223,8 +255,8 @@ public sealed partial class ShipyardSystem : SharedShipyardSystem
         var targetGrid = consoleXform.GridUid.Value;
 
         _sawmill.Info($"Shuttle loaded from file {shuttlePath} at {ToPrettyString(consoleUid)}");
-        _shuttle.TryFTLDock(shuttleGrid.Value, shuttleComponent, targetGrid);
-        shuttleEntityUid = shuttleGrid;
+        _shuttle.TryFTLDock(grid, shuttleComponent, targetGrid);
+        shuttleEntityUid = grid;
         return true;
     }
 
@@ -296,8 +328,68 @@ public sealed partial class ShipyardSystem : SharedShipyardSystem
             _shuttleIndex += grid.Value.Comp.LocalAABB.Width + ShuttleSpawnBuffer;
 
             _sawmill.Info($"Ship loaded from YAML data at {ToPrettyString(consoleUid)}");
+            // Immediately attempt to dock the loaded ship to the console's grid (station) just like purchase flow.
+            // This ensures the loaded vessel appears docked instead of floating.
+            try
+            {
+                // Pre-align shuttle to best docking angle to reduce clipping/rotation mismatch
+                try
+                {
+                    var config = _docking.GetDockingConfig(shuttleGrid, targetGrid);
+                    if (config != null && TryComp<TransformComponent>(shuttleGrid, out var preXform))
+                    {
+                        preXform.LocalRotation = config.Angle;
+                        _sawmill.Info($"Pre-aligned shuttle rotation to docking angle {config.Angle.Degrees:F2}°");
+                    }
+                }
+                catch (Exception alignEx)
+                {
+                    _sawmill.Debug($"Pre-dock alignment skipped: {alignEx.Message}");
+                }
+                if (TryComp<TransformComponent>(shuttleGrid, out var shipXform) && TryComp<TransformComponent>(targetGrid, out var targetXform))
+                {
+                    _sawmill.Info($"Pre-dock orientation: shipRot={shipXform.LocalRotation.Degrees:F2}° shipPos={shipXform.WorldPosition} targetRot={targetXform.LocalRotation.Degrees:F2}° targetPos={targetXform.WorldPosition}");
+                }
+                if (_shuttle.TryFTLDock(shuttleGrid, shuttleComponent, targetGrid))
+                {
+                    if (TryComp<TransformComponent>(shuttleGrid, out var shipXform2))
+                        _sawmill.Info($"Post-dock orientation: shipRot={shipXform2.LocalRotation.Degrees:F2}° shipPos={shipXform2.WorldPosition}");
+                    _sawmill.Info($"Auto-docked loaded ship {shuttleGrid} to grid {targetGrid}");
+                }
+                else
+                {
+                    // Fallback: try with Gas-type ports instead of Airlock (DockType.Docking does not exist)
+                    if (_shuttle.TryFTLDock(shuttleGrid, shuttleComponent, targetGrid, dockType: DockType.Gas))
+                    {
+                        if (TryComp<TransformComponent>(shuttleGrid, out var shipXform3))
+                            _sawmill.Info($"Post-dock (fallback) orientation: shipRot={shipXform3.LocalRotation.Degrees:F2}° shipPos={shipXform3.WorldPosition}");
+                        _sawmill.Info($"Auto-docked (fallback) loaded ship {shuttleGrid} to grid {targetGrid}");
+                    }
+                    else
+                    {
+                        _sawmill.Warning($"Auto-dock attempt for loaded ship {shuttleGrid} to grid {targetGrid} failed (no matching docks?)");
+                    }
+                }
 
-            // FTL docking will be handled in step 5 of the comprehensive loading process
+                // Post-load maintenance: cleanup duplicates & auto-anchor infrastructure.
+                // IMPORTANT: Do NOT move a grid after docking (joints expect a fixed transform). Any nudging while docked
+                // can cause position desync and wild teleporting on undock. Only resolve overlaps if NOT docked (handled in method).
+                try
+                {
+                    // Only resolves clipping if shuttle is not currently docked.
+                    ResolvePostDockClipping(shuttleGrid, targetGrid);
+                    CleanupDuplicateLooseParts(shuttleGrid);
+                    AutoAnchorInfrastructure(shuttleGrid);
+                }
+                catch (Exception postEx)
+                {
+                    _sawmill.Error($"Post-load maintenance error on {shuttleGrid}: {postEx.Message}");
+                }
+            }
+            catch (Exception dockEx)
+            {
+                _sawmill.Error($"Exception during auto-dock of loaded ship {shuttleGrid}: {dockEx.Message}");
+            }
 
             shuttleEntityUid = shuttleGrid;
             return true;
@@ -310,6 +402,215 @@ public sealed partial class ShipyardSystem : SharedShipyardSystem
     }
 
     /// <summary>
+    /// Removes loose duplicates of machine parts (boards, capacitors, matter bins, etc.) that were already restored inside machines.
+    /// Heuristic: if an item prototype name contains one of the target substrings and there exists an anchored entity on the same grid
+    /// that has a matching container slot already filled (implying the part was restored), delete the loose item.
+    /// This is a stop-gap until full container metadata round-trips reliably.
+    /// </summary>
+    private void CleanupDuplicateLooseParts(EntityUid shuttleGrid)
+    {
+        if (!TryComp<MapGridComponent>(shuttleGrid, out _))
+            return;
+
+        var partKeywords = new[] {
+            // Machine parts / boards
+            "capacitor", "matter bin", "board", "manipulator", "laser", "scanner",
+            // Added per request: tools, electronics, lights
+            "tool", "wrench", "screwdriver", "crowbar", "multitool",
+            "electronics", "circuit", "light", "lamp", "bulb"
+        };
+        var transformQuery = GetEntityQuery<TransformComponent>();
+        var metaQuery = GetEntityQuery<MetaDataComponent>();
+        var toDelete = new List<EntityUid>();
+
+        // Collect all loose (unanchored or no container parent) items with keywords
+        foreach (var uid in EntityManager.GetEntities())
+        {
+            if (!transformQuery.TryGetComponent(uid, out var xform))
+                continue;
+            if (xform.GridUid != shuttleGrid)
+                continue;
+            if (xform.Anchored) // anchored parts we leave alone
+                continue;
+            if (!metaQuery.TryGetComponent(uid, out var meta) || meta.EntityPrototype == null)
+                continue;
+            var name = meta.EntityPrototype.ID.ToLowerInvariant();
+            if (!partKeywords.Any(k => name.Contains(k)))
+                continue;
+
+            // Simple heuristic: if it's not in a container (parent is grid) mark for deletion
+            if (xform.ParentUid == shuttleGrid)
+                toDelete.Add(uid);
+        }
+
+        if (toDelete.Count == 0)
+            return;
+
+        foreach (var ent in toDelete)
+        {
+            QueueDel(ent);
+        }
+        _sawmill.Info($"Removed {toDelete.Count} loose duplicate machine part items on loaded ship {shuttleGrid}");
+    }
+
+    /// <summary>
+    /// Detects severe overlap (clipping) between the loaded shuttle grid and the target grid tiles after docking.
+    /// If more than a threshold of solid tiles overlap inside each other's AABBs, nudges the shuttle outward along the vector between dock centers.
+    /// This is a heuristic mitigation until rotation/origin alignment is fully resolved.
+    /// </summary>
+    private void ResolvePostDockClipping(EntityUid shuttleGrid, EntityUid targetGrid)
+    {
+        // If the shuttle is docked, we must NOT move it. Moving a docked grid breaks joint constraints and
+        // leads to drifting / teleporting upon undock. Skip in that case.
+        try
+        {
+            var docks = _docking.GetDocks(shuttleGrid);
+            if (docks.Count > 0 && docks.Any(d => d.Comp.Docked))
+            {
+                _sawmill.Debug($"ResolvePostDockClipping skipped: shuttle {shuttleGrid} is docked");
+                return;
+            }
+        }
+        catch
+        {
+            // best-effort; continue with checks below if docking query fails
+        }
+
+        // Use physics fixtures to detect overlap against target grid tiles and anchored collidables.
+        if (!TryComp<FixturesComponent>(shuttleGrid, out var shuttleFix) || shuttleFix.Fixtures.Count == 0)
+            return;
+        if (!TryComp<TransformComponent>(shuttleGrid, out var shuttleXform) || !TryComp<TransformComponent>(targetGrid, out var targetXform))
+            return;
+        if (!TryComp<MapGridComponent>(targetGrid, out var targetMap))
+            return;
+
+        int CountOverlaps()
+        {
+            var overlaps = 0;
+            var (shipPos, shipRot) = _transform.GetWorldPositionRotation(shuttleXform);
+            foreach (var fix in shuttleFix.Fixtures.Values)
+            {
+                if (fix.Shape is not PolygonShape poly)
+                    continue;
+                var worldAabb = poly.ComputeAABB(new Transform(shipPos, (float)shipRot.Theta), 0);
+
+                // Convert to target grid local space to check intersecting tiles
+                var corners = new System.Numerics.Vector2[4]
+                {
+                    new(worldAabb.Left, worldAabb.Bottom),
+                    new(worldAabb.Left, worldAabb.Top),
+                    new(worldAabb.Right, worldAabb.Bottom),
+                    new(worldAabb.Right, worldAabb.Top)
+                };
+                var invAngle = -targetXform.WorldRotation;
+                var invOrigin = targetXform.WorldPosition;
+                var min = new System.Numerics.Vector2(float.MaxValue, float.MaxValue);
+                var max = new System.Numerics.Vector2(float.MinValue, float.MinValue);
+                foreach (ref readonly var c in corners.AsSpan())
+                {
+                    var local = invAngle.RotateVec(c - invOrigin);
+                    min = System.Numerics.Vector2.Min(min, local);
+                    max = System.Numerics.Vector2.Max(max, local);
+                }
+                var localAabb = new Box2(min, max).Enlarged(-0.01f);
+
+                foreach (var tile in _map.GetLocalTilesIntersecting(targetGrid, targetMap, localAabb))
+                {
+                    var def = tile.Tile.GetContentTileDefinition(_tileDefManager);
+                    if (def.ID != "Space")
+                    {
+                        overlaps++;
+                        break;
+                    }
+                }
+
+                if (overlaps > 0)
+                    continue;
+
+                // Also check anchored hard collidables on target grid within worldAabb
+                var mapId = targetXform.MapID;
+                foreach (var ent in _lookup.GetEntitiesIntersecting(mapId, worldAabb))
+                {
+                    if (!TryComp<TransformComponent>(ent, out var ex) || ex.GridUid != targetGrid)
+                        continue;
+                    if (!TryComp<PhysicsComponent>(ent, out var phys) || !phys.Hard || !phys.CanCollide)
+                        continue;
+                    overlaps++;
+                    break;
+                }
+            }
+            return overlaps;
+        }
+
+        var start = CountOverlaps();
+        if (start <= 0)
+            return;
+
+        // Nudge outward up to N steps
+        var dir = shuttleXform.WorldPosition - targetXform.WorldPosition;
+        if (dir.LengthSquared() < 0.001f)
+            dir = new System.Numerics.Vector2(1, 0);
+        dir = System.Numerics.Vector2.Normalize(dir);
+
+        const int maxSteps = 10;
+        const float step = 0.5f;
+        var steps = 0;
+        var overlapsNow = start;
+        while (overlapsNow > 0 && steps < maxSteps)
+        {
+            shuttleXform.WorldPosition += dir * step;
+            overlapsNow = CountOverlaps();
+            steps++;
+        }
+
+        _sawmill.Info($"Post-dock fixture overlap: start={start}, end={overlapsNow}, steps={steps}");
+    }
+
+    /// <summary>
+    /// Anchors atmos and infrastructure entities (vents, scrubbers, pipes, manifolds, cables) that should be anchored but aren't.
+    /// </summary>
+    private void AutoAnchorInfrastructure(EntityUid shuttleGrid)
+    {
+        var transformQuery = GetEntityQuery<TransformComponent>();
+        var metaQuery = GetEntityQuery<MetaDataComponent>();
+        var anchored = 0;
+
+        foreach (var uid in EntityManager.GetEntities())
+        {
+            if (!transformQuery.TryGetComponent(uid, out var xform))
+                continue;
+            if (xform.GridUid != shuttleGrid)
+                continue;
+            if (xform.Anchored)
+                continue;
+            if (!metaQuery.TryGetComponent(uid, out var meta) || meta.EntityPrototype == null)
+                continue;
+            var id = meta.EntityPrototype.ID;
+            // Heuristic match list (can expand):
+            if (!(id.Contains("Vent", StringComparison.OrdinalIgnoreCase)
+                || id.Contains("Scrubber", StringComparison.OrdinalIgnoreCase)
+                || id.Contains("Pipe", StringComparison.OrdinalIgnoreCase)
+                || id.Contains("Manifold", StringComparison.OrdinalIgnoreCase)
+                || id.Contains("Cable", StringComparison.OrdinalIgnoreCase)
+                || id.Contains("Conduit", StringComparison.OrdinalIgnoreCase)))
+                continue;
+
+            try
+            {
+                _transform.AnchorEntity(uid, xform);
+                anchored++;
+            }
+            catch
+            {
+                // Ignore failures (some may not be anchorable)
+            }
+        }
+
+        if (anchored > 0)
+            _sawmill.Info($"Auto-anchored {anchored} infrastructure entities on loaded ship {shuttleGrid}");
+    }
+
+    /// <summary>
     /// Loads a grid directly from YAML string data, similar to MapLoaderSystem.TryLoadGrid but without file system dependency
     /// </summary>
     private bool TryLoadGridFromYamlData(string yamlData, MapId map, Vector2 offset, [NotNullWhen(true)] out Entity<MapGridComponent>? grid)
@@ -318,37 +619,57 @@ public sealed partial class ShipyardSystem : SharedShipyardSystem
 
         try
         {
-            _sawmill.Info($"Step 1: Loading ship 'Wisp' from YAML data");
+            _sawmill.Info($"[ShipLoad] Begin loading ship YAML (len={yamlData.Length}) at offset {offset}");
 
-            // First, try to load using the custom ship serialization system
-            // This handles the ship-specific YAML format that was created by ShipSerializationSystem
+            // 1. Fast-path: Treat YAML as an engine-standard grid file first.
             try
             {
-                // Try to deserialize as ship data first
+                var fastGridUid = _shipSerialization.TryLoadStandardGridYaml(yamlData, map, new System.Numerics.Vector2(offset.X, offset.Y));
+                if (fastGridUid != null && EntityManager.TryGetComponent<MapGridComponent>(fastGridUid.Value, out var fastGrid))
+                {
+                    grid = new Entity<MapGridComponent>(fastGridUid.Value, fastGrid);
+                    _sawmill.Info($"[ShipLoad] Loaded via standard MapLoader-compatible path: {fastGridUid.Value}");
+                    LogGridChildDiagnostics(fastGridUid.Value, "post-standard-load");
+                    return true;
+                }
+                _sawmill.Debug("[ShipLoad] Standard grid YAML loader did not succeed (may be custom ship format). Proceeding to custom parser.");
+            }
+            catch (Exception fastEx)
+            {
+                _sawmill.Debug($"[ShipLoad] Standard grid YAML path threw: {fastEx.Message}. Will attempt custom format.");
+            }
+
+            // 2. Custom ship serialization format (legacy / secure export) -> reconstruct entities manually
+            try
+            {
                 var shipGridData = _shipSerialization.DeserializeShipGridDataFromYaml(yamlData, Guid.Empty);
                 if (shipGridData != null)
                 {
-                    _sawmill.Info("Successfully parsed YAML as custom ship format");
-                    
-                    // Use the ship serialization system to reconstruct the ship
+                    _sawmill.Info("[ShipLoad] Parsed YAML as custom ShipGridData format (legacy / secure export)");
                     var shipGridUid = _shipSerialization.ReconstructShipOnMap(shipGridData, map, new System.Numerics.Vector2(offset.X, offset.Y));
-                    
+
+                    // Ensure the reconstructed grid has a ShuttleComponent so downstream docking logic treats it identically to purchased shuttles.
+                    if (!HasComp<ShuttleComponent>(shipGridUid))
+                    {
+                        EnsureComp<ShuttleComponent>(shipGridUid);
+                        _sawmill.Debug("[ShipLoad] Added missing ShuttleComponent to reconstructed grid");
+                    }
+
                     if (EntityManager.TryGetComponent<MapGridComponent>(shipGridUid, out var shipGrid))
                     {
                         grid = new Entity<MapGridComponent>(shipGridUid, shipGrid);
-                        _sawmill.Info($"Successfully loaded ship using custom deserializer: {shipGridUid}");
+                        _sawmill.Info($"[ShipLoad] Successfully reconstructed ship grid: {shipGridUid}");
+                        LogGridChildDiagnostics(shipGridUid, "post-reconstruct");
                         return true;
                     }
                 }
             }
             catch (Exception shipEx)
             {
-                _sawmill.Error($"Failed to load as custom ship format: {shipEx.Message}");
-                // Fall through to try standard format
+                _sawmill.Warning($"[ShipLoad] Custom ship reconstruction failed: {shipEx.Message}. Falling back to raw deserializer path.");
             }
 
-            _sawmill.Error("Failed to load ship from YAML data using existing system");
-            _sawmill.Error("Step 1 failed: Could not load ship from YAML data");
+            _sawmill.Debug("[ShipLoad] Proceeding to raw EntityDeserializer fallback path.");
 
             // Fallback: Parse YAML data directly (same approach as MapLoaderSystem.TryReadFile)
             using var textReader = new StringReader(yamlData);
@@ -430,6 +751,8 @@ public sealed partial class ShipyardSystem : SharedShipyardSystem
             if (deserializer.Result.Grids.Count == 1)
             {
                 grid = deserializer.Result.Grids.Single();
+                LogGridChildDiagnostics(grid.Value.Owner, "post-fallback-deserializer");
+                ReconcileGridChildren(grid.Value.Owner);
                 return true;
             }
 
@@ -444,14 +767,75 @@ public sealed partial class ShipyardSystem : SharedShipyardSystem
     }
 
     /// <summary>
+    /// Diagnostic helper to log counts of child entities & orphaned entities relative to a grid to help track issues
+    /// where only tiles move but entities are left behind (e.g., improper parenting before FTL docking).
+    /// </summary>
+    private void LogGridChildDiagnostics(EntityUid gridUid, string stage)
+    {
+        try
+        {
+            if (!TryComp<TransformComponent>(gridUid, out var gridXform))
+                return;
+
+            var total = 0;
+            var notParented = 0;
+            foreach (var uid in _entityManager.GetEntities())
+            {
+                if (!TryComp<TransformComponent>(uid, out var xform))
+                    continue;
+                if (xform.ParentUid == gridUid)
+                {
+                    total++;
+                }
+                else if (xform.GridUid == gridUid && xform.ParentUid != gridUid)
+                {
+                    // Entity is on the grid (GridUid matches) but parent is elsewhere (possible detach issue)
+                    notParented++;
+                }
+            }
+            if (notParented > 0)
+                _sawmill.Warning($"[ShipLoad][diag:{stage}] Grid {gridUid} children={total} mismatchedParent={notParented}");
+            else
+                _sawmill.Debug($"[ShipLoad][diag:{stage}] Grid {gridUid} children={total} (no mismatches)");
+        }
+        catch
+        {
+            // Best-effort diagnostics; ignore failures.
+        }
+    }
+
+    /// <summary>
+    /// Re-parent any entities that report GridUid == grid but are not parented under the grid transform.
+    /// This handles cases where legacy or custom deserialization did not establish proper hierarchy, causing
+    /// tiles to move without their entities during FTL docking or transforms.
+    /// </summary>
+    private void ReconcileGridChildren(EntityUid gridUid)
+    {
+        if (!TryComp<MapGridComponent>(gridUid, out _))
+            return;
+        var fixedCount = 0;
+        foreach (var uid in _entityManager.GetEntities())
+        {
+            if (uid == gridUid) continue;
+            if (!TryComp<TransformComponent>(uid, out var xform)) continue;
+            if (xform.GridUid == gridUid && xform.ParentUid != gridUid)
+            {
+                var coords = new EntityCoordinates(gridUid, xform.LocalPosition);
+                _transform.SetCoordinates((uid, xform, MetaData(uid)), coords, newParent: Transform(gridUid));
+                fixedCount++;
+            }
+        }
+        if (fixedCount > 0)
+            _sawmill.Info($"[ShipLoad] Reconciled {fixedCount} detached entities under grid {gridUid}");
+    }
+
+    /// <summary>
     /// Helper methods for our custom YAML loading - based on MapLoaderSystem implementation
     /// </summary>
     private void MergeMaps(EntityDeserializer deserializer, MapLoadOptions opts, HashSet<EntityUid> merged)
     {
-        if (opts.MergeMap == null)
+        if (opts.MergeMap is not { } targetId)
             return;
-
-        var targetId = opts.MergeMap.Value;
 
         if (!_map.TryGetMap(targetId, out var targetUid))
             throw new Exception($"Target map {targetId} does not exist");
@@ -461,17 +845,39 @@ public sealed partial class ShipyardSystem : SharedShipyardSystem
         var matrix = Matrix3Helpers.CreateTransform(opts.Offset, rotation);
         var target = new Entity<TransformComponent>(targetUid.Value, Transform(targetUid.Value));
 
-        // Apply transforms to all loaded entities that should be merged
+        // Mirror MapLoaderSystem.MergeMaps semantics: iterate all entities, reparent those whose parent is a map root.
+        HashSet<EntityUid> maps = new();
+        HashSet<EntityUid> logged = new();
         foreach (var uid in deserializer.Result.Entities)
         {
-            if (TryComp<TransformComponent>(uid, out var xform))
+            var xform = Transform(uid);
+            if (!TryComp<TransformComponent>(xform.ParentUid, out var parentXform))
+                continue;
+
+            if (!HasComp<MapComponent>(xform.ParentUid))
+                continue;
+
+            // If parent of this entity is a grid (grid-map root) log a warning (unsupported) similar to upstream logic.
+            if (HasComp<MapGridComponent>(xform.ParentUid) && logged.Add(xform.ParentUid))
             {
-                if (xform.MapUid == null || HasComp<MapComponent>(uid))
-                {
-                    Merge(merged, uid, target, matrix, rotation);
-                }
+                _sawmill.Error("[ShipLoad] Merging a grid-map onto another map is not supported (entity parent was grid-root)");
+                continue;
             }
+
+            maps.Add(xform.ParentUid);
+            Merge(merged, uid, target, matrix, rotation);
         }
+
+        // Remove any map roots we merged so only the grid remains
+        deserializer.ToDelete.UnionWith(maps);
+        deserializer.Result.Maps.RemoveWhere(x => maps.Contains(x.Owner));
+
+        // Also merge orphans (entities that ended up in nullspace / root of load)
+        foreach (var orphan in deserializer.Result.Orphans)
+        {
+            Merge(merged, orphan, target, matrix, rotation);
+        }
+        deserializer.Result.Orphans.Clear();
     }
 
     private void Merge(

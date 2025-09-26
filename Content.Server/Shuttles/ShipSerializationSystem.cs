@@ -67,6 +67,7 @@ namespace Content.Server.Shuttles.Save
         [Dependency] private readonly SharedTransformSystem _transform = default!;
         [Dependency] private readonly IGameTiming _gameManager = default!;
         [Dependency] private readonly MapLoaderSystem _mapLoader = default!; // For refactored serializer path
+        [Dependency] private readonly IDependencyCollection _dependencyCollection = default!; // Use same dependency collection as MapLoaderSystem
         // Note: For EntityDeserializer we use IoCManager.Instance directly to avoid extra injected fields.
 
         private ISawmill _sawmill = default!;
@@ -747,28 +748,64 @@ namespace Content.Server.Shuttles.Save
                 if (opts.MergeMap is { } mergeTarget && !_map.MapExists(mergeTarget))
                     throw new Exception($"Target map {mergeTarget} does not exist");
 
-                // IoCManager.Instance should never be null; use null-forgiving to satisfy nullable analysis.
-                var deps = IoCManager.Instance;
+                // Use injected dependency collection (mirrors MapLoaderSystem) instead of IoCManager.Instance to avoid missing registrations during map load.
+                var deps = _dependencyCollection;
                 if (deps == null)
                 {
-                    _sawmill.Error("IoCManager.Instance was unexpectedly null during ship grid load.");
+                    _sawmill.Error("Dependency collection was unexpectedly null during ship grid load.");
                     return null;
                 }
+                // Ensure MapSystem (server implementation of SharedMapSystem) is initialized; some early calls may occur
+                // before normal system initialization ordering if invoked very early in round startup or test harness.
+                if (!EntityManager.EntitySysManager.TryGetEntitySystem(typeof(MapSystem), out _))
+                {
+                    try
+                    {
+                        // Force creation - this mirrors how systems are normally lazily constructed.
+                        EntityManager.EntitySysManager.GetEntitySystem<MapSystem>();
+                        _sawmill.Debug("[ShipLoad] Lazily initialized MapSystem prior to EntityDeserializer creation.");
+                    }
+                    catch (Exception initEx)
+                    {
+                        _sawmill.Debug($"[ShipLoad] Failed to initialize MapSystem early: {initEx.Message}");
+                    }
+                }
+
                 EntityDeserializer deserializer;
-                try
+                var triedMapInit = false;
+                while (true)
                 {
-                    deserializer = new EntityDeserializer(
-                        deps!,
-                        data,
-                        opts.DeserializationOptions,
-                        ev.RenamedPrototypes,
-                        ev.DeletedPrototypes);
-                }
-                catch (Robust.Shared.IoC.Exceptions.UnregisteredDependencyException ude)
-                {
-                    // Gracefully treat missing injected dependencies (e.g., SharedMapSystem in limited context)
-                    _sawmill.Debug($"Standard grid path aborted due to unregistered dependency: {ude.Message}");
-                    return null;
+                    try
+                    {
+                        deserializer = new EntityDeserializer(
+                            deps!,
+                            data,
+                            opts.DeserializationOptions,
+                            ev.RenamedPrototypes,
+                            ev.DeletedPrototypes);
+                        break; // success
+                    }
+                    catch (Robust.Shared.IoC.Exceptions.UnregisteredDependencyException ude)
+                    {
+                        // Specifically handle missing SharedMapSystem / MapSystem once.
+                        if (!triedMapInit && ude.Message.Contains("SharedMapSystem"))
+                        {
+                            triedMapInit = true;
+                            _sawmill.Debug("[ShipLoad] Retrying deserializer after attempting MapSystem init due to missing SharedMapSystem.");
+                            try
+                            {
+                                EntityManager.EntitySysManager.GetEntitySystem<MapSystem>();
+                            }
+                            catch (Exception retryEx)
+                            {
+                                _sawmill.Debug($"[ShipLoad] MapSystem retry init failed: {retryEx.Message}");
+                                return null;
+                            }
+                            continue; // retry loop
+                        }
+                        _sawmill.Debug($"Standard grid path aborted due to unregistered dependency: {ude.Message}");
+                        return null;
+                    }
                 }
 
                 if (!deserializer.TryProcessData())

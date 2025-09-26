@@ -167,7 +167,7 @@
     soundGunshot: /Audio/Weapons/Guns/Gunshots/taser2.ogg
   - type: ProjectileBatteryAmmoProvider
     proto: BulletEnergyTurretDisabler # Frontier
-    fireCost: 10
+    fireCost: 1000
   - type: PointLight
     enabled: true
     mask: /Textures/Effects/LightMasks/cone.png
@@ -201,7 +201,7 @@
   - type: Appearance
   - type: StaticPrice
     price: 500
-    vendPrice: 6000
+    vendPrice: 12000
 
 - type: entity
   parent: BaseWeaponBallisticTurret
@@ -272,5 +272,5 @@
     size: Large
   - type: Appearance
   - type: StaticPrice
-    price: 500
-    vendPrice: 8500
+    price: 5000
+    vendPrice: 32000

@@ -164,8 +164,8 @@
     - FullAuto
     soundGunshot: /Audio/Weapons/Guns/Gunshots/lasersight.ogg
   - type: HitscanBatteryAmmoProvider
-      proto: lasersight # Frontier: use NF variant
-      fireCost: 1
+    proto: lasersight # Frontier: use NF variant
+    fireCost: 1
   - type: PointLight
     enabled: true
     mask: /Textures/Effects/LightMasks/cone.png

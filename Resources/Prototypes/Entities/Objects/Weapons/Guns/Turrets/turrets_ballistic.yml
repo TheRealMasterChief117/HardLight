@@ -158,10 +158,10 @@
       map: ["enum.GunVisualLayers.Mag"]
       shader: unshaded
   - type: Gun
-      fireRate: 10
-      selectedMode: FullAuto
-      availableModes:
-      - FullAuto
+    fireRate: 10
+    selectedMode: FullAuto
+    availableModes:
+    - FullAuto
     soundGunshot: /Audio/Weapons/Guns/Gunshots/lasersight.ogg
   - type: HitscanBatteryAmmoProvider
       proto: lasersight # Frontier: use NF variant

@@ -621,42 +621,61 @@ public sealed partial class ShipyardSystem : SharedShipyardSystem
         {
             _sawmill.Info($"[ShipLoad] Begin loading ship YAML (len={yamlData.Length}) at offset {offset}");
 
-            // Quick classification: distinguish engine-standard grid YAML vs custom ShipGridData export.
-            // Engine grid YAML starts with a 'meta:' block and then root-level keys like 'tilemap:', 'maps:', 'grids:', 'nullspace:' etc.
-            // Custom ShipGridData instead has a 'metadata:' root (after our legacy rewrite) followed by 'grids:' with structured objects.
-            bool LooksLikeStandardGridYaml(string text)
+            // Refined classification: Look only at the first few non-empty, non-comment root-level lines.
+            // If first root key is 'meta:' we treat as engine-standard grid YAML regardless of 'metadata:' appearing later inside components.
+            bool IsEngineStandardGrid(string text)
             {
-                // Cheap length guard
-                if (text.Length < 40)
-                    return false;
-                // Must have meta: and at least one of distinguishing keys.
-                if (!text.Contains("meta:") || text.Contains("metadata:"))
-                    return false; // If it already has 'metadata:' it's our custom format, not standard.
-                // Presence of tilemap/nullspace/orphans root keys is a strong signal of engine format.
-                var hasEngineRoots = text.Contains("tilemap:") || text.Contains("nullspace:") || text.Contains("orphans:");
-                if (!hasEngineRoots)
-                    return false;
-                return true;
+                using var reader = new System.IO.StringReader(text);
+                string? line;
+                var examined = 0;
+                while ((line = reader.ReadLine()) != null && examined < 30) // examine first 30 lines max
+                {
+                    var trimmed = line.Trim();
+                    if (string.IsNullOrEmpty(trimmed) || trimmed.StartsWith("#"))
+                        continue;
+                    // Root-level key? (no leading spaces)
+                    if (char.IsWhiteSpace(line, 0))
+                    {
+                        examined++;
+                        continue;
+                    }
+                    if (trimmed.StartsWith("meta:"))
+                        return true; // engine format
+                    if (trimmed.StartsWith("metadata:"))
+                        return false; // custom format
+                    // Any other root key before meta/metadata suggests custom; break.
+                    break;
+                }
+                // Fallback: if we never saw metadata but we did see characteristic engine keys globally, classify engine.
+                if (text.Contains("meta:") && (text.Contains("tilemap:") || text.Contains("nullspace:") || text.Contains("entityCount:")))
+                    return true;
+                return false;
             }
 
-            var isStandard = LooksLikeStandardGridYaml(yamlData);
+            var isStandard = IsEngineStandardGrid(yamlData);
+            var attemptedStandard = false;
 
             // 1. Fast-path: Treat YAML as an engine-standard grid file first (if heuristic says so, or we still just try anyway for safety).
             try
             {
+                attemptedStandard = true;
                 var fastGridUid = _shipSerialization.TryLoadStandardGridYaml(yamlData, map, new System.Numerics.Vector2(offset.X, offset.Y));
                 if (fastGridUid != null && EntityManager.TryGetComponent<MapGridComponent>(fastGridUid.Value, out var fastGrid))
                 {
                     grid = new Entity<MapGridComponent>(fastGridUid.Value, fastGrid);
                     _sawmill.Info($"[ShipLoad] Loaded via standard MapLoader-compatible path: {fastGridUid.Value}");
                     LogGridChildDiagnostics(fastGridUid.Value, "post-standard-load");
+                    LogPotentialOrphanedEntities(fastGridUid.Value, "post-standard-load");
+                    // Automatically purge obvious duplicate loose items that sometimes accumulate at grid origin.
+                    // This runs only once immediately after load.
+                    CleanupDuplicateOriginPile(fastGridUid.Value, "post-standard-load");
                     return true;
                 }
-                _sawmill.Debug("[ShipLoad] Standard grid YAML loader did not succeed (may be custom ship format). Proceeding to custom parser.");
+                _sawmill.Debug("[ShipLoad] Standard grid YAML loader did not succeed (may be custom or fallback needed).");
             }
             catch (Exception fastEx)
             {
-                _sawmill.Debug($"[ShipLoad] Standard grid YAML path threw: {fastEx.Message}. Will attempt custom format.");
+                _sawmill.Debug($"[ShipLoad] Standard grid YAML path threw: {fastEx.Message}.");
             }
 
             // 2. Custom ship serialization format (legacy / secure export) -> reconstruct entities manually (skip if clearly standard engine YAML)
@@ -682,6 +701,8 @@ public sealed partial class ShipyardSystem : SharedShipyardSystem
                             grid = new Entity<MapGridComponent>(shipGridUid, shipGrid);
                             _sawmill.Info($"[ShipLoad] Successfully reconstructed ship grid: {shipGridUid}");
                             LogGridChildDiagnostics(shipGridUid, "post-reconstruct");
+                            LogPotentialOrphanedEntities(shipGridUid, "post-reconstruct");
+                            CleanupDuplicateOriginPile(shipGridUid, "post-reconstruct");
                             return true;
                         }
                     }
@@ -694,6 +715,9 @@ public sealed partial class ShipyardSystem : SharedShipyardSystem
             else
             {
                 _sawmill.Debug("[ShipLoad] Skipping custom ShipGridData parser: looks like engine standard grid YAML.");
+                // If we already tried standard and it failed, jump straight to raw fallback (avoid metadata errors)
+                if (attemptedStandard)
+                    _sawmill.Debug("[ShipLoad] Proceeding directly to raw fallback deserializer for engine grid YAML.");
             }
 
             _sawmill.Debug("[ShipLoad] Proceeding to raw EntityDeserializer fallback path.");
@@ -779,7 +803,9 @@ public sealed partial class ShipyardSystem : SharedShipyardSystem
             {
                 grid = deserializer.Result.Grids.Single();
                 LogGridChildDiagnostics(grid.Value.Owner, "post-fallback-deserializer");
+                LogPotentialOrphanedEntities(grid.Value.Owner, "post-fallback-deserializer");
                 ReconcileGridChildren(grid.Value.Owner);
+                CleanupDuplicateOriginPile(grid.Value.Owner, "post-fallback-deserializer");
                 return true;
             }
 
@@ -828,6 +854,153 @@ public sealed partial class ShipyardSystem : SharedShipyardSystem
         catch
         {
             // Best-effort diagnostics; ignore failures.
+        }
+    }
+
+    /// <summary>
+    /// Logs potential duplicate / orphan entities that appear clustered near the grid's origin (0,0) and are unanchored.
+    /// This helps diagnose duplicated internal container contents (e.g. thruster/consoles ejecting their parts) on load.
+    /// </summary>
+    private void LogPotentialOrphanedEntities(EntityUid gridUid, string stage)
+    {
+        if (!_sawmill.IsDebugEnabled)
+            return;
+        try
+        {
+            var suspicious = new List<string>();
+            if (!TryComp<MapGridComponent>(gridUid, out _))
+                return;
+
+            var gridXform = Transform(gridUid);
+            foreach (var child in gridXform.ChildEnumerator)
+            {
+                if (!TryComp<TransformComponent>(child, out var childXform))
+                    continue;
+                // Only consider unanchored items within a radius (e.g. 1.5) of grid origin.
+                if (childXform.Anchored)
+                    continue;
+                if ((childXform.LocalPosition).LengthSquared() > 2.25f)
+                    continue;
+                // Skip obvious structural components (doors, docks, etc.)
+                if (HasComp<DockingComponent>(child) || HasComp<ThrusterComponent>(child))
+                    continue;
+                var meta = MetaData(child);
+                var proto = meta.EntityPrototype?.ID ?? "(no-proto)";
+                suspicious.Add($"{child} proto={proto} pos={childXform.LocalPosition}");
+            }
+
+            if (suspicious.Count > 0)
+            {
+                _sawmill.Debug($"[ShipLoad] Potential orphan/duplicate entities near origin after {stage}: {suspicious.Count}\n - " + string.Join("\n - ", suspicious.Take(40)) + (suspicious.Count > 40 ? "\n   (truncated)" : string.Empty));
+            }
+        }
+        catch (Exception ex)
+        {
+            _sawmill.Debug($"[ShipLoad] Orphan diagnostic failed: {ex.Message}");
+        }
+    }
+
+    /// <summary>
+    /// Deletes unanchored loose entities piled very close to the grid origin that appear to be duplicates of
+    /// properly contained / anchored equipment (e.g. machine parts, thrusters, consoles) created by legacy
+    /// deserialization quirks. We identify candidates by:
+    ///   - Unanchored
+    ///   - Parent is the grid (not inside a container / machine)
+    ///   - Within a small radius (default 1.75 tiles) of origin
+    ///   - Prototype matches a whitelist of typical duplicated categories OR there are multiple entities of same proto clustered
+    /// For safety we only delete if at least one anchored instance of that prototype exists elsewhere on the grid OR there
+    /// are 2+ loose copies in the pile (suggesting duplication rather than a legitimate loose item).
+    /// </summary>
+    private void CleanupDuplicateOriginPile(EntityUid gridUid, string stage)
+    {
+        try
+        {
+            if (!TryComp<MapGridComponent>(gridUid, out _))
+                return;
+
+            var origin = Transform(gridUid);
+            // Collect anchored prototypes to know what "legitimate" instances exist.
+            var anchoredProtoCounts = new Dictionary<string, int>();
+            var pileCandidates = new List<EntityUid>();
+            var pileByProto = new Dictionary<string, List<EntityUid>>();
+
+            foreach (var ent in _entityManager.GetEntities())
+            {
+                if (ent == gridUid) continue;
+                if (!TryComp<TransformComponent>(ent, out var xform)) continue;
+                if (xform.GridUid != gridUid) continue;
+                var meta = MetaData(ent);
+                var proto = meta.EntityPrototype?.ID;
+                if (proto == null) continue;
+
+                if (xform.Anchored)
+                {
+                    anchoredProtoCounts.TryGetValue(proto, out var count);
+                    anchoredProtoCounts[proto] = count + 1;
+                    continue;
+                }
+
+                // Only consider unanchored directly parented items very near origin (<= ~1.75 tile radius)
+                if (xform.ParentUid != gridUid) continue;
+                if (xform.LocalPosition.LengthSquared() > 3.0625f) continue; // 1.75^2
+
+                // Ignore players / mobs / docking parts etc.
+                if (HasComp<DockingComponent>(ent) || HasComp<ShuttleComponent>(ent))
+                    continue;
+
+                pileCandidates.Add(ent);
+                if (!pileByProto.TryGetValue(proto, out var list))
+                {
+                    list = new List<EntityUid>();
+                    pileByProto[proto] = list;
+                }
+                list.Add(ent);
+            }
+
+            if (pileCandidates.Count == 0)
+                return; // nothing to do
+
+            // Whitelist patterns frequently duplicated. Lowercase compare.
+            bool IsWhitelisted(string p)
+            {
+                p = p.ToLowerInvariant();
+                return p.Contains("thruster") || p.Contains("console") || p.Contains("computer") || p.Contains("circuit") || p.Contains("board") || p.Contains("capacitor") || p.Contains("manipulator") || p.Contains("laser") || p.Contains("scanner") || p.Contains("matter") || p.Contains("tool") || p.Contains("lamp") || p.Contains("light") || p.Contains("bulb") || p.Contains("engine");
+            }
+
+            var toDelete = new List<EntityUid>();
+            foreach (var (proto, list) in pileByProto)
+            {
+                // Safety: Only delete if more than 1 loose copy OR an anchored version exists somewhere else.
+                var looseCount = list.Count;
+                anchoredProtoCounts.TryGetValue(proto, out var anchoredCount);
+                if (looseCount == 0) continue;
+                if (anchoredCount == 0 && looseCount == 1 && !IsWhitelisted(proto))
+                    continue; // keep solitary non-whitelisted item (could be legitimately dropped)
+
+                // Retain one (if anchored copy missing and we only have loose ones) else delete all loose duplicates.
+                // If anchored copy exists, we can delete all loose copies.
+                if (anchoredCount == 0)
+                {
+                    // Keep first loose copy, delete rest.
+                    foreach (var ent in list.Skip(1)) toDelete.Add(ent);
+                }
+                else
+                {
+                    toDelete.AddRange(list); // anchored version(s) exist; purge loose pile
+                }
+            }
+
+            if (toDelete.Count == 0)
+                return;
+
+            foreach (var ent in toDelete)
+                QueueDel(ent);
+
+            _sawmill.Info($"[ShipLoad] Deleted {toDelete.Count} duplicate loose entities near origin on grid {gridUid} ({stage})");
+        }
+        catch (Exception ex)
+        {
+            _sawmill.Warning($"[ShipLoad] CleanupDuplicateOriginPile failed: {ex.Message}");
         }
     }
 

@@ -621,7 +621,27 @@ public sealed partial class ShipyardSystem : SharedShipyardSystem
         {
             _sawmill.Info($"[ShipLoad] Begin loading ship YAML (len={yamlData.Length}) at offset {offset}");
 
-            // 1. Fast-path: Treat YAML as an engine-standard grid file first.
+            // Quick classification: distinguish engine-standard grid YAML vs custom ShipGridData export.
+            // Engine grid YAML starts with a 'meta:' block and then root-level keys like 'tilemap:', 'maps:', 'grids:', 'nullspace:' etc.
+            // Custom ShipGridData instead has a 'metadata:' root (after our legacy rewrite) followed by 'grids:' with structured objects.
+            bool LooksLikeStandardGridYaml(string text)
+            {
+                // Cheap length guard
+                if (text.Length < 40)
+                    return false;
+                // Must have meta: and at least one of distinguishing keys.
+                if (!text.Contains("meta:") || text.Contains("metadata:"))
+                    return false; // If it already has 'metadata:' it's our custom format, not standard.
+                // Presence of tilemap/nullspace/orphans root keys is a strong signal of engine format.
+                var hasEngineRoots = text.Contains("tilemap:") || text.Contains("nullspace:") || text.Contains("orphans:");
+                if (!hasEngineRoots)
+                    return false;
+                return true;
+            }
+
+            var isStandard = LooksLikeStandardGridYaml(yamlData);
+
+            // 1. Fast-path: Treat YAML as an engine-standard grid file first (if heuristic says so, or we still just try anyway for safety).
             try
             {
                 var fastGridUid = _shipSerialization.TryLoadStandardGridYaml(yamlData, map, new System.Numerics.Vector2(offset.X, offset.Y));
@@ -639,34 +659,41 @@ public sealed partial class ShipyardSystem : SharedShipyardSystem
                 _sawmill.Debug($"[ShipLoad] Standard grid YAML path threw: {fastEx.Message}. Will attempt custom format.");
             }
 
-            // 2. Custom ship serialization format (legacy / secure export) -> reconstruct entities manually
-            try
+            // 2. Custom ship serialization format (legacy / secure export) -> reconstruct entities manually (skip if clearly standard engine YAML)
+            if (!isStandard)
             {
-                var shipGridData = _shipSerialization.DeserializeShipGridDataFromYaml(yamlData, Guid.Empty);
-                if (shipGridData != null)
+                try
                 {
-                    _sawmill.Info("[ShipLoad] Parsed YAML as custom ShipGridData format (legacy / secure export)");
-                    var shipGridUid = _shipSerialization.ReconstructShipOnMap(shipGridData, map, new System.Numerics.Vector2(offset.X, offset.Y));
-
-                    // Ensure the reconstructed grid has a ShuttleComponent so downstream docking logic treats it identically to purchased shuttles.
-                    if (!HasComp<ShuttleComponent>(shipGridUid))
+                    var shipGridData = _shipSerialization.DeserializeShipGridDataFromYaml(yamlData, Guid.Empty);
+                    if (shipGridData != null)
                     {
-                        EnsureComp<ShuttleComponent>(shipGridUid);
-                        _sawmill.Debug("[ShipLoad] Added missing ShuttleComponent to reconstructed grid");
-                    }
+                        _sawmill.Info("[ShipLoad] Parsed YAML as custom ShipGridData format (legacy / secure export)");
+                        var shipGridUid = _shipSerialization.ReconstructShipOnMap(shipGridData, map, new System.Numerics.Vector2(offset.X, offset.Y));
 
-                    if (EntityManager.TryGetComponent<MapGridComponent>(shipGridUid, out var shipGrid))
-                    {
-                        grid = new Entity<MapGridComponent>(shipGridUid, shipGrid);
-                        _sawmill.Info($"[ShipLoad] Successfully reconstructed ship grid: {shipGridUid}");
-                        LogGridChildDiagnostics(shipGridUid, "post-reconstruct");
-                        return true;
+                        // Ensure the reconstructed grid has a ShuttleComponent so downstream docking logic treats it identically to purchased shuttles.
+                        if (!HasComp<ShuttleComponent>(shipGridUid))
+                        {
+                            EnsureComp<ShuttleComponent>(shipGridUid);
+                            _sawmill.Debug("[ShipLoad] Added missing ShuttleComponent to reconstructed grid");
+                        }
+
+                        if (EntityManager.TryGetComponent<MapGridComponent>(shipGridUid, out var shipGrid))
+                        {
+                            grid = new Entity<MapGridComponent>(shipGridUid, shipGrid);
+                            _sawmill.Info($"[ShipLoad] Successfully reconstructed ship grid: {shipGridUid}");
+                            LogGridChildDiagnostics(shipGridUid, "post-reconstruct");
+                            return true;
+                        }
                     }
                 }
+                catch (Exception shipEx)
+                {
+                    _sawmill.Warning($"[ShipLoad] Custom ship reconstruction failed: {shipEx.Message}. Falling back to raw deserializer path.");
+                }
             }
-            catch (Exception shipEx)
+            else
             {
-                _sawmill.Warning($"[ShipLoad] Custom ship reconstruction failed: {shipEx.Message}. Falling back to raw deserializer path.");
+                _sawmill.Debug("[ShipLoad] Skipping custom ShipGridData parser: looks like engine standard grid YAML.");
             }
 
             _sawmill.Debug("[ShipLoad] Proceeding to raw EntityDeserializer fallback path.");

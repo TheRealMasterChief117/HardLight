@@ -598,7 +598,34 @@ namespace Content.Server.Shuttles.Save
             ShipGridData data;
             try
             {
-                // Try decode as our custom ShipGridData first
+                // Preprocess legacy root key 'meta' -> 'metadata' if present at top level.
+                // We only rewrite if we find 'meta:' before any non-whitespace / comment content for safety.
+                var span = yamlString.AsSpan();
+                // Quick heuristic: look for a line starting with 'meta:' (ignoring leading spaces) and also containing 'grids:' later.
+                // Avoid false positives if 'metadata:' already exists.
+                if (!yamlString.Contains("metadata:") && yamlString.IndexOf("\nmeta:") >= 0)
+                {
+                    // Replace only the first occurrence of a standalone 'meta:' at line start.
+                    var lines = yamlString.Split('\n');
+                    for (var i = 0; i < lines.Length; i++)
+                    {
+                        var trimmed = lines[i].TrimStart();
+                        if (trimmed.StartsWith("meta:") && !trimmed.StartsWith("metadata:"))
+                        {
+                            var leading = lines[i].Substring(0, lines[i].Length - trimmed.Length);
+                            lines[i] = leading + trimmed.Replace("meta:", "metadata:");
+                            wasLegacyConverted = true;
+                            break;
+                        }
+                        // Stop searching if we reach another root key that would precede metadata logically.
+                        if (trimmed.StartsWith("grids:"))
+                            break;
+                    }
+                    if (wasLegacyConverted)
+                        yamlString = string.Join('\n', lines);
+                }
+
+                // Try decode as our custom ShipGridData first (after legacy normalization)
                 data = _deserializer.Deserialize<ShipGridData>(yamlString);
             }
             catch (Exception ex)

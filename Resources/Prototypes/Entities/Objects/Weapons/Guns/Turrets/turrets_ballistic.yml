@@ -174,11 +174,11 @@
     energy: 10
     netsync: false
   - type: Battery
-    maxCharge: 100
-    startingCharge: 100
+    maxCharge: 1000
+    startingCharge: 1000
   - type: BatterySelfRecharger
     autoRecharge: true
-    autoRechargeRate: 5
+    autoRechargeRate: 50
   - type: Flatpack
     entity: SearchlightBoxDeployable
   - type: Anchorable

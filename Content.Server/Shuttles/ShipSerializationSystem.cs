@@ -79,6 +79,11 @@ namespace Content.Server.Shuttles.Save
             .WithNamingConvention(CamelCaseNamingConvention.Instance)
             .Build();
 
+        // Alternate deserializer for legacy saves that used underscored field names (format_version, original_grid_id, grid_id, etc.)
+        private IDeserializer _deserializerUnderscore = new DeserializerBuilder()
+            .WithNamingConvention(UnderscoredNamingConvention.Instance)
+            .Build();
+
         public override void Initialize()
         {
             base.Initialize();
@@ -662,8 +667,44 @@ namespace Content.Server.Shuttles.Save
                         yamlString = string.Join('\n', lines);
                 }
 
-                // Try decode as our custom ShipGridData first (after legacy normalization)
-                data = _deserializer.Deserialize<ShipGridData>(yamlString);
+                // Heuristic detection: legacy underscore style (old Robust serialization) vs new camelCase style (YamlDotNet default in this system)
+                // If we see common underscored keys we attempt the underscore deserializer first.
+                var looksUnderscore = yamlString.Contains("format_version:") ||
+                                      yamlString.Contains("original_grid_id:") ||
+                                      yamlString.Contains("grid_id:") ||
+                                      yamlString.Contains("tile_type:") ||
+                                      yamlString.Contains("entity_id:");
+
+                Exception? firstEx = null;
+                if (looksUnderscore)
+                {
+                    try
+                    {
+                        data = _deserializerUnderscore.Deserialize<ShipGridData>(yamlString);
+                        _sawmill.Debug("[ShipLoad] Parsed YAML using underscore naming convention.");
+                        return data;
+                    }
+                    catch (Exception exUnderscore)
+                    {
+                        firstEx = exUnderscore;
+                        _sawmill.Debug($"[ShipLoad] Underscore deserializer failed ({exUnderscore.Message}); attempting camelCase fallback.");
+                    }
+                }
+
+                // Fallback / primary path: camelCase
+                try
+                {
+                    data = _deserializer.Deserialize<ShipGridData>(yamlString);
+                }
+                catch (Exception exCamel)
+                {
+                    // If we already tried underscore and it failed, surface original + camel errors for context.
+                    if (firstEx != null)
+                    {
+                        _sawmill.Error($"YAML deserialization failed with both underscore ({firstEx.Message}) and camelCase ({exCamel.Message}) attempts.");
+                    }
+                    throw; // Original catch below will log again in unified format.
+                }
             }
             catch (Exception ex)
             {

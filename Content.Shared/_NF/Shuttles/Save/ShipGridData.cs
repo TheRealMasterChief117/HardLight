@@ -14,6 +14,18 @@ namespace Content.Shared.Shuttles.Save
         [DataField("metadata")]
         public ShipMetadata Metadata { get; set; } = new();
 
+        // Legacy alias: some older saves used 'meta' as the root metadata key.
+        // Provide a write-only shim so deserializer can accept it without duplicating during re-save.
+        [DataField("meta")]
+        public ShipMetadata? LegacyMeta
+        {
+            set
+            {
+                if (value != null)
+                    Metadata = value;
+            }
+        }
+
         [DataField("grids")]
         public List<GridData> Grids { get; set; } = new();
     }

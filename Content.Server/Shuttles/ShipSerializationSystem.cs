@@ -628,6 +628,40 @@ namespace Content.Server.Shuttles.Save
                         yamlString = string.Join('\n', lines);
                 }
 
+                // Additional legacy: some early saves used 'format:' instead of 'format_version:' inside metadata.
+                // Perform a simple line-based replacement only within the metadata block if present.
+                if (yamlString.Contains("format:") && !yamlString.Contains("format_version:"))
+                {
+                    // Very naive block scan: find line with 'metadata:' then replace first 'format:' encountered before 'grids:' root.
+                    var lines = yamlString.Split('\n');
+                    var inMetadata = false;
+                    for (var i = 0; i < lines.Length; i++)
+                    {
+                        var raw = lines[i];
+                        var trimmed = raw.TrimStart();
+                        if (!inMetadata)
+                        {
+                            if (trimmed.StartsWith("metadata:"))
+                                inMetadata = true;
+                        }
+                        else
+                        {
+                            // End metadata block heuristically if we hit a root-level key (no indent) like 'grids:'
+                            if (!char.IsWhiteSpace(raw, 0) && trimmed.StartsWith("grids:"))
+                                break;
+                            if (trimmed.StartsWith("format:") && !trimmed.StartsWith("format_version:"))
+                            {
+                                var leading = raw.Substring(0, raw.Length - trimmed.Length);
+                                lines[i] = leading + trimmed.Replace("format:", "format_version:");
+                                wasLegacyConverted = true;
+                                break;
+                            }
+                        }
+                    }
+                    if (wasLegacyConverted)
+                        yamlString = string.Join('\n', lines);
+                }
+
                 // Try decode as our custom ShipGridData first (after legacy normalization)
                 data = _deserializer.Deserialize<ShipGridData>(yamlString);
             }
@@ -679,12 +713,22 @@ namespace Content.Server.Shuttles.Save
                     _sawmill.Error("IoCManager.Instance was unexpectedly null during ship grid load.");
                     return null;
                 }
-                var deserializer = new EntityDeserializer(
-                    deps!,
-                    data,
-                    opts.DeserializationOptions,
-                    ev.RenamedPrototypes,
-                    ev.DeletedPrototypes);
+                EntityDeserializer deserializer;
+                try
+                {
+                    deserializer = new EntityDeserializer(
+                        deps!,
+                        data,
+                        opts.DeserializationOptions,
+                        ev.RenamedPrototypes,
+                        ev.DeletedPrototypes);
+                }
+                catch (Robust.Shared.IoC.Exceptions.UnregisteredDependencyException ude)
+                {
+                    // Gracefully treat missing injected dependencies (e.g., SharedMapSystem in limited context)
+                    _sawmill.Debug($"Standard grid path aborted due to unregistered dependency: {ude.Message}");
+                    return null;
+                }
 
                 if (!deserializer.TryProcessData())
                 {

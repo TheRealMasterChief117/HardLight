@@ -863,7 +863,8 @@ public sealed partial class ShipyardSystem : SharedShipyardSystem
     /// </summary>
     private void LogPotentialOrphanedEntities(EntityUid gridUid, string stage)
     {
-        if (!_sawmill.IsDebugEnabled)
+        // Only do work if debug level is enabled to avoid overhead.
+        if (!_sawmill.IsLogLevelEnabled(LogLevel.Debug))
             return;
         try
         {
@@ -872,7 +873,8 @@ public sealed partial class ShipyardSystem : SharedShipyardSystem
                 return;
 
             var gridXform = Transform(gridUid);
-            foreach (var child in gridXform.ChildEnumerator)
+            var childEnumerator = gridXform.ChildEnumerator;
+            while (childEnumerator.MoveNext(out var child))
             {
                 if (!TryComp<TransformComponent>(child, out var childXform))
                     continue;

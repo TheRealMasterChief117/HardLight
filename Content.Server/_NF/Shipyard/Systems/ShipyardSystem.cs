@@ -1613,7 +1613,7 @@ public sealed partial class ShipyardSystem : SharedShipyardSystem
             idDeedComponent.ShuttleName = shipName;
             idDeedComponent.ShuttleNameSuffix = ""; // No suffix for loaded ships
             idDeedComponent.ShuttleUid = GetNetEntity(shipUid);
-            idDeedComponent.PurchasedWithVoucher = true; // Mark as loaded
+            idDeedComponent.PurchasedWithVoucher = false; // Mark as loaded
 
             _sawmill.Info($"Updated ShuttleDeedComponent on ID card {idCardUid} for ship '{shipName}' ({shipUid})");
 

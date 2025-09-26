@@ -603,7 +603,10 @@ namespace Content.Server.Shuttles.Save
                 var span = yamlString.AsSpan();
                 // Quick heuristic: look for a line starting with 'meta:' (ignoring leading spaces) and also containing 'grids:' later.
                 // Avoid false positives if 'metadata:' already exists.
-                if (!yamlString.Contains("metadata:") && yamlString.IndexOf("\nmeta:") >= 0)
+                var hasMetadata = yamlString.Contains("metadata:");
+                // Detect 'meta:' even if it's the very first line (no leading newline) or later.
+                var hasLegacyMetaToken = !hasMetadata && (yamlString.StartsWith("meta:") || yamlString.Contains("\nmeta:"));
+                if (hasLegacyMetaToken)
                 {
                     // Replace only the first occurrence of a standalone 'meta:' at line start.
                     var lines = yamlString.Split('\n');

@@ -165,14 +165,15 @@
       availableModes:
       - SemiAuto
     soundGunshot: /Audio/Weapons/Guns/Gunshots/taser2.ogg
-  - type: ProjectileBatteryAmmoProvider
-    proto: BulletEnergyTurretDisabler # Frontier
-    fireCost: 1000
+  - type: HitscanBatteryAmmoProvider
+      proto: lasersight # Frontier: use NF variant
+      fireCost: 1
   - type: PointLight
     enabled: true
     mask: /Textures/Effects/LightMasks/cone.png
     autoRot: true
-    radius: 12
+    radius: 30
+    energy: 10
     netsync: false
   - type: Battery
     maxCharge: 100

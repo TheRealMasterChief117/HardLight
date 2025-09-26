@@ -197,12 +197,36 @@ public sealed class ShipyardGridSaveSystem : EntitySystem
                 };
             }
 
+            // Add a veto to exclude obvious near-origin loose duplicates from being saved.
+            // This is a safety net so we never persist the post-load duplicate pile even if cleanup missed it.
+            EntitySerializer.IsSerializableDelegate originPileVeto = (Entity<MetaDataComponent> ent, ref bool serializable) =>
+            {
+                if (!_entityManager.TryGetComponent<TransformComponent>(ent, out var xform))
+                    return;
+                if (xform.GridUid != gridUid)
+                    return;
+                // Only consider directly parented, unanchored entities very close to origin.
+                if (xform.ParentUid != gridUid || xform.Anchored)
+                    return;
+                if (xform.LocalPosition.LengthSquared() > 3.0625f) // ~1.75 tiles
+                    return;
+
+                // Heuristic match list similar to load-time cleanup; skip structure components automatically.
+                var id = ent.Comp.EntityPrototype?.ID ?? string.Empty;
+                var low = id.ToLowerInvariant();
+                if (low.Contains("thruster") || low.Contains("console") || low.Contains("computer") || low.Contains("circuit") || low.Contains("board") || low.Contains("capacitor") || low.Contains("manipulator") || low.Contains("laser") || low.Contains("scanner") || low.Contains("matter") || low.Contains("tool") || low.Contains("lamp") || low.Contains("light") || low.Contains("bulb") || low.Contains("engine"))
+                {
+                    serializable = false;
+                }
+            };
+
             var timestamp = DateTime.UtcNow.ToString("yyyyMMdd_HHmmss");
             var fileName = $"{shipName}_{timestamp}.yml";
             var tempFilePath = new ResPath("/") / "UserData" / fileName;
 
             if (veto != null)
                 _mapLoader.OnIsSerializable += veto;
+            _mapLoader.OnIsSerializable += originPileVeto;
             try
             {
                 var saved = _mapLoader.TrySaveGrid(gridUid, tempFilePath);
@@ -216,6 +240,7 @@ public sealed class ShipyardGridSaveSystem : EntitySystem
             {
                 if (veto != null)
                     _mapLoader.OnIsSerializable -= veto;
+                _mapLoader.OnIsSerializable -= originPileVeto;
             }
 
             // Read the YAML we just wrote and send to the client for local saving.

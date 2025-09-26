@@ -923,6 +923,8 @@ public sealed partial class ShipyardSystem : SharedShipyardSystem
             var origin = Transform(gridUid);
             // Collect anchored prototypes to know what "legitimate" instances exist.
             var anchoredProtoCounts = new Dictionary<string, int>();
+            // Collect container-contained prototype counts on this grid (used to identify duplicates dumped from containers)
+            var containerProtoCounts = GetContainerProtoCountsOnGrid(gridUid);
             var pileCandidates = new List<EntityUid>();
             var pileByProto = new Dictionary<string, List<EntityUid>>();
 
@@ -975,21 +977,32 @@ public sealed partial class ShipyardSystem : SharedShipyardSystem
                 // Safety: Only delete if more than 1 loose copy OR an anchored version exists somewhere else.
                 var looseCount = list.Count;
                 anchoredProtoCounts.TryGetValue(proto, out var anchoredCount);
+                containerProtoCounts.TryGetValue(proto, out var containedCount);
                 if (looseCount == 0) continue;
-                if (anchoredCount == 0 && looseCount == 1 && !IsWhitelisted(proto))
-                    continue; // keep solitary non-whitelisted item (could be legitimately dropped)
 
-                // Retain one (if anchored copy missing and we only have loose ones) else delete all loose duplicates.
-                // If anchored copy exists, we can delete all loose copies.
-                if (anchoredCount == 0)
+                // If there are anchored instances somewhere on the grid, purge all loose copies near origin.
+                if (anchoredCount > 0)
                 {
-                    // Keep first loose copy, delete rest.
-                    foreach (var ent in list.Skip(1)) toDelete.Add(ent);
+                    toDelete.AddRange(list);
+                    continue;
                 }
-                else
+
+                // If containers on this grid already contain this prototype, treat near-origin copies as duplicates.
+                if (containedCount > 0)
                 {
-                    toDelete.AddRange(list); // anchored version(s) exist; purge loose pile
+                    // Delete up to the number of contained instances to avoid over-deleting if the map legitimately had extras.
+                    var delCount = Math.Min(looseCount, containedCount);
+                    foreach (var ent in list.Take(delCount))
+                        toDelete.Add(ent);
+                    continue;
                 }
+
+                // Otherwise, keep a single copy for safety unless on whitelist, where duplication is common.
+                if (looseCount == 1 && !IsWhitelisted(proto))
+                    continue;
+
+                foreach (var ent in list.Skip(1))
+                    toDelete.Add(ent);
             }
 
             if (toDelete.Count == 0)
@@ -1004,6 +1017,45 @@ public sealed partial class ShipyardSystem : SharedShipyardSystem
         {
             _sawmill.Warning($"[ShipLoad] CleanupDuplicateOriginPile failed: {ex.Message}");
         }
+    }
+
+    /// <summary>
+    /// Builds a per-prototype count of entities contained inside any containers owned by entities on the specified grid.
+    /// Used to identify loose near-origin duplicates that actually belong in containers (e.g., boards, tools, bulbs...).
+    /// </summary>
+    private Dictionary<string, int> GetContainerProtoCountsOnGrid(EntityUid gridUid)
+    {
+        var counts = new Dictionary<string, int>();
+        try
+        {
+            var xformQuery = GetEntityQuery<TransformComponent>();
+            var metaQuery = GetEntityQuery<MetaDataComponent>();
+            var query = _entityManager.EntityQueryEnumerator<ContainerManagerComponent>();
+            while (query.MoveNext(out var ownerUid, out var manager))
+            {
+                if (!xformQuery.TryGetComponent(ownerUid, out var ownerXform))
+                    continue;
+                if (ownerXform.GridUid != gridUid)
+                    continue;
+
+                foreach (var container in manager.Containers.Values)
+                {
+                    foreach (var ent in container.ContainedEntities)
+                    {
+                        if (!metaQuery.TryGetComponent(ent, out var meta) || meta.EntityPrototype == null)
+                            continue;
+                        var proto = meta.EntityPrototype.ID;
+                        counts.TryGetValue(proto, out var c);
+                        counts[proto] = c + 1;
+                    }
+                }
+            }
+        }
+        catch
+        {
+            // best-effort; if anything fails just return what we have.
+        }
+        return counts;
     }
 
     /// <summary>

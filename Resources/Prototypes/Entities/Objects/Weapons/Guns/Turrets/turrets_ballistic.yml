@@ -162,7 +162,7 @@
       selectedMode: FullAuto
       availableModes:
       - FullAuto
-    soundGunshot: /Audio/Weapons/Guns/Gunshots/taser2.ogg
+    soundGunshot: /Audio/Weapons/Guns/Gunshots/lasersight.ogg
   - type: HitscanBatteryAmmoProvider
       proto: lasersight # Frontier: use NF variant
       fireCost: 1

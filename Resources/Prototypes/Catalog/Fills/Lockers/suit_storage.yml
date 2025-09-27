@@ -302,6 +302,24 @@
         - id: ClothingMaskGasSyndicate
         - id: JetpackBlackFilled # Frontier
 
+#Interdyne hardsuit
+- type: entity
+  id: SuitStorageInterdyne
+  parent: SuitStorageBase
+  suffix: Interdyne Hardsuit
+  components:
+  - type: StorageFill
+    contents:
+#        - id: NitrogenTankFilled
+#        - id: OxygenTankFilled
+        - id: NFTankO2N2EqualFilled # Frontier
+        - id: ClothingOuterHardsuitInterdyne
+        - id: ClothingShoesBootsMagSyndie
+        - id: ClothingMaskGasSyndicate
+        - id: JetpackBlackFilled # Frontier
+        - id: ClothingNeckMantleInterdyne
+
+
 #Pirate Captain's hardsuit
 - type: entity
   id: SuitStoragePirateCap

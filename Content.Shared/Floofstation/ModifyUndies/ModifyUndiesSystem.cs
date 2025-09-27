@@ -23,11 +23,9 @@ public sealed class ModifyUndiesSystem : EntitySystem
     [Dependency] private readonly SharedAudioSystem _audio = default!;
     [Dependency] private readonly SharedHumanoidAppearanceSystem _humanoid = default!;
     [Dependency] private readonly SharedDoAfterSystem _doAfterSystem = default!;
-    [Dependency] private readonly EntityManager _entMan = default!;
+    [Dependency] private readonly InventorySystem _inventory = default!;
+    [Dependency] private readonly IEntityManager _entMan = default!;
     [Dependency] private readonly INetManager _net = default!;
-
-    public static readonly VerbCategory UndiesCat =
-        new("verb-categories-undies", "/Textures/Interface/VerbIcons/undies.png");
 
     /// <inheritdoc/>
     public override void Initialize()
@@ -46,7 +44,7 @@ public sealed class ModifyUndiesSystem : EntitySystem
         if (!TryComp<HumanoidAppearanceComponent>(args.Target, out var humApp))
             return;
 
-        if (args.User != args.Target && _entMan.System<InventorySystem>().TryGetSlotEntity(args.Target, "jumpsuit", out _))
+        if (args.User != args.Target && _inventory.TryGetSlotEntity(args.Target, "jumpsuit", out _))
             return; // mainly so people cant just spy on others undies *too* easily
 
         var user = args.User;
@@ -86,17 +84,16 @@ public sealed class ModifyUndiesSystem : EntitySystem
                     ("undies", localizedName),
                     ("isVisible", isVisible),
                     ("isMine", isMine),
-                    ("target", Identity.Entity(target, EntityManager))
+                    ("target", Identity.Entity(target, _entMan))
                 ),
 
                 Icon = underwearIcon,
-                Category = UndiesCat,
                 Act = () =>
                 {
                     var ev = new ModifyUndiesDoAfterEvent(marking, localizedName, isVisible);
 
                     var doAfterArgs = new DoAfterArgs(
-                        EntityManager,
+                        _entMan,
                         user,
                         TimeSpan.FromSeconds(2),
                         ev,
@@ -125,7 +122,7 @@ public sealed class ModifyUndiesSystem : EntitySystem
 
                         // to the target
                         var targetString = isVisible ? "undies-removed-target-start" : "undies-equipped-target-start";
-                        var targetPopup = Loc.GetString(targetString, ("undie", localizedName), ("user", Identity.Entity(user, EntityManager)));
+                        var targetPopup = Loc.GetString(targetString, ("undie", localizedName), ("user", Identity.Entity(user, _entMan)));
                         _popupSystem.PopupClient(targetPopup, target, target, PopupType.MediumCaution);
                     }
 
@@ -159,7 +156,7 @@ public sealed class ModifyUndiesSystem : EntitySystem
         var target = args.Target.Value;
         var isMine = user == target;
 
-        _humanoid.SetLayerVisibility(ent, partSlot, !isVisible);
+        _humanoid.SetLayerVisibility(ent.Owner, partSlot, !isVisible);
 
         if (isMine)
         {
@@ -176,7 +173,7 @@ public sealed class ModifyUndiesSystem : EntitySystem
 
             // to the target
             var targetString = isVisible ? "undies-removed-target" : "undies-equipped-target";
-            var targetPopup = Loc.GetString(targetString, ("undie", localizedName), ("user", Identity.Entity(user, EntityManager)));
+            var targetPopup = Loc.GetString(targetString, ("undie", localizedName), ("user", Identity.Entity(user, _entMan)));
             _popupSystem.PopupClient(targetPopup, target, target, PopupType.MediumCaution);
         }
 

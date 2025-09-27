@@ -14,11 +14,11 @@ public sealed partial class ModifyUndiesComponent : Component
     ///     The bodypart target enums for the undies.
     /// </summary>
     [DataField, AutoNetworkedField]
-    public List<HumanoidVisualLayers> BodyPartTargets =
-    [
+    public List<HumanoidVisualLayers> BodyPartTargets = new()
+    {
         HumanoidVisualLayers.UndergarmentTop,
         HumanoidVisualLayers.UndergarmentBottom
-    ];
+    };
 
     /// <summary>
     ///     The sound played when underwear is removed or added.
@@ -26,10 +26,6 @@ public sealed partial class ModifyUndiesComponent : Component
     [DataField, AutoNetworkedField]
     public SoundSpecifier Sound = new SoundPathSpecifier("/Audio/Effects/thudswoosh.ogg")
     {
-        Params = new()
-        {
-            Variation = 0.5f,
-            Volume = 0.5f
-        }
+        Params = AudioParams.Default.WithVolume(0.5f).WithVariation(0.5f),
     };
 }

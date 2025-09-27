@@ -20,7 +20,7 @@
   class:
   - Civilian
   engine:
-  - Welding Fuel
+  - Plasma
 
 - type: gameMap
   id: Gnat

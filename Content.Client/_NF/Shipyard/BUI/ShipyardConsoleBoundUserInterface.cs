@@ -79,8 +79,8 @@ public sealed class ShipyardConsoleBoundUserInterface : BoundUserInterface
 
         if (_loadShipButton != null)
             _loadShipButton.OnPressed += OnLoadShipButtonPressed;
-        if (_saveShipButton != null)
-            _saveShipButton.OnPressed += OnSaveShipButtonPressed;
+        // Save button already wired via ShipyardConsoleMenu to raise OnSaveShip, which we handle in SaveShip()
+        // Avoid wiring a second handler that would incorrectly send a direct save request.
         if (_savedShipsList != null)
             _savedShipsList.OnItemSelected += OnSavedShipSelected;
 
@@ -91,19 +91,7 @@ public sealed class ShipyardConsoleBoundUserInterface : BoundUserInterface
         RefreshSavedShipList();
     }
 
-    private void OnSaveShipButtonPressed(BaseButton.ButtonEventArgs args)
-    {
-        // Allow saving as long as owner is valid - don't require existing ship deed
-        if (Owner.Valid)
-        {
-            _shipFileManagementSystem.RequestSaveShip(Owner);
-            Logger.Info($"Requested to save ship for entity {Owner}");
-        }
-        else
-        {
-            Logger.Warning("Cannot save ship - invalid owner");
-        }
-    }
+    // Removed duplicate direct save path to prevent sending an incorrect deed UID.
 
     private async void OnLoadShipButtonPressed(BaseButton.ButtonEventArgs args)
     {

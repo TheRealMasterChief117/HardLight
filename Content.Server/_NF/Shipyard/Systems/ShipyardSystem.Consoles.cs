@@ -53,6 +53,10 @@ using Content.Shared._NF.ShuttleRecords;
 using Content.Server.StationEvents.Components;
 using Content.Shared.Forensics.Components;
 using Robust.Server.Player;
+using Robust.Shared.Log;
+
+// Suppress naming style rule for the _NF namespace prefix (project convention)
+#pragma warning disable IDE1006
 
 namespace Content.Server._NF.Shipyard.Systems;
 
@@ -181,7 +185,7 @@ public sealed partial class ShipyardSystem : SharedShipyardSystem
             }
         }
 
-    if (!TryPurchaseShuttle(shipyardConsoleUid, vessel.ShuttlePath, out var shuttleUidOut))
+        if (!TryPurchaseShuttle(shipyardConsoleUid, vessel.ShuttlePath, out var shuttleUidOut))
         {
             PlayDenySound(player, shipyardConsoleUid, component);
             return;
@@ -380,15 +384,31 @@ public sealed partial class ShipyardSystem : SharedShipyardSystem
         ConsolePopup(player, $"Saving ship {deed.ShuttleName}... Check your Exports folder.");
         PlayConfirmSound(player, uid, component);
 
-        RefreshState(uid, balance, true, name, sellValue, targetId, (ShipyardConsoleUiKey)args.UiKey, false);
+        // Refresh UI with current deed info and player's balance
+        int balance = 0;
+        if (TryComp<BankAccountComponent>(player, out var bankAcc))
+            balance = bankAcc.Balance;
+
+        var fullName = GetFullName(deed);
+        var sellValue = 0;
+        if (deed.ShuttleUid != null && TryGetEntity(deed.ShuttleUid.Value, out var appraisalShuttle))
+        {
+            sellValue = (int)_pricing.AppraiseGrid(appraisalShuttle.Value, LacksPreserveOnSaleComp);
+            sellValue = CalculateShipResaleValue((uid, component), sellValue);
+        }
+
+        RefreshState(uid, balance, true, fullName, sellValue, targetId, (ShipyardConsoleUiKey)args.UiKey, false);
     }
 
     public void OnLoadMessage(EntityUid uid, ShipyardConsoleComponent component, ShipyardConsoleLoadMessage args)
     {
+        if (args.Actor is not { Valid: true } player)
+            return;
+
         if (component.TargetIdSlot.ContainerSlot?.ContainedEntity is not { Valid: true } targetId)
         {
             ConsolePopup(player, Loc.GetString("shipyard-console-no-idcard"));
-            PlayDenySound(player, shipyardConsoleUid, component);
+            PlayDenySound(player, uid, component);
             return;
         }
 
@@ -397,28 +417,21 @@ public sealed partial class ShipyardSystem : SharedShipyardSystem
         if (idCard is null && voucher is null)
         {
             ConsolePopup(player, Loc.GetString("shipyard-console-no-idcard"));
-            PlayDenySound(player, shipyardConsoleUid, component);
+            PlayDenySound(player, uid, component);
             return;
         }
 
         if (HasComp<ShuttleDeedComponent>(targetId))
         {
             ConsolePopup(player, Loc.GetString("shipyard-console-already-deeded"));
-            PlayDenySound(player, shipyardConsoleUid, component);
+            PlayDenySound(player, uid, component);
             return;
         }
 
-        if (TryComp<AccessReaderComponent>(shipyardConsoleUid, out var accessReaderComponent) && !_access.IsAllowed(player, shipyardConsoleUid, accessReaderComponent))
+        if (TryComp<AccessReaderComponent>(uid, out var accessReaderComponent) && !_access.IsAllowed(player, uid, accessReaderComponent))
         {
             ConsolePopup(player, Loc.GetString("comms-console-permission-denied"));
-            PlayDenySound(player, shipyardConsoleUid, component);
-            return;
-        }
-
-        if (!_prototypeManager.TryIndex<VesselPrototype>(args.Vessel, out var vessel))
-        {
-            ConsolePopup(player, Loc.GetString("shipyard-console-invalid-vessel", ("vessel", args.Vessel)));
-            PlayDenySound(player, shipyardConsoleUid, component);
+            PlayDenySound(player, uid, component);
             return;
         }
 
@@ -464,7 +477,7 @@ public sealed partial class ShipyardSystem : SharedShipyardSystem
         }
         catch (Exception ex)
         {
-            _sawmill.Error($"Error while attempting to load shuttle from file/temp: {ex}");
+            Logger.Error($"Error while attempting to load shuttle from file/temp: {ex}");
             loaded = false;
         }
 
@@ -482,20 +495,8 @@ public sealed partial class ShipyardSystem : SharedShipyardSystem
             PlayDenySound(player, uid, component);
             return;
         }
+        // For loaded ships, we don't spawn a new station via a GameMap prototype; skip station init.
         EntityUid? shuttleStation = null;
-        // setting up any stations if we have a matching game map prototype to allow late joins directly onto the vessel
-        if (_prototypeManager.TryIndex<GameMapPrototype>(vessel.ID, out var stationProto))
-        {
-            List<EntityUid> gridUids = new()
-            {
-                shuttleUid
-            };
-            shuttleStation = _station.InitializeNewStation(stationProto.Stations[vessel.ID], gridUids);
-            name = Name(shuttleStation.Value);
-
-            var vesselInfo = EnsureComp<ExtraShuttleInformationComponent>(shuttleStation.Value);
-            vesselInfo.Vessel = vessel.ID;
-        }
 
         if (TryComp<AccessComponent>(targetId, out var newCap))
         {
@@ -507,10 +508,11 @@ public sealed partial class ShipyardSystem : SharedShipyardSystem
         var deedID = EnsureComp<ShuttleDeedComponent>(targetId);
 
         var shuttleOwner = Name(player).Trim();
-        AssignShuttleDeedProperties((targetId, deedID), shuttleUid, name, shuttleOwner, voucherUsed);
+        const bool loadedFromSave = true; // mark as voucher-like to prevent resale
+        AssignShuttleDeedProperties((targetId, deedID), shuttleUid, name, shuttleOwner, loadedFromSave);
 
         var deedShuttle = EnsureComp<ShuttleDeedComponent>(shuttleUid);
-        AssignShuttleDeedProperties((shuttleUid, deedShuttle), shuttleUid, name, shuttleOwner, voucherUsed);
+        AssignShuttleDeedProperties((shuttleUid, deedShuttle), shuttleUid, name, shuttleOwner, loadedFromSave);
 
         var stationList = EntityQueryEnumerator<StationRecordsComponent>();
 
@@ -541,9 +543,9 @@ public sealed partial class ShipyardSystem : SharedShipyardSystem
                 _records.CreateGeneralRecord(shuttleStation.Value, targetId, profile.Name, profile.Age, profile.Species, profile.Gender, $"Captain", fingerprintComponent!.Fingerprint, dnaComponent!.DNA, profile, stationRec!);
             }
         }
-        _records.Synchronize(shuttleStation!.Value);
-
-        EntityManager.AddComponents(shuttleUid, vessel.AddComponents);
+        if (shuttleStation != null)
+            _records.Synchronize(shuttleStation.Value);
+        // No additional components from a vessel prototype for loaded ships.
 
         // Ensure cleanup on ship sale
         EnsureComp<LinkedLifecycleGridParentComponent>(shuttleUid);
@@ -558,10 +560,9 @@ public sealed partial class ShipyardSystem : SharedShipyardSystem
         PlayConfirmSound(player, uid, component);
 
         // Optional: show price/sell in UI; for loaded ships, resale is disabled so set 0
-        int sellValue = 0;
         int balance = 0;
-        if (TryComp<BankAccountComponent>(player, out var bank))
-            balance = bank.Balance;
+        if (TryComp<BankAccountComponent>(player, out var bankAcc2))
+            balance = bankAcc2.Balance;
 
         if (component.CanTransferDeed)
         {
@@ -571,8 +572,8 @@ public sealed partial class ShipyardSystem : SharedShipyardSystem
                     suffix: deedShuttle.ShuttleNameSuffix ?? "",
                     ownerName: shuttleOwner,
                     entityUid: EntityManager.GetNetEntity(shuttleUid),
-                    purchasedWithVoucher: voucherUsed,
-                    purchasePrice: (uint)vessel.Price
+                    purchasedWithVoucher: loadedFromSave,
+                    purchasePrice: 0u
                 )
             );
         }
@@ -587,11 +588,11 @@ public sealed partial class ShipyardSystem : SharedShipyardSystem
             try
             {
                 RaiseNetworkEvent(new Content.Shared.Shuttles.Save.DeleteLocalShipFileMessage(args.SourceFilePath!), session);
-                _sawmill.Info($"Requested client to delete local ship file '{args.SourceFilePath}' after successful load");
+                Logger.Info($"Requested client to delete local ship file '{args.SourceFilePath}' after successful load");
             }
             catch (Exception ex)
             {
-                _sawmill.Warning($"Failed to request client-side deletion for '{args.SourceFilePath}': {ex}");
+                Logger.Warning($"Failed to request client-side deletion for '{args.SourceFilePath}': {ex}");
             }
         }
     }

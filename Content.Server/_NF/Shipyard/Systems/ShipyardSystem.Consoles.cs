@@ -379,42 +379,46 @@ public sealed partial class ShipyardSystem : SharedShipyardSystem
         // Note: Deed removal happens after server confirms save success in ShipSaveSystem
         ConsolePopup(player, $"Saving ship {deed.ShuttleName}... Check your Exports folder.");
         PlayConfirmSound(player, uid, component);
+
+        RefreshState(uid, balance, true, name, sellValue, targetId, (ShipyardConsoleUiKey)args.UiKey, false);
     }
 
     public void OnLoadMessage(EntityUid uid, ShipyardConsoleComponent component, ShipyardConsoleLoadMessage args)
     {
-        if (args.Actor is not { Valid: true } player)
-            return;
-
         if (component.TargetIdSlot.ContainerSlot?.ContainedEntity is not { Valid: true } targetId)
         {
             ConsolePopup(player, Loc.GetString("shipyard-console-no-idcard"));
-            PlayDenySound(player, uid, component);
+            PlayDenySound(player, shipyardConsoleUid, component);
             return;
         }
 
-        // Require a valid ID card on the slot (mirrors purchase flow)
         TryComp<IdCardComponent>(targetId, out var idCard);
-        if (idCard is null)
+        TryComp<ShipyardVoucherComponent>(targetId, out var voucher);
+        if (idCard is null && voucher is null)
         {
-            ConsolePopup(player, Loc.GetString("shipyard-console-invalid-idcard"));
-            PlayDenySound(player, uid, component);
+            ConsolePopup(player, Loc.GetString("shipyard-console-no-idcard"));
+            PlayDenySound(player, shipyardConsoleUid, component);
             return;
         }
 
-        // Already has a deed? Don't allow loading
         if (HasComp<ShuttleDeedComponent>(targetId))
         {
             ConsolePopup(player, Loc.GetString("shipyard-console-already-deeded"));
-            PlayDenySound(player, uid, component);
+            PlayDenySound(player, shipyardConsoleUid, component);
             return;
         }
 
-        // Access reader check, same as purchase
-        if (TryComp<AccessReaderComponent>(uid, out var accessReaderComponent) && !_access.IsAllowed(player, uid, accessReaderComponent))
+        if (TryComp<AccessReaderComponent>(shipyardConsoleUid, out var accessReaderComponent) && !_access.IsAllowed(player, shipyardConsoleUid, accessReaderComponent))
         {
             ConsolePopup(player, Loc.GetString("comms-console-permission-denied"));
-            PlayDenySound(player, uid, component);
+            PlayDenySound(player, shipyardConsoleUid, component);
+            return;
+        }
+
+        if (!_prototypeManager.TryIndex<VesselPrototype>(args.Vessel, out var vessel))
+        {
+            ConsolePopup(player, Loc.GetString("shipyard-console-invalid-vessel", ("vessel", args.Vessel)));
+            PlayDenySound(player, shipyardConsoleUid, component);
             return;
         }
 
@@ -478,12 +482,21 @@ public sealed partial class ShipyardSystem : SharedShipyardSystem
             PlayDenySound(player, uid, component);
             return;
         }
+        EntityUid? shuttleStation = null;
+        // setting up any stations if we have a matching game map prototype to allow late joins directly onto the vessel
+        if (_prototypeManager.TryIndex<GameMapPrototype>(vessel.ID, out var stationProto))
+        {
+            List<EntityUid> gridUids = new()
+            {
+                shuttleUid
+            };
+            shuttleStation = _station.InitializeNewStation(stationProto.Stations[vessel.ID], gridUids);
+            name = Name(shuttleStation.Value);
 
-        // Station membership: shuttle has already been added to the console's station inside TryPurchaseShuttleFromFile.
-        // Retrieve it for records copying below.
-        EntityUid? shuttleStation = _station.GetOwningStation(shuttleUid);
+            var vesselInfo = EnsureComp<ExtraShuttleInformationComponent>(shuttleStation.Value);
+            vesselInfo.Vessel = vessel.ID;
+        }
 
-        // Merge access tags onto the ID
         if (TryComp<AccessComponent>(targetId, out var newCap))
         {
             var newAccess = newCap.Tags.ToList();
@@ -491,16 +504,16 @@ public sealed partial class ShipyardSystem : SharedShipyardSystem
             _accessSystem.TrySetTags(targetId, newAccess, newCap);
         }
 
-        // Assign deed to ID and to shuttle; mark as "purchased with voucher" to disable resale of loaded ships.
-        var shuttleOwner = Name(player).Trim();
         var deedID = EnsureComp<ShuttleDeedComponent>(targetId);
-        AssignShuttleDeedProperties((targetId, deedID), shuttleUid, name, shuttleOwner, purchasedWithVoucher: true);
+
+        var shuttleOwner = Name(player).Trim();
+        AssignShuttleDeedProperties((targetId, deedID), shuttleUid, name, shuttleOwner, voucherUsed);
 
         var deedShuttle = EnsureComp<ShuttleDeedComponent>(shuttleUid);
-        AssignShuttleDeedProperties((shuttleUid, deedShuttle), shuttleUid, name, shuttleOwner, purchasedWithVoucher: true);
+        AssignShuttleDeedProperties((shuttleUid, deedShuttle), shuttleUid, name, shuttleOwner, voucherUsed);
 
-        // Try to copy/create station records for the ship's new station
         var stationList = EntityQueryEnumerator<StationRecordsComponent>();
+
         if (TryComp<StationRecordKeyStorageComponent>(targetId, out var keyStorage)
             && shuttleStation != null
             && keyStorage.Key != null)
@@ -511,6 +524,7 @@ public sealed partial class ShipyardSystem : SharedShipyardSystem
                 if (!_records.TryGetRecord<GeneralStationRecord>(keyStorage.Key.Value, out var record))
                     continue;
 
+                //_records.RemoveRecord(keyStorage.Key.Value);
                 _records.AddRecordEntry(shuttleStation.Value, record);
                 recSuccess = true;
                 break;
@@ -527,11 +541,14 @@ public sealed partial class ShipyardSystem : SharedShipyardSystem
                 _records.CreateGeneralRecord(shuttleStation.Value, targetId, profile.Name, profile.Age, profile.Species, profile.Gender, $"Captain", fingerprintComponent!.Fingerprint, dnaComponent!.DNA, profile, stationRec!);
             }
         }
-        if (shuttleStation != null)
-            _records.Synchronize(shuttleStation.Value);
+        _records.Synchronize(shuttleStation!.Value);
 
-        // Ensure cleanup on ship sale lifecycle hooks are present
+        EntityManager.AddComponents(shuttleUid, vessel.AddComponents);
+
+        // Ensure cleanup on ship sale
         EnsureComp<LinkedLifecycleGridParentComponent>(shuttleUid);
+
+        var sellValue = 0;
 
         // Send radio messages and update UI
         SendPurchaseMessage(uid, player, name, component.ShipyardChannel, secret: false);
@@ -546,7 +563,21 @@ public sealed partial class ShipyardSystem : SharedShipyardSystem
         if (TryComp<BankAccountComponent>(player, out var bank))
             balance = bank.Balance;
 
-    RefreshState(uid, balance, true, name, sellValue, targetId, (ShipyardConsoleUiKey)args.UiKey, false);
+        if (component.CanTransferDeed)
+        {
+            _shuttleRecordsSystem.AddRecord(
+                new ShuttleRecord(
+                    name: deedShuttle.ShuttleName ?? "",
+                    suffix: deedShuttle.ShuttleNameSuffix ?? "",
+                    ownerName: shuttleOwner,
+                    entityUid: EntityManager.GetNetEntity(shuttleUid),
+                    purchasedWithVoucher: voucherUsed,
+                    purchasePrice: (uint)vessel.Price
+                )
+            );
+        }
+
+        RefreshState(uid, balance, true, name, sellValue, targetId, (ShipyardConsoleUiKey)args.UiKey, false);
 
         _adminLogger.Add(LogType.ShipYardUsage, LogImpact.Low, $"{ToPrettyString(player):actor} loaded shuttle {ToPrettyString(shuttleUid)} from {(args.SourceFilePath ?? "YAML data")} via {ToPrettyString(uid)}");
 

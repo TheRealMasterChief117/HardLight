@@ -2,6 +2,7 @@ using Content.Client._NF.Shipyard.UI;
 using Content.Shared.Containers.ItemSlots;
 using Content.Shared._NF.Shipyard.BUI;
 using Content.Shared._NF.Shipyard.Events;
+// Docked deed creation removed from Shipyard; no ShipyardConsoleCreateDeedMessage
 using static Robust.Client.UserInterface.Controls.BaseButton;
 using Robust.Client.UserInterface;
 using Content.Client.Shuttles.Save;
@@ -11,6 +12,8 @@ using Robust.Shared.IoC;
 using Robust.Shared.Log;
 using System.Linq;
 
+// Suppress naming style rule for the _NF namespace prefix (project convention)
+#pragma warning disable IDE1006
 namespace Content.Client._NF.Shipyard.BUI;
 
 public sealed class ShipyardConsoleBoundUserInterface : BoundUserInterface
@@ -28,7 +31,7 @@ public sealed class ShipyardConsoleBoundUserInterface : BoundUserInterface
     private ItemList? _savedShipsList;
     private int _selectedShipIndex = -1;
 
-
+    // Docked grids deed creation disabled for shipyard console
 
     public ShipyardConsoleBoundUserInterface(EntityUid owner, Enum uiKey) : base(owner, uiKey)
     {
@@ -90,6 +93,8 @@ public sealed class ShipyardConsoleBoundUserInterface : BoundUserInterface
 
         RefreshSavedShipList();
     }
+
+    // No docked grids deed creation handlers on shipyard console
 
     // Removed duplicate direct save path to prevent sending an incorrect deed UID.
 
@@ -202,12 +207,12 @@ public sealed class ShipyardConsoleBoundUserInterface : BoundUserInterface
 
         Balance = cState.Balance;
         ShipSellValue = cState.ShipSellValue;
-        var castState = (ShipyardConsoleInterfaceState) state;
-        Populate(castState.ShipyardPrototypes.available, castState.ShipyardPrototypes.unavailable, castState.FreeListings, castState.IsTargetIdPresent);
-        _menu?.UpdateState(castState);
+        Populate(cState.ShipyardPrototypes.available, cState.ShipyardPrototypes.unavailable, cState.FreeListings, cState.IsTargetIdPresent);
+        _menu?.UpdateState(cState);
 
-        // Don't refresh saved ships list on every update - it's handled by OnShipsUpdated event
-        // and when the UI is first opened
+        // Docked grids UI removed on shipyard console
+
+        // Don't refresh saved ships list on every update - it's handled by events
     }
 
     private void ApproveOrder(ButtonEventArgs args)

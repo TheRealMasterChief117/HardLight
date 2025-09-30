@@ -27,6 +27,8 @@ public sealed class ModifyUndiesSystem : EntitySystem
     [Dependency] private readonly IEntityManager _entMan = default!;
     [Dependency] private readonly INetManager _net = default!;
 
+    public static readonly VerbCategory UndiesCat = new("verb-categories-undies", "/Textures/Interface/VerbIcons/undies.png");
+
     /// <inheritdoc/>
     public override void Initialize()
     {
@@ -88,6 +90,7 @@ public sealed class ModifyUndiesSystem : EntitySystem
                 ),
 
                 Icon = underwearIcon,
+                Category = UndiesCat,
                 Act = () =>
                 {
                     var ev = new ModifyUndiesDoAfterEvent(marking, localizedName, isVisible);

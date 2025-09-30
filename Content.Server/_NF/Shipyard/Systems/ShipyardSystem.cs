@@ -1713,6 +1713,8 @@ public sealed partial class ShipyardSystem : SharedShipyardSystem
             RaiseLocalEvent(shipLoadedEvent);
             _sawmill.Info($"Fired ShipLoadedEvent for ship '{shipName}'");
 
+            // Commented out for now 
+            /*
             // If this load originated from a client-side file, notify the client to delete it now
             if (!string.IsNullOrEmpty(filePath) && playerSession != null)
             {
@@ -1726,7 +1728,7 @@ public sealed partial class ShipyardSystem : SharedShipyardSystem
                     _sawmill.Warning($"Failed to send delete local ship file message: {ex}");
                 }
             }
-
+            */
             // Console updates are handled by the calling method (UI feedback)
             // Additional console-specific updates could go here if needed
 

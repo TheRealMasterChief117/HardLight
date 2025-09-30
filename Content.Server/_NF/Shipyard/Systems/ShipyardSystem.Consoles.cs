@@ -620,7 +620,7 @@ public sealed partial class ShipyardSystem : SharedShipyardSystem
         RefreshState(uid, balance, true, name, sellValue, targetId, (ShipyardConsoleUiKey)args.UiKey, false);
 
         _adminLogger.Add(LogType.ShipYardUsage, LogImpact.Low, $"{ToPrettyString(player):actor} loaded shuttle {ToPrettyString(shuttleUid)} from {(args.SourceFilePath ?? "YAML data")} via {ToPrettyString(uid)}");
-
+        /* Temporarily commenting this out
         // After a successful server-side load, instruct the client to delete their local YAML file.
         if (!string.IsNullOrWhiteSpace(args.SourceFilePath) && _player.TryGetSessionByEntity(player, out var session))
         {
@@ -634,6 +634,7 @@ public sealed partial class ShipyardSystem : SharedShipyardSystem
                 Logger.Warning($"Failed to request client-side deletion for '{args.SourceFilePath}': {ex}");
             }
         }
+        */
     }
 
 

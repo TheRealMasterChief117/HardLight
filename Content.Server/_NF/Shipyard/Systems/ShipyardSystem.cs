@@ -21,6 +21,7 @@ using System.Linq;
 using System.Numerics;
 using System.Threading.Tasks;
 using Content.Shared._NF.Shipyard.Events;
+using Content.Shared._NF.Bank.Components; // For BankAccountComponent
 using Content.Shared.Mobs.Components;
 using Robust.Shared.Containers;
 using Content.Server._NF.Station.Components;
@@ -97,6 +98,7 @@ public sealed partial class ShipyardSystem : SharedShipyardSystem
     [Dependency] private readonly ITileDefinitionManager _tileDefManager = default!; // For tile lookups in clipping resolver
     [Dependency] private readonly EntityLookupSystem _lookup = default!; // For physics overlap checks
     [Dependency] private readonly SharedContainerSystem _container = default!; // For safe container removal before deletion
+    [Dependency] private readonly SharedPopupSystem _popupSystem = default!; // For user feedback popups
 
     public MapId? ShipyardMap { get; private set; }
     private float _shuttleIndex;
@@ -137,6 +139,7 @@ public sealed partial class ShipyardSystem : SharedShipyardSystem
         SubscribeLocalEvent<ShipyardConsoleComponent, ComponentStartup>(OnShipyardStartup);
         SubscribeLocalEvent<ShipyardConsoleComponent, BoundUIOpenedEvent>(OnConsoleUIOpened);
         SubscribeLocalEvent<ShipyardConsoleComponent, ShipyardConsoleSellMessage>(OnSellMessage);
+        // Docked-grid deed creation is handled in Shuttle Records, not Shipyard
         SubscribeLocalEvent<ShipyardConsoleComponent, ShipyardConsolePurchaseMessage>(OnPurchaseMessage);
         // Ship saving/loading functionality
         SubscribeLocalEvent<ShipyardConsoleComponent, ShipyardConsoleLoadMessage>(OnLoadMessage);
@@ -180,6 +183,8 @@ public sealed partial class ShipyardSystem : SharedShipyardSystem
     {
         _baseSaleRate = Math.Clamp(value, 0.0f, 1.0f);
     }
+
+    // Docked-grid deed creation logic removed from Shipyard; use Shuttle Records console instead
 
     /// <summary>
     /// Adds a ship to the shipyard, calculates its price, and attempts to ftl-dock it to the given station

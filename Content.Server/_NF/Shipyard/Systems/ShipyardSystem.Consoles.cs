@@ -54,6 +54,8 @@ using Content.Server.StationEvents.Components;
 using Content.Shared.Forensics.Components;
 using Robust.Server.Player;
 using Robust.Shared.Log;
+using Content.Shared.Shuttles.Components;
+using Content.Server.Shuttles.Systems;
 
 // Suppress naming style rule for the _NF namespace prefix (project convention)
 #pragma warning disable IDE1006
@@ -80,6 +82,7 @@ public sealed partial class ShipyardSystem : SharedShipyardSystem
     [Dependency] private readonly MindSystem _mind = default!;
     [Dependency] private readonly ShuttleRecordsSystem _shuttleRecordsSystem = default!;
     [Dependency] private readonly IMapManager _mapManager = default!;
+    [Dependency] private readonly DockingSystem _dockingSystem = default!;
 
     private static readonly Regex DeedRegex = new(@"\s*\([^()]*\)");
 
@@ -1098,6 +1101,8 @@ public sealed partial class ShipyardSystem : SharedShipyardSystem
 
         _ui.SetUiState(uid, uiKey, newState);
     }
+
+    // Shipyard console no longer exposes docked grids for deed creation
 
     #region Deed Assignment
     void AssignShuttleDeedProperties(Entity<ShuttleDeedComponent> deed, EntityUid? shuttleUid, string? shuttleName, string? shuttleOwner, bool purchasedWithVoucher)

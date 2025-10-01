@@ -357,6 +357,22 @@ public sealed partial class ShipyardSystem : SharedShipyardSystem
                 PurgeJointsAndResetDocks(loadedGrid.Value);
                 CleanupDuplicateLooseParts(loadedGrid.Value);
                 AutoAnchorInfrastructure(loadedGrid.Value);
+
+                // Important: Treat loaded ships like independent shuttles, not part of the station.
+                // The purchase-from-file path temporarily adds the grid to the console's station for IFF/ownership.
+                // That causes station-wide events (alerts, etc.) to target the loaded ship. Remove that membership.
+                if (TryComp<Content.Shared.Station.Components.StationMemberComponent>(loadedGrid.Value, out var member))
+                {
+                    try
+                    {
+                        _station.RemoveGridFromStation(member.Station, loadedGrid.Value);
+                        _sawmill.Info($"[ShipLoad] Removed station membership from loaded ship grid {loadedGrid.Value} (station {member.Station})");
+                    }
+                    catch (Exception rmEx)
+                    {
+                        _sawmill.Warning($"[ShipLoad] Failed to remove station membership from {loadedGrid.Value}: {rmEx.Message}");
+                    }
+                }
             }
             catch (Exception postEx)
             {
@@ -1718,7 +1734,7 @@ public sealed partial class ShipyardSystem : SharedShipyardSystem
             RaiseLocalEvent(shipLoadedEvent);
             _sawmill.Info($"Fired ShipLoadedEvent for ship '{shipName}'");
 
-            // Commented out for now 
+            // Commented out for now
             /*
             // If this load originated from a client-side file, notify the client to delete it now
             if (!string.IsNullOrEmpty(filePath) && playerSession != null)

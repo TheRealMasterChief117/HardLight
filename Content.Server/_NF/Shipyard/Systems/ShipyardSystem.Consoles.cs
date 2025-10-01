@@ -523,6 +523,24 @@ public sealed partial class ShipyardSystem : SharedShipyardSystem
             PlayDenySound(player, uid, component);
             return;
         }
+
+        // Important: Treat loaded ships like independent shuttles, not part of the console's station.
+        // The purchase-from-file path temporarily adds the grid to the console's station for IFF/ownership.
+        // That causes station-wide events (alerts, etc.) to target the loaded ship. Remove that membership here.
+        try
+        {
+            var consoleStation = _station.GetOwningStation(uid);
+            if (consoleStation != null && TryComp<Content.Shared.Station.Components.StationMemberComponent>(shuttleUid, out var member)
+                && member.Station == consoleStation)
+            {
+                _station.RemoveGridFromStation(consoleStation.Value, shuttleUid);
+                Logger.Info($"[ShipLoad(Console)] Removed station membership from loaded ship {ToPrettyString(shuttleUid)} (station {ToPrettyString(consoleStation.Value)})");
+            }
+        }
+        catch (Exception rmEx)
+        {
+            Logger.Warning($"[ShipLoad(Console)] Failed to remove station membership from {ToPrettyString(shuttleUid)}: {rmEx.Message}");
+        }
         // For loaded ships, we don't spawn a new station via a GameMap prototype unless we can infer the vessel ID.
         EntityUid? shuttleStation = null;
         if (vessel != null && _prototypeManager.TryIndex<GameMapPrototype>(vessel.ID, out var stationProto))

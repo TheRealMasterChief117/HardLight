@@ -5,6 +5,7 @@ using Content.Server.Shuttles.Systems;
 using Content.Server.Shuttles.Components;
 using Content.Server.Station.Components;
 using Content.Shared.Station.Components; // For StationMemberComponent
+using StationMemberComponent = Content.Shared.Station.Components.StationMemberComponent;
 using Content.Server.Cargo.Systems;
 using Content.Server.Station.Systems;
 using Content.Shared._NF.Shipyard.Components;
@@ -361,7 +362,7 @@ public sealed partial class ShipyardSystem : SharedShipyardSystem
                 // Important: Treat loaded ships like independent shuttles, not part of the station.
                 // The purchase-from-file path temporarily adds the grid to the console's station for IFF/ownership.
                 // That causes station-wide events (alerts, etc.) to target the loaded ship. Remove that membership.
-                if (TryComp<Content.Shared.Station.Components.StationMemberComponent>(loadedGrid.Value, out var member))
+                if (TryComp<StationMemberComponent>(loadedGrid.Value, out var member))
                 {
                     try
                     {

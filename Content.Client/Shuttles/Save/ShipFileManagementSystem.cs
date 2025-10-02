@@ -238,7 +238,7 @@ namespace Content.Client.Shuttles.Save
             return yamlData;
         }
 
-    private void LoadExistingShips()
+        private void LoadExistingShips()
         {
             try
             {

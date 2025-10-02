@@ -1,3 +1,4 @@
+using StationMemberComponent = Content.Shared.Station.Components.StationMemberComponent;
 using Content.Server.Access.Systems;
 using Content.Server.Popups;
 using Content.Server.Radio.EntitySystems;
@@ -46,6 +47,7 @@ using System.Text.RegularExpressions;
 using Content.Shared.UserInterface;
 using System;
 using System.Threading.Tasks;
+using Content.Shared.Chat; // For InGameICChatType
 using Robust.Shared.Audio.Systems;
 using Content.Shared.Access;
 using Content.Shared._NF.Bank.BUI;
@@ -530,7 +532,7 @@ public sealed partial class ShipyardSystem : SharedShipyardSystem
         try
         {
             var consoleStation = _station.GetOwningStation(uid);
-            if (consoleStation != null && TryComp<Content.Shared.Station.Components.StationMemberComponent>(shuttleUid, out var member)
+            if (consoleStation != null && TryComp<StationMemberComponent>(shuttleUid, out var member)
                 && member.Station == consoleStation)
             {
                 _station.RemoveGridFromStation(consoleStation.Value, shuttleUid);

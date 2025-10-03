@@ -5,6 +5,7 @@ using Content.Server.Shuttles.Systems;
 using Content.Server.Shuttles.Components;
 using Content.Server.Station.Components;
 using Content.Shared.Station.Components; // For StationMemberComponent
+using StationMemberComponent = Content.Shared.Station.Components.StationMemberComponent;
 using Content.Server.Cargo.Systems;
 using Content.Server.Station.Systems;
 using Content.Shared._NF.Shipyard.Components;
@@ -21,6 +22,7 @@ using System.Linq;
 using System.Numerics;
 using System.Threading.Tasks;
 using Content.Shared._NF.Shipyard.Events;
+using Content.Shared._NF.Bank.Components; // For BankAccountComponent
 using Content.Shared.Mobs.Components;
 using Robust.Shared.Containers;
 using Content.Server._NF.Station.Components;
@@ -97,6 +99,7 @@ public sealed partial class ShipyardSystem : SharedShipyardSystem
     [Dependency] private readonly ITileDefinitionManager _tileDefManager = default!; // For tile lookups in clipping resolver
     [Dependency] private readonly EntityLookupSystem _lookup = default!; // For physics overlap checks
     [Dependency] private readonly SharedContainerSystem _container = default!; // For safe container removal before deletion
+    [Dependency] private readonly SharedPopupSystem _popupSystem = default!; // For user feedback popups
 
     public MapId? ShipyardMap { get; private set; }
     private float _shuttleIndex;
@@ -137,6 +140,7 @@ public sealed partial class ShipyardSystem : SharedShipyardSystem
         SubscribeLocalEvent<ShipyardConsoleComponent, ComponentStartup>(OnShipyardStartup);
         SubscribeLocalEvent<ShipyardConsoleComponent, BoundUIOpenedEvent>(OnConsoleUIOpened);
         SubscribeLocalEvent<ShipyardConsoleComponent, ShipyardConsoleSellMessage>(OnSellMessage);
+        // Docked-grid deed creation is handled in Shuttle Records, not Shipyard
         SubscribeLocalEvent<ShipyardConsoleComponent, ShipyardConsolePurchaseMessage>(OnPurchaseMessage);
         // Ship saving/loading functionality
         SubscribeLocalEvent<ShipyardConsoleComponent, ShipyardConsoleLoadMessage>(OnLoadMessage);
@@ -180,6 +184,8 @@ public sealed partial class ShipyardSystem : SharedShipyardSystem
     {
         _baseSaleRate = Math.Clamp(value, 0.0f, 1.0f);
     }
+
+    // Docked-grid deed creation logic removed from Shipyard; use Shuttle Records console instead
 
     /// <summary>
     /// Adds a ship to the shipyard, calculates its price, and attempts to ftl-dock it to the given station
@@ -352,6 +358,22 @@ public sealed partial class ShipyardSystem : SharedShipyardSystem
                 PurgeJointsAndResetDocks(loadedGrid.Value);
                 CleanupDuplicateLooseParts(loadedGrid.Value);
                 AutoAnchorInfrastructure(loadedGrid.Value);
+
+                // Important: Treat loaded ships like independent shuttles, not part of the station.
+                // The purchase-from-file path temporarily adds the grid to the console's station for IFF/ownership.
+                // That causes station-wide events (alerts, etc.) to target the loaded ship. Remove that membership.
+                if (TryComp<StationMemberComponent>(loadedGrid.Value, out var member))
+                {
+                    try
+                    {
+                        _station.RemoveGridFromStation(member.Station, loadedGrid.Value);
+                        _sawmill.Info($"[ShipLoad] Removed station membership from loaded ship grid {loadedGrid.Value} (station {member.Station})");
+                    }
+                    catch (Exception rmEx)
+                    {
+                        _sawmill.Warning($"[ShipLoad] Failed to remove station membership from {loadedGrid.Value}: {rmEx.Message}");
+                    }
+                }
             }
             catch (Exception postEx)
             {
@@ -1713,6 +1735,8 @@ public sealed partial class ShipyardSystem : SharedShipyardSystem
             RaiseLocalEvent(shipLoadedEvent);
             _sawmill.Info($"Fired ShipLoadedEvent for ship '{shipName}'");
 
+            // Commented out for now
+            /*
             // If this load originated from a client-side file, notify the client to delete it now
             if (!string.IsNullOrEmpty(filePath) && playerSession != null)
             {
@@ -1726,7 +1750,7 @@ public sealed partial class ShipyardSystem : SharedShipyardSystem
                     _sawmill.Warning($"Failed to send delete local ship file message: {ex}");
                 }
             }
-
+            */
             // Console updates are handled by the calling method (UI feedback)
             // Additional console-specific updates could go here if needed
 

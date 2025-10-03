@@ -1,3 +1,4 @@
+using StationMemberComponent = Content.Shared.Station.Components.StationMemberComponent;
 using Content.Server.Access.Systems;
 using Content.Server.Popups;
 using Content.Server.Radio.EntitySystems;
@@ -46,6 +47,7 @@ using System.Text.RegularExpressions;
 using Content.Shared.UserInterface;
 using System;
 using System.Threading.Tasks;
+using Content.Shared.Chat; // For InGameICChatType
 using Robust.Shared.Audio.Systems;
 using Content.Shared.Access;
 using Content.Shared._NF.Bank.BUI;
@@ -54,6 +56,8 @@ using Content.Server.StationEvents.Components;
 using Content.Shared.Forensics.Components;
 using Robust.Server.Player;
 using Robust.Shared.Log;
+using Content.Shared.Shuttles.Components;
+using Content.Server.Shuttles.Systems;
 
 // Suppress naming style rule for the _NF namespace prefix (project convention)
 #pragma warning disable IDE1006
@@ -80,6 +84,7 @@ public sealed partial class ShipyardSystem : SharedShipyardSystem
     [Dependency] private readonly MindSystem _mind = default!;
     [Dependency] private readonly ShuttleRecordsSystem _shuttleRecordsSystem = default!;
     [Dependency] private readonly IMapManager _mapManager = default!;
+    [Dependency] private readonly DockingSystem _dockingSystem = default!;
 
     private static readonly Regex DeedRegex = new(@"\s*\([^()]*\)");
 
@@ -450,6 +455,31 @@ public sealed partial class ShipyardSystem : SharedShipyardSystem
         }
         name ??= $"LoadedShip_{DateTime.Now:yyyyMMdd_HHmmss}";
 
+        // Best-effort: infer a vessel prototype from the source file path or the computed name
+        VesselPrototype? vessel = null;
+        try
+        {
+            if (!string.IsNullOrWhiteSpace(args.SourceFilePath))
+            {
+                var fileId = System.IO.Path.GetFileNameWithoutExtension(args.SourceFilePath);
+                if (!string.IsNullOrWhiteSpace(fileId) && _prototypeManager.TryIndex<VesselPrototype>(fileId, out var vByFile))
+                    vessel = vByFile;
+            }
+
+            if (vessel == null && !string.IsNullOrWhiteSpace(name))
+            {
+                // As a fallback, try to match by display name (case-insensitive)
+                var match = _prototypeManager.EnumeratePrototypes<VesselPrototype>()
+                    .FirstOrDefault(p => string.Equals(p.Name, name, StringComparison.OrdinalIgnoreCase));
+                if (match != null)
+                    vessel = match;
+            }
+        }
+        catch
+        {
+            // Ignore inference errors; we'll guard vessel usages below.
+        }
+
         // Attempt to load the shuttle using the exact purchase-from-file path.
         // If the client provided a source file path under UserData, use it; otherwise, write YAML to a temp and load from there.
         EntityUid? shuttleUidOut = null;
@@ -495,8 +525,38 @@ public sealed partial class ShipyardSystem : SharedShipyardSystem
             PlayDenySound(player, uid, component);
             return;
         }
-        // For loaded ships, we don't spawn a new station via a GameMap prototype; skip station init.
+
+        // Important: Treat loaded ships like independent shuttles, not part of the console's station.
+        // The purchase-from-file path temporarily adds the grid to the console's station for IFF/ownership.
+        // That causes station-wide events (alerts, etc.) to target the loaded ship. Remove that membership here.
+        try
+        {
+            var consoleStation = _station.GetOwningStation(uid);
+            if (consoleStation != null && TryComp<StationMemberComponent>(shuttleUid, out var member)
+                && member.Station == consoleStation)
+            {
+                _station.RemoveGridFromStation(consoleStation.Value, shuttleUid);
+                Logger.Info($"[ShipLoad(Console)] Removed station membership from loaded ship {ToPrettyString(shuttleUid)} (station {ToPrettyString(consoleStation.Value)})");
+            }
+        }
+        catch (Exception rmEx)
+        {
+            Logger.Warning($"[ShipLoad(Console)] Failed to remove station membership from {ToPrettyString(shuttleUid)}: {rmEx.Message}");
+        }
+        // For loaded ships, we don't spawn a new station via a GameMap prototype unless we can infer the vessel ID.
         EntityUid? shuttleStation = null;
+        if (vessel != null && _prototypeManager.TryIndex<GameMapPrototype>(vessel.ID, out var stationProto))
+        {
+            List<EntityUid> gridUids = new()
+            {
+                shuttleUid
+            };
+            shuttleStation = _station.InitializeNewStation(stationProto.Stations[vessel.ID], gridUids);
+            name = Name(shuttleStation.Value);
+
+            var vesselInfo = EnsureComp<ExtraShuttleInformationComponent>(shuttleStation.Value);
+            vesselInfo.Vessel = vessel.ID;
+        }
 
         if (TryComp<AccessComponent>(targetId, out var newCap))
         {
@@ -545,7 +605,9 @@ public sealed partial class ShipyardSystem : SharedShipyardSystem
         }
         if (shuttleStation != null)
             _records.Synchronize(shuttleStation.Value);
-        // No additional components from a vessel prototype for loaded ships.
+        // If we managed to infer a vessel prototype, add any extra components it specifies.
+        if (vessel != null)
+            EntityManager.AddComponents(shuttleUid, vessel.AddComponents);
 
         // Ensure cleanup on ship sale
         EnsureComp<LinkedLifecycleGridParentComponent>(shuttleUid);
@@ -573,7 +635,7 @@ public sealed partial class ShipyardSystem : SharedShipyardSystem
                     ownerName: shuttleOwner,
                     entityUid: EntityManager.GetNetEntity(shuttleUid),
                     purchasedWithVoucher: loadedFromSave,
-                    purchasePrice: 0u
+                    purchasePrice: (uint)(vessel?.Price ?? 0)
                 )
             );
         }
@@ -595,6 +657,7 @@ public sealed partial class ShipyardSystem : SharedShipyardSystem
                 Logger.Warning($"Failed to request client-side deletion for '{args.SourceFilePath}': {ex}");
             }
         }
+
     }
 
 
@@ -1058,6 +1121,8 @@ public sealed partial class ShipyardSystem : SharedShipyardSystem
 
         _ui.SetUiState(uid, uiKey, newState);
     }
+
+    // Shipyard console no longer exposes docked grids for deed creation
 
     #region Deed Assignment
     void AssignShuttleDeedProperties(Entity<ShuttleDeedComponent> deed, EntityUid? shuttleUid, string? shuttleName, string? shuttleOwner, bool purchasedWithVoucher)

@@ -7,7 +7,7 @@
   parent: BaseVessel
   name: USS Mayflower mk II
   description: Designed and produced by SESWC. Heavily Upgraded from the Mayflower MKI. This expedition capable bounty hunters ship offers two armorys, small medical treatment bay, expand cargo bay, Two confinment cells, captain quaters and crew quater with addition station like lattice protection!
-  price: 100000 # ~91000 on mapinit
+  price: 100000 # 89838 on mapinit 13 percent mark up
   category: Medium
   group: Expedition
   shuttlePath: /Maps/_HL/Shuttles/Expedition/mayflowerII.yml

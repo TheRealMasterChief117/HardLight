@@ -47,6 +47,8 @@ using Robust.Shared.Serialization.Markdown.Value;
 using YamlDotNet.RepresentationModel;
 using YamlDotNet.Core;
 using Robust.Shared.Serialization;
+using Content.Shared.Storage.Components;
+using Robust.Shared.GameStates;
 
 // Suppress RA0004 for this file. There is no Task<Result> usage here, but the analyzer
 // occasionally reports a false positive during Release/integration builds.
@@ -189,6 +191,9 @@ public sealed class ShipyardGridSaveSystem : EntitySystem
 
         try
         {
+            // Per user request: before purging / serializing, add SecretStashComponent to any entity contained
+            // directly within a secret stash so that they are also considered preserved.
+            TagStashContents(gridUid);
             // Purge transient entities (unanchored or inside containers) before serialization.
             // This mutates the live grid, but only removes objects explicitly deemed non-persistent by design.
             PurgeTransientEntities(gridUid);
@@ -245,6 +250,42 @@ public sealed class ShipyardGridSaveSystem : EntitySystem
     }
 
     /// <summary>
+    /// Adds <see cref="SecretStashComponent"/> to any entity currently hidden inside a SecretStash on the target grid.
+    /// This satisfies the explicit requirement to "add secretstashcomponent to anything within the bluespace stash".
+    /// NOTE: This will grant those items stash-like behavior (verbs, extra container). If this becomes undesirable,
+    /// consider introducing a lightweight marker component instead and adjusting purge logic to check it.
+    /// </summary>
+    private void TagStashContents(EntityUid gridUid)
+    {
+        try
+        {
+            var tagged = 0;
+            var stashQuery = _entityManager.EntityQueryEnumerator<SecretStashComponent, TransformComponent>();
+            while (stashQuery.MoveNext(out var stashEnt, out var stashComp, out var xform))
+            {
+                if (xform.GridUid != gridUid)
+                    continue;
+                var hidden = stashComp.ItemContainer?.ContainedEntity;
+                if (hidden == null)
+                    continue;
+                // If already a stash, skip.
+                if (_entityManager.HasComponent<SecretStashComponent>(hidden.Value))
+                    continue;
+                // Dynamically add the component. OnInit won't run automatically here for networked comps
+                // when added at runtime; EnsureComp will construct and initialize it.
+                _entityManager.EnsureComponent<SecretStashComponent>(hidden.Value);
+                tagged++;
+            }
+            if (tagged > 0)
+                _sawmill.Info($"TagStashContents: Added SecretStashComponent to {tagged} hidden item(s) on grid {gridUid}");
+        }
+        catch (Exception e)
+        {
+            _sawmill.Warning($"TagStashContents: Exception while tagging stash contents on grid {gridUid}: {e.Message}");
+        }
+    }
+
+    /// <summary>
     /// Deletes entities on the grid that should not be persisted with the ship:
     ///  - Any entity whose Transform is not Anchored
     ///  - Any entity that is currently inside any container (including nested)
@@ -261,6 +302,27 @@ public sealed class ShipyardGridSaveSystem : EntitySystem
             var containerContentDeletes = new List<EntityUid>();
             var processed = new HashSet<EntityUid>();
 
+            // Pre-mark all stash roots and their direct hidden item contents as processed so they are never purged.
+            // (User request was to make stash contents survive; instead of mutating items with SecretStashComponent we just exempt them here.)
+            var stashQuery = _entityManager.EntityQueryEnumerator<SecretStashComponent, TransformComponent>();
+            var preservedStashItemCount = 0;
+            while (stashQuery.MoveNext(out var stashEnt, out var stashComp, out var xform))
+            {
+                if (xform.GridUid != gridUid)
+                    continue;
+                processed.Add(stashEnt); // stash root
+                var hidden = stashComp.ItemContainer?.ContainedEntity;
+                if (hidden != null && _entityManager.EntityExists(hidden.Value))
+                {
+                    // Mark the hidden item as processed so fallback scans won't queue it for deletion.
+                    processed.Add(hidden.Value);
+                    preservedStashItemCount++;
+                }
+            }
+
+            if (preservedStashItemCount > 0)
+                _sawmill.Info($"PurgeTransientEntities: Preserving {preservedStashItemCount} secret stash item(s) on grid {gridUid}");
+
             _sawmill.Info($"PurgeTransientEntities: Scanning grid {gridUid} for transient entities (loose + contained)");
 
             // 1. Collect all entities spatially present on the grid (this won't include items inside containers)
@@ -268,6 +330,9 @@ public sealed class ShipyardGridSaveSystem : EntitySystem
             {
                 if (ent == gridUid)
                     continue;
+                // Preserve any secret stash root or bluespace stash prototype entity itself
+                if (_entityManager.HasComponent<SecretStashComponent>(ent) || IsBluespaceStashPrototype(ent))
+                    processed.Add(ent); // don't treat stash as loose
                 if (!TryQueueLoose(ent, looseDeletes, processed))
                     continue;
             }
@@ -278,6 +343,9 @@ public sealed class ShipyardGridSaveSystem : EntitySystem
                 if (ent == gridUid)
                     continue;
                 if (!_entityManager.TryGetComponent<ContainerManagerComponent>(ent, out var manager))
+                    continue;
+                // If this entity is a stash or bluespace stash, preserve its contents entirely.
+                if (_entityManager.HasComponent<SecretStashComponent>(ent) || IsBluespaceStashPrototype(ent))
                     continue;
                 foreach (var container in manager.Containers.Values)
                 {
@@ -311,9 +379,16 @@ public sealed class ShipyardGridSaveSystem : EntitySystem
                         continue;
                     if (xform.GridUid != gridUid)
                         continue;
+                    if (_entityManager.HasComponent<SecretStashComponent>(ent) || IsBluespaceStashPrototype(ent))
+                    {
+                        fallbackProcessed.Add(ent);
+                        continue; // stash root preserved
+                    }
                     TryQueueLoose(ent, fallbackLoose, fallbackProcessed);
                     if (_entityManager.TryGetComponent<ContainerManagerComponent>(ent, out var mgr))
                     {
+                        if (_entityManager.HasComponent<SecretStashComponent>(ent) || IsBluespaceStashPrototype(ent))
+                            continue; // don't traverse preserved stash contents
                         foreach (var container in mgr.Containers.Values)
                             CollectContainerContentsRecursive(container.ContainedEntities, fallbackContained, fallbackProcessed);
                     }
@@ -361,12 +436,20 @@ public sealed class ShipyardGridSaveSystem : EntitySystem
         // Skip if terminating
         if (_entityManager.GetComponent<MetaDataComponent>(ent).EntityLifeStage >= EntityLifeStage.Terminating)
             return false;
+        if (_entityManager.HasComponent<SecretStashComponent>(ent) || IsBluespaceStashPrototype(ent))
+            return false; // preserve stash root outright
         if (_entityManager.HasComponent<MapGridComponent>(ent))
             return false; // never delete grid root or nested grids here
         var anchored = false;
         if (_entityManager.TryGetComponent<TransformComponent>(ent, out var xform))
             anchored = xform.Anchored;
         var inContainer = _containerSystem.IsEntityInContainer(ent);
+        if (inContainer)
+        {
+            // If this entity (at any ancestor depth) is ultimately inside a secret stash preserve it.
+            if (IsInsideSecretStash(ent))
+                return false;
+        }
         if (!anchored || inContainer)
         {
             list.Add(ent);
@@ -384,6 +467,12 @@ public sealed class ShipyardGridSaveSystem : EntitySystem
                 continue;
             if (!processed.Add(ent))
                 continue;
+            // If the entity is a secret stash root, preserve it and do not descend or queue its contents.
+            if (_entityManager.HasComponent<SecretStashComponent>(ent) || IsBluespaceStashPrototype(ent))
+                continue;
+            // If this entity (or an ancestor) is inside a secret stash we preserve it (do not queue) but still must not descend further since entire subtree should be kept.
+            if (IsInsideSecretStash(ent))
+                continue;
             aggregate.Add(ent);
             if (_entityManager.TryGetComponent<ContainerManagerComponent>(ent, out var manager))
             {
@@ -393,6 +482,44 @@ public sealed class ShipyardGridSaveSystem : EntitySystem
                 }
             }
         }
+    }
+
+    /// <summary>
+    /// Returns true if the given entity is contained (at any depth) within a <see cref="SecretStashComponent"/>.
+    /// Walks up container parents until a non-contained entity is reached or a stash root is found.
+    /// </summary>
+    private bool IsInsideSecretStash(EntityUid ent)
+    {
+        // Fast path: immediately contained?
+        if (!_containerSystem.IsEntityInContainer(ent))
+            return false;
+        // Walk up container chain.
+        EntityUid current = ent;
+        var safety = 0;
+        while (safety++ < 64 && _containerSystem.TryGetContainingContainer(current, out var container))
+        {
+            var owner = container.Owner;
+            if (!_entityManager.EntityExists(owner))
+                return false;
+            if (_entityManager.HasComponent<SecretStashComponent>(owner))
+                return true; // Found stash root above.
+            // Also treat bluespacestash prototype (storage-based) as a preservation root.
+            if (IsBluespaceStashPrototype(owner))
+                return true; // Found stash root above.
+            current = owner;
+        }
+        return false;
+    }
+
+    /// <summary>
+    /// Returns true if this entity's prototype id matches the explicit bluespace stash prototype we need to preserve.
+    /// </summary>
+    private bool IsBluespaceStashPrototype(EntityUid ent)
+    {
+        if (!_entityManager.TryGetComponent<MetaDataComponent>(ent, out var meta))
+            return false;
+        // Prototype id comparison (case-insensitive) to 'bluespacestash'
+        return meta.EntityPrototype?.ID.Equals("bluespacestash", StringComparison.InvariantCultureIgnoreCase) == true;
     }
 
     private void DeleteEntityList(List<EntityUid> list, string category)

@@ -189,7 +189,11 @@ public sealed class ShipyardGridSaveSystem : EntitySystem
 
         try
         {
-            _sawmill.Info($"Serializing ship grid {gridUid} as '{shipName}' using direct serialization (non-destructive save)");
+            // Purge transient entities (unanchored or inside containers) before serialization.
+            // This mutates the live grid, but only removes objects explicitly deemed non-persistent by design.
+            PurgeTransientEntities(gridUid);
+
+            _sawmill.Info($"Serializing ship grid {gridUid} as '{shipName}' after transient purge using direct serialization");
 
             // 1) Serialize the grid and its children to a MappingDataNode (engine-standard format)
             var entities = new HashSet<EntityUid> { gridUid };
@@ -237,6 +241,182 @@ public sealed class ShipyardGridSaveSystem : EntitySystem
         {
             _sawmill.Error($"Exception during non-destructive ship save: {ex}");
             return false;
+        }
+    }
+
+    /// <summary>
+    /// Deletes entities on the grid that should not be persisted with the ship:
+    ///  - Any entity whose Transform is not Anchored
+    ///  - Any entity that is currently inside any container (including nested)
+    /// Excludes the grid root itself.
+    /// </summary>
+    private void PurgeTransientEntities(EntityUid gridUid)
+    {
+        try
+        {
+            if (!_entityManager.TryGetComponent<MapGridComponent>(gridUid, out var grid))
+                return;
+            var lookupSystem = _entitySystemManager.GetEntitySystem<EntityLookupSystem>();
+            var looseDeletes = new List<EntityUid>();
+            var containerContentDeletes = new List<EntityUid>();
+            var processed = new HashSet<EntityUid>();
+
+            _sawmill.Info($"PurgeTransientEntities: Scanning grid {gridUid} for transient entities (loose + contained)");
+
+            // 1. Collect all entities spatially present on the grid (this won't include items inside containers)
+            foreach (var ent in lookupSystem.GetEntitiesIntersecting(gridUid, grid.LocalAABB))
+            {
+                if (ent == gridUid)
+                    continue;
+                if (!TryQueueLoose(ent, looseDeletes, processed))
+                    continue;
+            }
+
+            // 2. Traverse container graphs on every anchored entity to collect ALL contained descendants
+            foreach (var ent in lookupSystem.GetEntitiesIntersecting(gridUid, grid.LocalAABB))
+            {
+                if (ent == gridUid)
+                    continue;
+                if (!_entityManager.TryGetComponent<ContainerManagerComponent>(ent, out var manager))
+                    continue;
+                foreach (var container in manager.Containers.Values)
+                {
+                    CollectContainerContentsRecursive(container.ContainedEntities, containerContentDeletes, processed);
+                }
+            }
+
+            // Remove any duplicates between lists (if an entity was both loose + in container due to race, unlikely)
+            if (containerContentDeletes.Count > 0)
+            {
+                var contentSet = new HashSet<EntityUid>(containerContentDeletes);
+                looseDeletes.RemoveAll(e => contentSet.Contains(e));
+            }
+
+            var total = looseDeletes.Count + containerContentDeletes.Count;
+
+            if (total == 0)
+            {
+                // Possibly lookup missed because of AABB mismatch or container-only population. Do a fallback exhaustive scan.
+                var fallbackLoose = new List<EntityUid>();
+                var fallbackContained = new List<EntityUid>();
+                var fallbackProcessed = new HashSet<EntityUid>();
+
+                // Exhaustive: iterate every entity with a Transform and check if its GridUid matches.
+                var xformQuery = _entityManager.EntityQueryEnumerator<TransformComponent>();
+                var inspected = 0;
+                while (xformQuery.MoveNext(out var ent, out var xform))
+                {
+                    inspected++;
+                    if (ent == gridUid)
+                        continue;
+                    if (xform.GridUid != gridUid)
+                        continue;
+                    TryQueueLoose(ent, fallbackLoose, fallbackProcessed);
+                    if (_entityManager.TryGetComponent<ContainerManagerComponent>(ent, out var mgr))
+                    {
+                        foreach (var container in mgr.Containers.Values)
+                            CollectContainerContentsRecursive(container.ContainedEntities, fallbackContained, fallbackProcessed);
+                    }
+                }
+
+                // Remove duplicates
+                if (fallbackContained.Count > 0)
+                {
+                    var contentSet2 = new HashSet<EntityUid>(fallbackContained);
+                    fallbackLoose.RemoveAll(e => contentSet2.Contains(e));
+                }
+
+                var fallbackTotal = fallbackLoose.Count + fallbackContained.Count;
+                if (fallbackTotal == 0)
+                {
+                    _sawmill.Info($"PurgeTransientEntities: No transient entities found on grid {gridUid} after fallback (inspected={inspected}, AABB={grid.LocalAABB})");
+                    return;
+                }
+
+                _sawmill.Info($"PurgeTransientEntities: Primary scan empty; fallback found {fallbackTotal} (loose={fallbackLoose.Count}, contained={fallbackContained.Count}) on grid {gridUid}");
+                DeleteEntityList(fallbackContained, "contained-fallback");
+                DeleteEntityList(fallbackLoose, "loose-fallback");
+                return;
+            }
+
+            _sawmill.Info($"PurgeTransientEntities: Deleting {total} entities (loose={looseDeletes.Count}, contained={containerContentDeletes.Count}) on grid {gridUid}");
+
+            // Delete contained entities first (so container state is clean before possibly deleting loose objects referencing them)
+            DeleteEntityList(containerContentDeletes, "contained");
+            // Then delete loose ones
+            DeleteEntityList(looseDeletes, "loose");
+        }
+        catch (Exception ex)
+        {
+            _sawmill.Error($"Exception during PurgeTransientEntities on grid {gridUid}: {ex}");
+        }
+    }
+
+    private bool TryQueueLoose(EntityUid ent, List<EntityUid> list, HashSet<EntityUid> processed)
+    {
+        if (!_entityManager.EntityExists(ent))
+            return false;
+        if (!processed.Add(ent))
+            return false; // already processed
+        // Skip if terminating
+        if (_entityManager.GetComponent<MetaDataComponent>(ent).EntityLifeStage >= EntityLifeStage.Terminating)
+            return false;
+        if (_entityManager.HasComponent<MapGridComponent>(ent))
+            return false; // never delete grid root or nested grids here
+        var anchored = false;
+        if (_entityManager.TryGetComponent<TransformComponent>(ent, out var xform))
+            anchored = xform.Anchored;
+        var inContainer = _containerSystem.IsEntityInContainer(ent);
+        if (!anchored || inContainer)
+        {
+            list.Add(ent);
+            return true;
+        }
+        return false;
+    }
+
+    private void CollectContainerContentsRecursive(IReadOnlyList<EntityUid> contents, List<EntityUid> aggregate, HashSet<EntityUid> processed)
+    {
+        for (var i = 0; i < contents.Count; i++)
+        {
+            var ent = contents[i];
+            if (!_entityManager.EntityExists(ent))
+                continue;
+            if (!processed.Add(ent))
+                continue;
+            aggregate.Add(ent);
+            if (_entityManager.TryGetComponent<ContainerManagerComponent>(ent, out var manager))
+            {
+                foreach (var container in manager.Containers.Values)
+                {
+                    CollectContainerContentsRecursive(container.ContainedEntities, aggregate, processed);
+                }
+            }
+        }
+    }
+
+    private void DeleteEntityList(List<EntityUid> list, string category)
+    {
+        foreach (var ent in list)
+        {
+            try
+            {
+                // If it is still in a container, remove it cleanly first to clear flags
+                if (_containerSystem.IsEntityInContainer(ent) && _entityManager.TryGetComponent<TransformComponent>(ent, out var _))
+                {
+                    // We need the container instance; brute force via manager (cheap for small counts)
+                    if (_entityManager.TryGetComponent<ContainerManagerComponent>(ent, out var _))
+                    {
+                        // If the entity itself owns containers we don't care; removal is for when entity is inside one.
+                    }
+                }
+                if (_entityManager.EntityExists(ent))
+                    _entityManager.DeleteEntity(ent);
+            }
+            catch (Exception ex)
+            {
+                _sawmill.Warning($"Failed deleting {category} entity {ent}: {ex.Message}");
+            }
         }
     }
 

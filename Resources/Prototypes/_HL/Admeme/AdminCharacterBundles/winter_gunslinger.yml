@@ -252,7 +252,7 @@
     size: Small
   - type: ActivatableUI
     inHandsOnly: false
-    requireActiveHands: false
+    requireActiveHand: false
 
 
 - type: entity

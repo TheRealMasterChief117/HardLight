@@ -332,8 +332,8 @@
   suffix: Marrik, Admin
   components:
   - type: IdCard
-    jobTitle: Bounty Hunter
-    icon: JobIconSergeant
+    jobTitle: job-title-bounty-hunter
+    jobIcon: JobIconSergeant
   - type: Sprite
     sprite: _NF/Objects/Misc/id_cards.rsi
     layers:
@@ -400,7 +400,6 @@
   components:
   - type: RadarConsole
     maxRange: 500
-    rangeVV: 500
   - type: ActivatableUI
     inHandsOnly: false
     requireActiveHand: false

@@ -27,7 +27,7 @@
       stationProto: StandardFrontierExpeditionVessel
       components:
         - type: StationNameSetup
-          mapNameTemplate: 'Mayflower mk II {1}'
+          mapNameTemplate: 'Mayflower Mk. II {1}'
           nameGenerator:
             !type:NanotrasenNameGenerator
             prefixCreator: '14'

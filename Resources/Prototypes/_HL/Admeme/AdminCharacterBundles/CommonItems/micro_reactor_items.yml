@@ -14,6 +14,14 @@
   id: HandheldCrewMonitorMicroreactor
   parent: [ BaseMicroreactorItem, HandheldCrewMonitor ]
 
+- type: entity
+  id: HolofanProjectorAntiqueProto
+  parent: [ BaseAntiqueProtoItem, HolofanProjector ]
+
+- type: entity
+  id: ClothingShoesBootsSpeedAntiqueProto
+  parent: [ BaseAntiqueProtoItem, ClothingShoesBootsSpeed ]
+
 
 # Base Item with Microreactor
 - type: entity
@@ -26,6 +34,19 @@
       cell_slot:
         name: power-cell-slot-component-slot-name-default
         startingItem: PowerCellMicroreactor
+
+# Base Item with Antique Power Cell
+- type: entity
+  id: BaseAntiqueProtoItem
+  suffix: Admin, Antique
+  abstract: true
+  components:
+  - type: ItemSlots
+    slots:
+      cell_slot:
+        name: power-cell-slot-component-slot-name-default
+        startingItem: PowerCellAntiqueProto
+
 
 
 # a recharging Disabler SMG

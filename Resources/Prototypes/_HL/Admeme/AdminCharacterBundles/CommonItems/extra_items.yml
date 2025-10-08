@@ -13,7 +13,7 @@
 - type: entity
   id: DoubleEmergencyOxygenTankFilledLiquidOxygen
   parent: DoubleEmergencyOxygenTankFilled
-  name: double emergency oxygen tank
+  # name: 
   # description: 
   suffix: Filled, Liquid Oxygen
   components:
@@ -24,6 +24,40 @@
       volume: 2.5
       moles:
         - 4.23154936696 # oxygen
+      temperature: 72
+
+# 5L OxygenTank Filled with Liquid Oxygen
+- type: entity
+  id: OxygenTankFilledLiquidOxygen
+  parent: OxygenTankFilled
+  # name: 
+  # description: 
+  suffix: Filled, Liquid Oxygen
+  components:
+  - type: GasTank
+    outputPressure: 4.2
+    air:
+      # 160 Min, 50 Sec
+      volume: 5
+      moles:
+        - 8.463098734 # oxygen
+      temperature: 72
+
+# 10L OxygenTank Filled with Liquid Oxygen
+- type: entity
+  id: OxygenTankFilledLiquidOxygen10L
+  parent: OxygenTankFilled
+  name: 10L oxygen tank
+  description: A standard cylindrical gas tank for oxygen. It can hold 10 L of gas.
+  suffix: 10L Filled, Liquid Oxygen
+  components:
+  - type: GasTank
+    outputPressure: 4.2
+    air:
+      # 321 Min, 40 Sec
+      volume: 10
+      moles:
+        - 16.92619747 # oxygen
       temperature: 72
 
 

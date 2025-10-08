@@ -373,3 +373,21 @@
         reagents:
           - ReagentId: Amoxla
             Quantity: 300
+
+
+
+
+# Hyposprays!
+- type: entity
+  id: AdminHypoSaline
+  parent: AdminHypo
+  name: experimental hypospray (saline)
+  suffix: Admin, Saline
+  components: 
+  - type: SolutionContainerManager
+    solutions:
+      hypospray:
+        maxVol: 3000
+        reagents:
+          - ReagentId: Saline
+            Quantity: 3000

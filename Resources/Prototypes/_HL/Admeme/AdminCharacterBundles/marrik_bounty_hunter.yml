@@ -339,6 +339,8 @@
     layers:
     - state: nfsd
     - state: idnfsdsergeant
+  - type: Item
+    heldPrefix: nfsd
   - type: Access
     groups:
     - AllAccess

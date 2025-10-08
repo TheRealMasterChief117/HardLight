@@ -81,6 +81,13 @@
   description: A disposable tin of orange spray paint.
   suffix: Disposable, Admin
 
+- type: entity
+  id: SprayPaintBlueDisposable
+  parent: [ SprayPaintDisposableBase, SprayPaintBlue, PaintBase ]
+  name: disposable spray paint
+  description: A disposable tin of blue spray paint.
+  suffix: Disposable, Admin
+
 # useful code for when a custom color is needed
 # - type: entity
   # id: SprayPaintf6a44bDisposable
@@ -150,8 +157,9 @@
   - type: Item
     heldPrefix: hug
   - type: Storage
+    maxItemSize: Normal
     grid:
-    - 0,0,6,1
+    - 0,0,7,7
 
 
 # Disposable Surgery Toolkit
@@ -184,6 +192,7 @@
   - type: Tending
     speed: 99
   - type: Storage
+    maxItemSize: Normal
     grid:
     - 0,0,6,1
   - type: SurgeryTool

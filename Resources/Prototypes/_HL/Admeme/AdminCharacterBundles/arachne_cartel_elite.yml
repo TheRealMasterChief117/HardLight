@@ -312,10 +312,12 @@
 
 - type: entity
   id: OrganSyntheticLiverArachne
-  parent: OrganSyntheticLiver
+  parent: BaseHumanOrgan
   name: synthetic narco-processor liver
   suffix: Arachne
   components:
+  - type: Sprite
+    state: liver
   - type: Metabolizer
     maxReagents: 5
     metabolizerTypes: [Human]
@@ -333,6 +335,7 @@
     slotId: liver
   - type: Item
     size: Small
+    heldPrefix: liver
 
 
 # Disposable Surgery Toolkit

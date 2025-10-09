@@ -1,3 +1,4 @@
+using StationMemberComponent = Content.Shared.Station.Components.StationMemberComponent;
 using Content.Server.Access.Systems;
 using Content.Server.Popups;
 using Content.Server.Radio.EntitySystems;
@@ -46,6 +47,7 @@ using System.Text.RegularExpressions;
 using Content.Shared.UserInterface;
 using System;
 using System.Threading.Tasks;
+using Content.Shared.Chat; // For InGameICChatType
 using Robust.Shared.Audio.Systems;
 using Content.Shared.Access;
 using Content.Shared._NF.Bank.BUI;
@@ -523,6 +525,24 @@ public sealed partial class ShipyardSystem : SharedShipyardSystem
             PlayDenySound(player, uid, component);
             return;
         }
+
+        // Important: Treat loaded ships like independent shuttles, not part of the console's station.
+        // The purchase-from-file path temporarily adds the grid to the console's station for IFF/ownership.
+        // That causes station-wide events (alerts, etc.) to target the loaded ship. Remove that membership here.
+        try
+        {
+            var consoleStation = _station.GetOwningStation(uid);
+            if (consoleStation != null && TryComp<StationMemberComponent>(shuttleUid, out var member)
+                && member.Station == consoleStation)
+            {
+                _station.RemoveGridFromStation(consoleStation.Value, shuttleUid);
+                Logger.Info($"[ShipLoad(Console)] Removed station membership from loaded ship {ToPrettyString(shuttleUid)} (station {ToPrettyString(consoleStation.Value)})");
+            }
+        }
+        catch (Exception rmEx)
+        {
+            Logger.Warning($"[ShipLoad(Console)] Failed to remove station membership from {ToPrettyString(shuttleUid)}: {rmEx.Message}");
+        }
         // For loaded ships, we don't spawn a new station via a GameMap prototype unless we can infer the vessel ID.
         EntityUid? shuttleStation = null;
         if (vessel != null && _prototypeManager.TryIndex<GameMapPrototype>(vessel.ID, out var stationProto))
@@ -623,7 +643,7 @@ public sealed partial class ShipyardSystem : SharedShipyardSystem
         RefreshState(uid, balance, true, name, sellValue, targetId, (ShipyardConsoleUiKey)args.UiKey, false);
 
         _adminLogger.Add(LogType.ShipYardUsage, LogImpact.Low, $"{ToPrettyString(player):actor} loaded shuttle {ToPrettyString(shuttleUid)} from {(args.SourceFilePath ?? "YAML data")} via {ToPrettyString(uid)}");
-        /* Temporarily commenting this out
+
         // After a successful server-side load, instruct the client to delete their local YAML file.
         if (!string.IsNullOrWhiteSpace(args.SourceFilePath) && _player.TryGetSessionByEntity(player, out var session))
         {
@@ -637,7 +657,7 @@ public sealed partial class ShipyardSystem : SharedShipyardSystem
                 Logger.Warning($"Failed to request client-side deletion for '{args.SourceFilePath}': {ex}");
             }
         }
-        */
+
     }
 
 

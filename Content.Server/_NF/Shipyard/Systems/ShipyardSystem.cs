@@ -5,6 +5,7 @@ using Content.Server.Shuttles.Systems;
 using Content.Server.Shuttles.Components;
 using Content.Server.Station.Components;
 using Content.Shared.Station.Components; // For StationMemberComponent
+using StationMemberComponent = Content.Shared.Station.Components.StationMemberComponent;
 using Content.Server.Cargo.Systems;
 using Content.Server.Station.Systems;
 using Content.Shared._NF.Shipyard.Components;
@@ -357,6 +358,21 @@ public sealed partial class ShipyardSystem : SharedShipyardSystem
                 PurgeJointsAndResetDocks(loadedGrid.Value);
                 CleanupDuplicateLooseParts(loadedGrid.Value);
                 AutoAnchorInfrastructure(loadedGrid.Value);
+
+                // IMPORTANT:
+                // Previously we removed the StationMemberComponent from loaded ships so that station-wide
+                // events (alerts, random events, etc.) would not include them. However, a number of systems
+                // (expedition consoles, salvage / persistence restoration, ownership queries, pricing, etc.)
+                // rely on the ship retaining its station membership. Stripping it caused consoles to lose
+                // their backing SalvageExpeditionData and "station member" lookups to fail.
+                //
+                // Purchased shuttles never had this problem because we never removed their membership; the
+                // regression only affected the YAML load path. We now keep the membership exactly like a
+                // purchased shuttle. If we still need to suppress certain station-wide events from targeting
+                // loaded ships, the correct follow-up is to introduce a marker component (e.g.
+                // ExcludeFromStationEventsComponent) and have the station event system filter on that marker
+                // instead of mutating core membership state here.
+                // (No action needed here; membership is intentionally preserved.)
             }
             catch (Exception postEx)
             {
@@ -1718,7 +1734,7 @@ public sealed partial class ShipyardSystem : SharedShipyardSystem
             RaiseLocalEvent(shipLoadedEvent);
             _sawmill.Info($"Fired ShipLoadedEvent for ship '{shipName}'");
 
-            // Commented out for now 
+            // Commented out for now
             /*
             // If this load originated from a client-side file, notify the client to delete it now
             if (!string.IsNullOrEmpty(filePath) && playerSession != null)

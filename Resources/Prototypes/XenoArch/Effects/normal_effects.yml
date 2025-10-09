@@ -20,11 +20,6 @@
     - badfeeling-artifact-13
     - badfeeling-artifact-14
     - badfeeling-artifact-15
-    - badfeeling-artifact-16
-    - badfeeling-artifact-17
-    - badfeeling-artifact-18
-    - badfeeling-artifact-19
-    - badfeeling-artifact-20
     drastic:
     - badfeeling-artifact-drastic-1
     - badfeeling-artifact-drastic-2
@@ -32,11 +27,6 @@
     - badfeeling-artifact-drastic-4
     - badfeeling-artifact-drastic-5
     - badfeeling-artifact-drastic-6
-    - badfeeling-artifact-drastic-7
-    - badfeeling-artifact-drastic-8
-    - badfeeling-artifact-drastic-9
-    - badfeeling-artifact-drastic-10
-    - badfeeling-artifact-drastic-11
 
 - type: artifactEffect
   id: EffectGoodFeeling
@@ -59,10 +49,6 @@
     - goodfeeling-artifact-12
     - goodfeeling-artifact-13
     - goodfeeling-artifact-14
-    - goodfeeling-artifact-15
-    - goodfeeling-artifact-16
-    - goodfeeling-artifact-17
-    - goodfeeling-artifact-18
     drastic:
     - goodfeeling-artifact-drastic-1
     - goodfeeling-artifact-drastic-2
@@ -70,10 +56,6 @@
     - goodfeeling-artifact-drastic-4
     - goodfeeling-artifact-drastic-5
     - goodfeeling-artifact-drastic-6
-    - goodfeeling-artifact-drastic-7
-    - goodfeeling-artifact-drastic-8
-    - goodfeeling-artifact-drastic-9
-    - goodfeeling-artifact-drastic-10
 
 - type: artifactEffect
   id: EffectJunkSpawn

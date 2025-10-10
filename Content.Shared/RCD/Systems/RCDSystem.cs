@@ -131,7 +131,7 @@ public sealed class RCDSystem : EntitySystem
         if (args.Handled)
             return;
 
-        if (!_net.IsServer)
+        if (_net.IsClient)
             return;
 
         if (args.Target is not { Valid: true } target || !args.CanReach)

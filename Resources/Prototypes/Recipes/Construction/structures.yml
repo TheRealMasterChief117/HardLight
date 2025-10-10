@@ -1574,7 +1574,7 @@
   startNode: start
   targetNode: cardDoor
   category: construction-category-structures
-  descriotion: A cheap cardboard door.
+  description: A cheap cardboard door.
   objectType: Structure
   placementMode: SnapgridCenter
   canBuildInImpassable: false

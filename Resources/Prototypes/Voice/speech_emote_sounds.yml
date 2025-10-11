@@ -122,6 +122,10 @@
       collection: DeathGasp
     Belch: # Frontier
       collection: Belch # Frontier
+    Purr: # RMC14
+      path: /Audio/_RMC14/Voice/Reptilian/lizard_purr.ogg
+      params:
+        variation: 0.125
 
 - type: emoteSounds
   id: FemaleReptilian

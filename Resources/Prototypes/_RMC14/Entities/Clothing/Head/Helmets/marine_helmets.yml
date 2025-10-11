@@ -624,10 +624,6 @@
     sprite: _RMC14/Objects/Clothing/Head/Helmets/m35/jungle.rsi
   - type: Clothing
     sprite: _RMC14/Objects/Clothing/Head/Helmets/m35/jungle.rsi
-  - type: ItemCamouflage
-    camouflageVariations:
-      Classic: _RMC14/Objects/Clothing/Head/Helmets/m35/classic.rsi
-      Urban: _RMC14/Objects/Clothing/Head/Helmets/m35/urban.rsi
   - type: TemperatureProtection
     heatingCoefficient: 0.001
 
@@ -779,7 +775,7 @@
 
 - type: entity
   parent: RMCArmorHelmetM3TDemo
-  id: RMCArmorHelmetM3TDemoClassic
+  id: RMCArmorHelmetM3TDemoUrban
   suffix: Urban
   components:
   - type: Sprite

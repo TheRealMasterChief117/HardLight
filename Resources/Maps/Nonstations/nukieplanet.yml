@@ -6674,20 +6674,6 @@ entities:
     - type: Transform
       pos: -13.494709,9.54891
       parent: 104
-- proto: BoxMagazinePistolCaselessRiflePractice
-  entities:
-  - uid: 1635
-    components:
-    - type: Transform
-      pos: 5.4970627,10.597828
-      parent: 104
-- proto: BoxMagazinePistolSubMachineGunPractice
-  entities:
-  - uid: 1634
-    components:
-    - type: Transform
-      pos: 5.388983,13.953581
-      parent: 104
 - proto: BoxPillCanister
   entities:
   - uid: 1844
@@ -6695,15 +6681,6 @@ entities:
     - type: Transform
       pos: 7.629849,-12.44286
       parent: 104
-- proto: BoxShotgunPractice
-  entities:
-  - uid: 1633
-    components:
-    - type: Transform
-      pos: 5.4972115,14.562988
-      parent: 104
-    - type: BallisticAmmoProvider
-      unspawnedCount: 12
 - proto: Bucket
   entities:
   - uid: 153
@@ -10739,13 +10716,6 @@ entities:
     components:
     - type: Transform
       pos: 2.5389562,-6.3072195
-      parent: 104
-- proto: FoodDonutJellySlugcat
-  entities:
-  - uid: 3327
-    components:
-    - type: Transform
-      pos: -5.7255287,20.539352
       parent: 104
 - proto: GeneratorBasic15kW
   entities:
@@ -15162,35 +15132,12 @@ entities:
     - type: Transform
       pos: 11.5,-4.5
       parent: 104
-- proto: WeaponPistolCobra
-  entities:
-  - uid: 1705
-    components:
-    - type: Transform
-      pos: 5.4793262,12.166912
-      parent: 104
-- proto: WeaponShotgunSawn
-  entities:
-  - uid: 228
-    components:
-    - type: Transform
-      pos: 5.347948,13.528896
-      parent: 104
-    - type: BallisticAmmoProvider
-      unspawnedCount: 2
 - proto: WeaponSprayNozzle
   entities:
   - uid: 152
     components:
     - type: Transform
       pos: 9.67418,-4.571714
-      parent: 104
-- proto: WeaponSubMachineGunC20r
-  entities:
-  - uid: 1704
-    components:
-    - type: Transform
-      pos: 5.497257,12.817707
       parent: 104
 - proto: WelderIndustrial
   entities:

@@ -337,7 +337,7 @@
   parent: [ClothingHeadHelmetHardsuitSyndie, BaseC3SyndicateContraband, ContrabandClothing]
   id: ClothingHeadHelmetHardsuitSUNS
   name: SUNS hardsuit helmet
-  description: Amysterious hardsuit, bearing purple and gold styling.
+  description: A mysterious hardsuit, bearing purple and gold styling.
   components:
   - type: Sprite
     sprite: _HL/Clothing/OuterClothing/Hardsuits/sunsHSHelm.rsi

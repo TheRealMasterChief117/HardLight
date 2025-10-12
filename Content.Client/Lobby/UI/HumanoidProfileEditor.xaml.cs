@@ -436,13 +436,14 @@ namespace Content.Client.Lobby.UI
 
             #endregion Jobs
 
-            //TabContainer.SetTabTitle(2, Loc.GetString("humanoid-profile-editor-antags-tab")); // Frontier
+            // Ensure tab titles match XAML order: 0 Appearance, 1 Jobs, 2 Antags, 3 Traits, 4 Markings
+            TabContainer.SetTabTitle(2, Loc.GetString("humanoid-profile-editor-antags-tab")); // Frontier: show proper label if present
 
             RefreshTraits();
 
             #region Markings
 
-            TabContainer.SetTabTitle(3, Loc.GetString("humanoid-profile-editor-markings-tab")); // Frontier: 4<3
+            TabContainer.SetTabTitle(4, Loc.GetString("humanoid-profile-editor-markings-tab")); // Frontier: Markings is the 5th tab in XAML
 
             Markings.OnMarkingAdded += OnMarkingChange;
             Markings.OnMarkingRemoved += OnMarkingChange;
@@ -520,7 +521,7 @@ namespace Content.Client.Lobby.UI
             TraitsList.DisposeAllChildren();
 
             var traits = _prototypeManager.EnumeratePrototypes<TraitPrototype>().OrderBy(t => Loc.GetString(t.Name)).ToList();
-            TabContainer.SetTabTitle(2, Loc.GetString("humanoid-profile-editor-traits-tab")); // Frontier: 3<2
+            TabContainer.SetTabTitle(3, Loc.GetString("humanoid-profile-editor-traits-tab"));
 
             if (traits.Count < 1)
             {

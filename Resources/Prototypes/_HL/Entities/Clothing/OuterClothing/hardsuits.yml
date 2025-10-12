@@ -161,7 +161,7 @@
   parent: [ClothingOuterHardsuitSyndie, BaseC3SyndicateContraband, ContrabandClothing]
   id: ClothingOuterHardsuitSUNS
   name: SUNS hardsuit
-  description: A hardsuit featuring the SUNS organization's colors and protective specifications.
+  description: A mysterious hardsuit, bearing a golden sun emblem on a purple background.
   components:
   - type: Sprite
     sprite: _HL/Clothing/OuterClothing/Hardsuits/sunsHS.rsi
@@ -176,6 +176,7 @@
         Heat: 0.4
         Radiation: 0.4
         Caustic: 0.4
+        Holy: 0.4
   - type: ToggleableClothing
     clothingPrototype: ClothingHeadHelmetHardsuitSUNS
 

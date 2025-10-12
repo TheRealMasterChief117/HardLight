@@ -1156,7 +1156,7 @@
         tags:
           - NukeOpsUplink
 
-Frontier: no reinforcements
+#Frontier: no reinforcements
 - type: listing
   id: UplinkReinforcementRadioSyndicateNukeops # Version for Nukeops that spawns another nuclear operative without the uplink.
   name: uplink-reinforcement-radio-nukeops-name
@@ -1172,7 +1172,7 @@ Frontier: no reinforcements
       whitelist:
         tags:
           - NukeOpsUplink
-End Frontier
+#End Frontier
 
 - type: listing # Frontier
   id: UplinkReinforcementRadioSyndicateCyborgAssault

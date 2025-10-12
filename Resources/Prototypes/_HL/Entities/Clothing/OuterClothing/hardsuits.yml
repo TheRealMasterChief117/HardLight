@@ -337,7 +337,7 @@
   parent: [ClothingHeadHelmetHardsuitSyndie, BaseC3SyndicateContraband, ContrabandClothing]
   id: ClothingHeadHelmetHardsuitSUNS
   name: SUNS hardsuit helmet
-  description: A hardsuit helmet manufactured by the SUNS organization.
+  description: Amysterious hardsuit, bearing purple and gold styling.
   components:
   - type: Sprite
     sprite: _HL/Clothing/OuterClothing/Hardsuits/sunsHSHelm.rsi
@@ -350,6 +350,7 @@
         Slash: 0.8
         Piercing: 0.8
         Heat: 0.8
+        Holy: 0.8
 
 # Syndicate Navy Hardsuit Helmet
 - type: entity

@@ -133,7 +133,7 @@
                     </ScrollContainer>
                 </BoxContainer>
                 <BoxContainer Orientation="Vertical" Margin="10">
-                    <! - - Antags  - - >
+                    <!-- Antags -->
                     <ScrollContainer VerticalExpand="True">
                         <BoxContainer Name="AntagList" Orientation="Vertical" />
                     </ScrollContainer>

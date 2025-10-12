@@ -462,28 +462,51 @@ public sealed partial class BanPanel : DefaultWindow
 
     private void SubmitButtonOnOnPressed(BaseButton.ButtonEventArgs obj)
     {
-        string[]? roles = null;
+        ProtoId<JobPrototype>[]? jobs = null;
+        ProtoId<AntagPrototype>[]? antags = null;
+
         if (TypeOption.SelectedId == (int) Types.Role)
         {
-            var rolesList = new List<string>();
+            var jobList = new List<ProtoId<JobPrototype>>();
+            var antagList = new List<ProtoId<AntagPrototype>>();
+
             if (_roleCheckboxes.Count == 0)
                 throw new DebugAssertException("RoleCheckboxes was empty");
 
-            rolesList.AddRange(_roleCheckboxes.Where(c => c is { Pressed: true, Text: { } }).Select(c => c.Text!));
+            foreach (var button in _roleCheckboxes.Values.SelectMany(departmentButtons => departmentButtons))
+            {
+                if (button.Item1 is { Pressed: true, Name: not null })
+                {
+                    switch (button.Item2)
+                    {
+                        case JobPrototype:
+                            jobList.Add(button.Item2.ID);
 
-            if (rolesList.Count == 0)
+                            break;
+                        case AntagPrototype:
+                            antagList.Add(button.Item2.ID);
+
+                            break;
+                    }
+                }
+            }
+
+            if (jobList.Count + antagList.Count == 0)
             {
                 Tabs.CurrentTab = (int) TabNumbers.Roles;
+
                 return;
             }
 
-            roles = rolesList.ToArray();
+            jobs = jobList.ToArray();
+            antags = antagList.ToArray();
         }
 
         if (TypeOption.SelectedId == (int) Types.None)
         {
             TypeOption.ModulateSelfOverride = Color.Red;
             Tabs.CurrentTab = (int) TabNumbers.BasicInfo;
+
             return;
         }
 
@@ -495,6 +518,7 @@ public sealed partial class BanPanel : DefaultWindow
             ReasonTextEdit.GrabKeyboardFocus();
             ReasonTextEdit.ModulateSelfOverride = Color.Red;
             ReasonTextEdit.OnKeyBindDown += ResetTextEditor;
+
             return;
         }
 
@@ -503,9 +527,10 @@ public sealed partial class BanPanel : DefaultWindow
             ButtonResetOn = _gameTiming.CurTime.Add(TimeSpan.FromSeconds(3));
             SubmitButton.ModulateSelfOverride = Color.Red;
             SubmitButton.Text = Loc.GetString("ban-panel-confirm");
+
             return;
         }
-
+        
         var player = PlayerCheckbox.Pressed ? PlayerUsername : null;
         var useLastIp = IpCheckbox.Pressed && LastConnCheckbox.Pressed && IpAddress is null;
         var useLastHwid = HwidCheckbox.Pressed && LastConnCheckbox.Pressed && Hwid is null;

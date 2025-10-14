@@ -51,7 +51,7 @@
 
 - type: entity
   name: FG-13 flamethrower
-  parent: [ WeaponFlamethrowerBase, BaseGunWieldable, BaseSyndicateContraband ]
+  parent: [ WeaponFlamethrowerBase, BaseGunWieldable, BaseC3SyndicateContraband ]
   id: WeaponFlamethrowerFG
   description: Simple as it is deadly, the FG-13 fulfills a long-standing craving of the Gorlex Marauders for Nanotrasen Barbeque. Uses welding fuel.
   components:

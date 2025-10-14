@@ -664,6 +664,8 @@
       amount: 1
     - id: JerryCanWeldingFuel
       amount: 3
+    - id: ClothingOuterSuitAtmosFire
+      amount: 1
 
 #region LMG
 - type: entity

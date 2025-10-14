@@ -666,6 +666,8 @@
       amount: 3
     - id: ClothingOuterSuitAtmosFire
       amount: 1
+    - id: ClothingHeadHelmetAtmosFire
+      amount: 1
 
 #region LMG
 - type: entity

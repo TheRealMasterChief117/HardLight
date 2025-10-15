@@ -46,7 +46,7 @@ public sealed class XenoNestSystem : EntitySystem
         SubscribeLocalEvent<XenoNestedComponent, PreventCollideEvent>(OnNestedPreventCollide);
         SubscribeLocalEvent<XenoNestedComponent, PullAttemptEvent>(OnNestedPullAttempt);
         SubscribeLocalEvent<XenoNestedComponent, UpdateCanMoveEvent>(OnNestedCancel);
-        SubscribeLocalEvent<XenoNestedComponent, InteractionAttemptEvent>(OnNestedCancel);
+    SubscribeLocalEvent<XenoNestedComponent, InteractionAttemptEvent>(OnNestedCancel);
         SubscribeLocalEvent<XenoNestedComponent, UseAttemptEvent>(OnNestedCancel);
         SubscribeLocalEvent<XenoNestedComponent, ThrowAttemptEvent>(OnNestedCancel);
         SubscribeLocalEvent<XenoNestedComponent, PickupAttemptEvent>(OnNestedCancel);
@@ -212,6 +212,11 @@ public sealed class XenoNestSystem : EntitySystem
     private void OnNestedCancel<T>(Entity<XenoNestedComponent> ent, ref T args) where T : CancellableEntityEventArgs
     {
         args.Cancel();
+    }
+
+    private void OnNestedCancel(Entity<XenoNestedComponent> ent, ref InteractionAttemptEvent args)
+    {
+        args.Cancelled = true;
     }
 
     private Direction? GetNestDirection(EntityUid surface, EntityUid victim)

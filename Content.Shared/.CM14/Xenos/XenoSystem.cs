@@ -23,8 +23,8 @@ public sealed class XenoSystem : EntitySystem
     {
         base.Initialize();
 
-    SubscribeLocalEvent<XenoComponent, MapInitEvent>(OnXenoMapInit);
-    SubscribeLocalEvent<XenoComponent, EntityUnpausedEvent>(OnXenoUnpaused);
+        SubscribeLocalEvent<XenoComponent, MapInitEvent>(OnXenoMapInit);
+        SubscribeLocalEvent<XenoComponent, EntityUnpausedEvent>(OnXenoUnpaused);
         SubscribeLocalEvent<XenoComponent, XenoOpenEvolutionsEvent>(OnXenoEvolve);
         SubscribeLocalEvent<XenoComponent, EvolveBuiMessage>(OnXenoEvolveBui);
     }
@@ -91,11 +91,11 @@ public sealed class XenoSystem : EntitySystem
     {
         xeno.Comp.Plasma = Math.Max(xeno.Comp.Plasma - plasma, 0);
         Dirty(xeno);
-        if (ent.Comp.EvolvesTo.Count == 0)
+        if (xeno.Comp.EvolvesTo.Count == 0)
             return;
 
-        _action.AddAction(ent, ref ent.Comp.EvolveAction, ent.Comp.EvolveActionId);
-        _action.SetCooldown(ent.Comp.EvolveAction, _timing.CurTime, _timing.CurTime + ent.Comp.EvolveIn);
+        _action.AddAction(xeno, ref xeno.Comp.EvolveAction, xeno.Comp.EvolveActionId);
+        _action.SetCooldown(xeno.Comp.EvolveAction, _timing.CurTime, _timing.CurTime + xeno.Comp.EvolveIn);
     }
 
     private void OnXenoEvolve(Entity<XenoComponent> ent, ref XenoOpenEvolutionsEvent args)
@@ -103,7 +103,7 @@ public sealed class XenoSystem : EntitySystem
         if (_net.IsClient || !TryComp(ent, out ActorComponent? actor))
             return;
 
-        _ui.TryOpen(ent.Owner, XenoEvolutionUIKey.Key, actor.PlayerSession);
+        _ui.OpenUi(ent.Owner, XenoEvolutionUIKey.Key, actor.PlayerSession);
     }
 
     private void OnXenoEvolveBui(Entity<XenoComponent> ent, ref EvolveBuiMessage args)
@@ -114,7 +114,7 @@ public sealed class XenoSystem : EntitySystem
         var choices = ent.Comp.EvolvesTo.Count;
         if (args.Choice >= choices || args.Choice < 0)
         {
-            Log.Warning($"User {args.Session.Name} sent an out of bounds evolution choice: {args.Choice}. Choices: {choices}");
+            Log.Warning($"User {ToPrettyString(args.Actor)} sent an out of bounds evolution choice: {args.Choice}. Choices: {choices}");
             return;
         }
 
@@ -124,6 +124,6 @@ public sealed class XenoSystem : EntitySystem
         Del(ent.Owner);
 
         if (TryComp(ent, out ActorComponent? actor))
-            _ui.TryClose(ent.Owner, XenoEvolutionUIKey.Key, actor.PlayerSession);
+            _ui.CloseUi(ent.Owner, XenoEvolutionUIKey.Key, actor.PlayerSession);
     }
 }

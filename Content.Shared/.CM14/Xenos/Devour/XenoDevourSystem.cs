@@ -1,4 +1,5 @@
 ﻿using Content.Shared.CM14.Marines;
+using Robust.Shared.Audio.Systems;
 using Content.Shared.DoAfter;
 using Content.Shared.DragDrop;
 using Content.Shared.Mobs.Systems;
@@ -90,8 +91,7 @@ public sealed class XenoDevourSystem : EntitySystem
     {
         var doAfter = new DoAfterArgs(EntityManager, xeno, delay, new XenoDevourDoAfterEvent(), xeno, target)
         {
-            BreakOnTargetMove = true,
-            BreakOnUserMove = true
+            BreakOnMove = true
         };
 
         _doAfter.TryStartDoAfter(doAfter);

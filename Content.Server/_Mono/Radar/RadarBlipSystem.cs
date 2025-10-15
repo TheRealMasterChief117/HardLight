@@ -1,3 +1,4 @@
+#if ENABLE_MONO_RADAR
 using System.Numerics;
 using Content.Shared._Mono.Radar;
 using Content.Shared.Shuttles.Components;
@@ -88,3 +89,4 @@ public sealed partial class RadarBlipSystem : EntitySystem
         return blips;
     }
 }
+#endif

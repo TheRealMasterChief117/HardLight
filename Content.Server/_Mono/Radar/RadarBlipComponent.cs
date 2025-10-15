@@ -1,3 +1,4 @@
+#if ENABLE_MONO_RADAR
 namespace Content.Server._Mono.Radar;
 
 using Content.Shared._Mono.Radar;
@@ -40,4 +41,7 @@ public sealed partial class RadarBlipComponent : Component
 
     [DataField]
     public bool Enabled = true;
-} 
+}
+#else
+// _Mono radar component disabled by default. Define ENABLE_MONO_RADAR to enable this alternative implementation.
+#endif

@@ -16,6 +16,8 @@ using Robust.Shared.Timing;
 using Content.Client._Mono.Radar;
 using Content.Shared._Mono.Radar;
 using Content.Client.Station; // Frontier
+using Robust.Shared.Collections; // Frontier helpers
+using Content.Shared._NF.Shuttles.Events; // Frontier: InertiaDampeningMode
 
 namespace Content.Client.Shuttles.UI;
 
@@ -27,6 +29,7 @@ public sealed partial class ShuttleNavControl : BaseShuttleControl
     private readonly SharedShuttleSystem _shuttles;
     private readonly SharedTransformSystem _transform;
     private readonly RadarBlipsSystem _blips;
+    private readonly StationSystem _station; // Frontier
 
     /// <summary>
     /// Used to transform all of the radar objects. Typically is a shuttle console parented to a grid.
@@ -70,6 +73,14 @@ public sealed partial class ShuttleNavControl : BaseShuttleControl
     private Vector2 _lastMousePos;
     private float _lastFireTime;
     private const float FireRateLimit = 0.1f; // 100ms between shots
+
+    // Frontier/NF exposed properties for UI controls
+    public float MaximumIFFDistance { get; set; } = -1f;
+    public bool HideCoords { get; set; } = false;
+    private static Color _dockLabelColor = Color.White;
+
+    public InertiaDampeningMode DampeningMode { get; set; }
+    public ServiceFlags ServiceFlags { get; set; } = ServiceFlags.None;
 
     public ShuttleNavControl() : base(64f, 256f, 256f)
     {
@@ -226,6 +237,16 @@ public sealed partial class ShuttleNavControl : BaseShuttleControl
 
         NFUpdateState(state); // Frontier Update State
     }
+
+    /// <summary>
+    /// Frontier: Update additional state used by NF UI features.
+    /// </summary>
+    private void NFUpdateState(NavInterfaceState state)
+    {
+        // Minimal state application to drive UI toggles
+        DampeningMode = state.DampeningMode;
+        ServiceFlags = state.ServiceFlags;
+    }
     protected override void Draw(DrawingHandleScreen handle)
     {
         base.Draw(handle);
@@ -332,7 +353,7 @@ public sealed partial class ShuttleNavControl : BaseShuttleControl
             }
 
             //var mapCenter = curGridToWorld. * gridBody.LocalCenter;
-            //shouldDrawIFF = NfCheckShouldDrawIffRangeCondition(shouldDrawIFF, mapCenter, curGridToWorld); // Frontier code
+            //shouldDrawIFF = NfCheckShouldDrawIffRangeCondition(shouldDrawIff, mapCenter, curGridToWorld); // Frontier code
             // Frontier: range checks
             var gridMapPos = _transform.ToMapCoordinates(new EntityCoordinates(gUid, gridBody.LocalCenter)).Position;
             shouldDrawIFF = NFCheckShouldDrawIffRangeCondition(shouldDrawIFF, gridMapPos - mapPos.Position);
@@ -350,11 +371,11 @@ public sealed partial class ShuttleNavControl : BaseShuttleControl
                 var uiPosition = Vector2.Transform(gridBody.LocalCenter, curGridToView) / UIScale;
 
                 // Confines the UI position within the viewport.
-                var uiXCentre = (int) Width / 2;
-                var uiYCentre = (int) Height / 2;
+                var uiXCentre = (int)Width / 2;
+                var uiYCentre = (int)Height / 2;
                 var uiXOffset = uiPosition.X - uiXCentre;
                 var uiYOffset = uiPosition.Y - uiYCentre;
-                var uiDistance = (int) Math.Sqrt(Math.Pow(uiXOffset, 2) + Math.Pow(uiYOffset, 2));
+                var uiDistance = (int)Math.Sqrt(Math.Pow(uiXOffset, 2) + Math.Pow(uiYOffset, 2));
                 var uiX = uiXCentre * uiXOffset / uiDistance;
                 var uiY = uiYCentre * uiYOffset / uiDistance;
 
@@ -443,7 +464,7 @@ public sealed partial class ShuttleNavControl : BaseShuttleControl
             }
         }
 
-    // Frontier: radar blip system for the mass scanners and shapes
+        // Frontier: radar blip system for the mass scanners and shapes
         // Draw radar line
         // First, figure out which angle to draw.
         var updateRatio = _updateAccumulator / RadarUpdateInterval;
@@ -456,7 +477,7 @@ public sealed partial class ShuttleNavControl : BaseShuttleControl
         var rawBlips = _blips.GetRawBlips();
 
         // Prepare view bounds for culling
-    var blipViewBounds = new Box2(-3f, -3f, Size.X + 3f, Size.Y + 3f);
+        var blipViewBounds = new Box2(-3f, -3f, Size.X + 3f, Size.Y + 3f);
 
         // Draw blips using the same grid-relative transformation approach as docks
         foreach (var blip in rawBlips)
@@ -489,6 +510,96 @@ public sealed partial class ShuttleNavControl : BaseShuttleControl
             {
                 DrawBlipShape(handle, blipPosInView, blip.Scale * 3f, blip.Color.WithAlpha(0.8f), blip.Shape);
             }
+        }
+    }
+
+    /// <summary>
+    /// Frontier: Checks if an IFF marker should be drawn based on distance and maximum IFF range.
+    /// </summary>
+    private bool NFCheckShouldDrawIffRangeCondition(bool shouldDrawIff, Vector2 distance)
+    {
+        if (shouldDrawIff && MaximumIFFDistance >= 0.0f)
+        {
+            if (distance.Length() > MaximumIFFDistance)
+                shouldDrawIff = false;
+        }
+        return shouldDrawIff;
+    }
+
+    /// <summary>
+    /// Frontier: Adds a blip to the list for later drawing.
+    /// </summary>
+    private static void NFAddBlipToList(List<BlipData> blipDataList, bool isOutsideRadarCircle, Vector2 uiPosition, int uiXCentre, int uiYCentre, Color color)
+    {
+        blipDataList.Add(new BlipData
+        {
+            IsOutsideRadarCircle = isOutsideRadarCircle,
+            UiPosition = uiPosition,
+            VectorToPosition = uiPosition - new Vector2(uiXCentre, uiYCentre),
+            Color = color
+        });
+    }
+
+    /// <summary>
+    /// Frontier: Adds blip style triangles on ship edges or towards ships.
+    /// </summary>
+    private void NFDrawBlips(DrawingHandleBase handle, List<BlipData> blipDataList)
+    {
+        var blipValueList = new Dictionary<Color, ValueList<Vector2>>();
+
+        foreach (var blipData in blipDataList)
+        {
+            var triangleShapeVectorPoints = new[]
+            {
+                new Vector2(0, 0),
+                new Vector2(RadarBlipSize, 0),
+                new Vector2(RadarBlipSize * 0.5f, RadarBlipSize)
+            };
+
+            if (blipData.IsOutsideRadarCircle)
+            {
+                var angle = (float)Math.Atan2(blipData.VectorToPosition.Y, blipData.VectorToPosition.X) + -1.6f;
+                var cos = (float)Math.Cos(angle);
+                var sin = (float)Math.Sin(angle);
+                float[,] rotationMatrix = { { cos, -sin }, { sin, cos } };
+
+                for (var i = 0; i < triangleShapeVectorPoints.Length; i++)
+                {
+                    var vertex = triangleShapeVectorPoints[i];
+                    var x = vertex.X * rotationMatrix[0, 0] + vertex.Y * rotationMatrix[0, 1];
+                    var y = vertex.X * rotationMatrix[1, 0] + vertex.Y * rotationMatrix[1, 1];
+                    triangleShapeVectorPoints[i] = new Vector2(x, y);
+                }
+            }
+
+            var triangleCenterVector =
+                (triangleShapeVectorPoints[0] + triangleShapeVectorPoints[1] + triangleShapeVectorPoints[2]) / 3;
+
+            var vectorsFromCenter = new Vector2[3];
+            for (int i = 0; i < 3; i++)
+            {
+                vectorsFromCenter[i] = (triangleShapeVectorPoints[i] - triangleCenterVector) * UIScale;
+            }
+
+            var newVerts = new Vector2[3];
+            for (var i = 0; i < 3; i++)
+            {
+                newVerts[i] = (blipData.UiPosition * UIScale) + vectorsFromCenter[i];
+            }
+
+            if (!blipValueList.TryGetValue(blipData.Color, out var valueList))
+            {
+                valueList = new ValueList<Vector2>();
+            }
+            valueList.Add(newVerts[0]);
+            valueList.Add(newVerts[1]);
+            valueList.Add(newVerts[2]);
+            blipValueList[blipData.Color] = valueList;
+        }
+
+        foreach (var color in blipValueList)
+        {
+            handle.DrawPrimitives(DrawPrimitiveTopology.TriangleList, color.Value.Span, color.Key);
         }
     }
 

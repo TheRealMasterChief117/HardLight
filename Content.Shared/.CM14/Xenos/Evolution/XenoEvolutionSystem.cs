@@ -34,7 +34,7 @@ public sealed class XenoEvolutionSystem : EntitySystem
         if (_net.IsClient || !TryComp(ent, out ActorComponent? actor))
             return;
 
-        _ui.TryOpen(ent.Owner, XenoEvolutionUIKey.Key, actor.PlayerSession);
+        _ui.TryOpenUi(ent.Owner, XenoEvolutionUIKey.Key, actor.Owner);
     }
 
     private void OnXenoEvolveBui(Entity<XenoComponent> ent, ref EvolveBuiMessage args)
@@ -45,7 +45,7 @@ public sealed class XenoEvolutionSystem : EntitySystem
         var choices = ent.Comp.EvolvesTo.Count;
         if (args.Choice >= choices || args.Choice < 0)
         {
-            Log.Warning($"User {args.Session.Name} sent an out of bounds evolution choice: {args.Choice}. Choices: {choices}");
+            Log.Warning($"User {args.Actor} sent an out of bounds evolution choice: {args.Choice}. Choices: {choices}");
             return;
         }
 
@@ -55,6 +55,6 @@ public sealed class XenoEvolutionSystem : EntitySystem
         Del(ent.Owner);
 
         if (TryComp(ent, out ActorComponent? actor))
-            _ui.TryClose(ent.Owner, XenoEvolutionUIKey.Key, actor.PlayerSession);
+            _ui.CloseUi(ent.Owner, XenoEvolutionUIKey.Key, actor.Owner);
     }
 }

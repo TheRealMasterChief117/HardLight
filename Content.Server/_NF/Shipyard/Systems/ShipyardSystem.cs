@@ -669,19 +669,14 @@ public sealed partial class ShipyardSystem : SharedShipyardSystem
     /// </summary>
     private void TryResetUseDelays(EntityUid shuttleGrid)
     {
-        var transformQuery = GetEntityQuery<TransformComponent>();
-        var useDelayQuery = GetEntityQuery<UseDelayComponent>();
+        var useDelayQuery = _entityManager.EntityQueryEnumerator<UseDelayComponent, TransformComponent>();
 
-        foreach (var uid in EntityManager.GetEntities())
+        while (useDelayQuery.MoveNext(out var uid, out var comp, out var xform))
         {
-            if (!transformQuery.TryGetComponent(uid, out var xform))
-                continue;
             if (xform.GridUid != shuttleGrid)
                 continue;
-            if (!useDelayQuery.TryComp(uid, out var useDelayComp))
-                continue;
 
-            _useDelay.ResetAllDelays((uid, useDelayComp));
+            _useDelay.ResetAllDelays((uid, comp));
         }
     }
 

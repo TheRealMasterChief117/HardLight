@@ -1,37 +1,37 @@
 ﻿---
 # Base prototypes for CM14 xenos (abstract)
 - type: entity
-	id: CMXenoUndeveloped
-	abstract: true
-	name: Xeno Undeveloped (base)
-	components:
-	- type: Sprite
-		drawdepth: Mobs
-	- type: MobState
-		allowedStates:
-		- Alive
-		- Critical
-		- Dead
-	- type: MobThresholds
-		thresholds:
-			0: Alive
-			200: Critical
-			300: Dead
+  id: CMXenoUndeveloped
+  abstract: true
+  name: Xeno Undeveloped (base)
+  components:
+  - type: Sprite
+    drawdepth: Mobs
+  - type: MobState
+    allowedStates:
+    - Alive
+    - Critical
+    - Dead
+  - type: MobThresholds
+    thresholds:
+      0: Alive
+      200: Critical
+      300: Dead
 
 - type: entity
-	id: CMXenoDeveloped
-	abstract: true
-	name: Xeno Developed (base)
-	components:
-	- type: Sprite
-		drawdepth: Mobs
-	- type: MobState
-		allowedStates:
-		- Alive
-		- Critical
-		- Dead
-	- type: MobThresholds
-		thresholds:
-			0: Alive
-			200: Critical
-			300: Dead
+  id: CMXenoDeveloped
+  abstract: true
+  name: Xeno Developed (base)
+  components:
+  - type: Sprite
+    drawdepth: Mobs
+  - type: MobState
+    allowedStates:
+    - Alive
+    - Critical
+    - Dead
+  - type: MobThresholds
+    thresholds:
+      0: Alive
+      200: Critical
+      300: Dead

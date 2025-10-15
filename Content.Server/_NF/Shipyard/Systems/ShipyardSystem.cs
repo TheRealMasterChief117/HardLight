@@ -658,26 +658,19 @@ public sealed partial class ShipyardSystem : SharedShipyardSystem
     /// Tries to reset the delays on any entities with the UseDelayComponent.
     /// Needed to ensure items don't have prolonged delays after saving.
     /// </summary>
-    public void TryResetUseDelays(EntityUid gridUid)
+    private void TryResetUseDelays(EntityUid gridUid)
     {
-        try
-        {
-            if (!_entityManager.TryGetComponent<MapGridComponent>(gridUid, out var grid))
-                return;
+        if (!_entityManager.TryGetComponent<MapGridComponent>(gridUid, out var grid))
+            return;
 
-            // Pre-mark all stash roots and their direct hidden item contents as processed so they are never purged.
-            var useDelayQuery = _entityManager.EntityQueryEnumerator<UseDelayComponent, TransformComponent>();
-            while (useDelayQuery.MoveNext(out var uid, out var useDelay, out var xform))
-            {
-                if (xform.GridUid != gridUid)
-                    continue;
-
-                _useDelay.ResetAllDelays((uid, useDelay));
-            }
-        }
-        catch (Exception ex)
+        // Pre-mark all stash roots and their direct hidden item contents as processed so they are never purged.
+        var useDelayQuery = _entityManager.EntityQueryEnumerator<UseDelayComponent, TransformComponent>();
+        while (useDelayQuery.MoveNext(out var uid, out var useDelay, out var xform))
         {
-            _sawmill.Error($"Exception during TryResetUseDelays on grid {gridUid}: {ex}");
+            if (xform.GridUid != gridUid)
+                continue;
+
+            _useDelay.ResetAllDelays((uid, useDelay));
         }
     }
 

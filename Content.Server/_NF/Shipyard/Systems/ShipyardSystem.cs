@@ -293,6 +293,16 @@ public sealed partial class ShipyardSystem : SharedShipyardSystem
         {
             _sawmill.Warning($"[ShipLoad] PurgeJointsAndResetDocks failed on {grid}: {ex.Message}");
         }
+
+        try
+        {
+            TryResetUseDelays(grid);
+        }
+        catch (Exception ex)
+        {
+            _sawmill.Warning($"[ShipLoad] TryResetUseDelays failed on {grid}: {ex.Message}");
+        }
+
         // Add new grid to the same station as the console's grid (for IFF / ownership), if any
         if (TryComp<StationMemberComponent>(consoleXform.GridUid, out var stationMember))
         {
@@ -360,7 +370,6 @@ public sealed partial class ShipyardSystem : SharedShipyardSystem
                 PurgeJointsAndResetDocks(loadedGrid.Value);
                 CleanupDuplicateLooseParts(loadedGrid.Value);
                 AutoAnchorInfrastructure(loadedGrid.Value);
-                TryResetUseDelays(loadedGrid.Value);
 
                 // IMPORTANT:
                 // Previously we removed the StationMemberComponent from loaded ships so that station-wide
@@ -658,26 +667,21 @@ public sealed partial class ShipyardSystem : SharedShipyardSystem
     /// Tries to reset the delays on any entities with the UseDelayComponent.
     /// Needed to ensure items don't have prolonged delays after saving.
     /// </summary>
-    public void TryResetUseDelays(EntityUid gridUid)
+    private void TryResetUseDelays(EntityUid shuttleGrid)
     {
-        try
-        {
-            if (!_entityManager.TryGetComponent<MapGridComponent>(gridUid, out var grid))
-                return;
+        var transformQuery = GetEntityQuery<TransformComponent>();
+        var useDelayQuery = GetEntityQuery<UseDelayComponent>();
 
-            // Pre-mark all stash roots and their direct hidden item contents as processed so they are never purged.
-            var useDelayQuery = _entityManager.EntityQueryEnumerator<UseDelayComponent, TransformComponent>();
-            while (useDelayQuery.MoveNext(out var uid, out var useDelay, out var xform))
-            {
-                if (xform.GridUid != gridUid)
-                    continue;
-
-                _useDelay.ResetAllDelays((uid, useDelay));
-            }
-        }
-        catch (Exception ex)
+        foreach (var uid in EntityManager.GetEntities())
         {
-            _sawmill.Error($"Exception during TryResetUseDelays on grid {gridUid}: {ex}");
+            if (!transformQuery.TryGetComponent(uid, out var xform))
+                continue;
+            if (xform.GridUid != shuttleGrid)
+                continue;
+            if (!useDelayQuery.TryComp(uid, out var useDelayComp))
+                continue;
+
+            _useDelay.ResetAllDelays((uid, useDelayComp));
         }
     }
 

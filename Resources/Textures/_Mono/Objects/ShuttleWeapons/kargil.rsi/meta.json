@@ -1,10 +1,10 @@
 {
   "version": 1,
   "license": "CC-BY-SA-3.0",
-  "copyright": "Made by kyres1 (discord)",
+  "copyright": "Made by zeranov",
   "size": {
-    "x": 32,
-    "y": 32
+    "x": 128,
+    "y": 128
   },
   "states": [
     {

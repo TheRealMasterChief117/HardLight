@@ -6,7 +6,7 @@
   components:
   - type: Sprite
     drawdepth: Mobs
-    sprite: .CM14/Mobs/Xenos/Larva/larva.rsi
+    sprite: Mobs/Aliens/Xenos/larva.rsi
     offset: 0,0.4
     layers:
     - map: [ "enum.DamageStateVisualLayers.Base" ]

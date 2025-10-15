@@ -65,6 +65,7 @@ using Robust.Shared.Physics; // Physics Transform
 using Robust.Shared.Utility; // Box2 helpers
 using Robust.Shared.Map.Events; // For BeforeEntityReadEvent
 using Robust.Shared.Containers; // For SharedContainerSystem, ContainerManagerComponent
+using Content.Shared.Timing;
 
 // Suppress naming rule for _NF namespace prefix (modding convention)
 #pragma warning disable IDE1006
@@ -100,6 +101,7 @@ public sealed partial class ShipyardSystem : SharedShipyardSystem
     [Dependency] private readonly EntityLookupSystem _lookup = default!; // For physics overlap checks
     [Dependency] private readonly SharedContainerSystem _container = default!; // For safe container removal before deletion
     [Dependency] private readonly SharedPopupSystem _popupSystem = default!; // For user feedback popups
+    [Dependency] private readonly UseDelaySystem _useDelay = default!;
 
     public MapId? ShipyardMap { get; private set; }
     private float _shuttleIndex;
@@ -358,6 +360,7 @@ public sealed partial class ShipyardSystem : SharedShipyardSystem
                 PurgeJointsAndResetDocks(loadedGrid.Value);
                 CleanupDuplicateLooseParts(loadedGrid.Value);
                 AutoAnchorInfrastructure(loadedGrid.Value);
+                TryResetUseDelays(loadedGrid.Value);
 
                 // IMPORTANT:
                 // Previously we removed the StationMemberComponent from loaded ships so that station-wide
@@ -649,6 +652,33 @@ public sealed partial class ShipyardSystem : SharedShipyardSystem
 
         if (anchored > 0)
             _sawmill.Info($"Auto-anchored {anchored} infrastructure entities on loaded ship {shuttleGrid}");
+    }
+
+    /// <summary>
+    /// Tries to reset the delays on any entities with the UseDelayComponent.
+    /// Needed to ensure items don't have prolonged delays after saving.
+    /// </summary>
+    public void TryResetUseDelays(EntityUid gridUid)
+    {
+        try
+        {
+            if (!_entityManager.TryGetComponent<MapGridComponent>(gridUid, out var grid))
+                return;
+
+            // Pre-mark all stash roots and their direct hidden item contents as processed so they are never purged.
+            var useDelayQuery = _entityManager.EntityQueryEnumerator<UseDelayComponent, TransformComponent>();
+            while (useDelayQuery.MoveNext(out var uid, out var useDelay, out var xform))
+            {
+                if (xform.GridUid != gridUid)
+                    continue;
+
+                _useDelay.ResetAllDelays((uid, useDelay));
+            }
+        }
+        catch (Exception ex)
+        {
+            _sawmill.Error($"Exception during TryResetUseDelays on grid {gridUid}: {ex}");
+        }
     }
 
     /// <summary>

@@ -1,6 +1,7 @@
 ﻿---
 # Base prototypes for CM14 xenos (abstract)
 - type: entity
+  parent: MobXeno
   id: CMXenoUndeveloped
   abstract: true
   name: Xeno Undeveloped (base)
@@ -20,6 +21,7 @@
 
 - type: entity
   id: CMXenoDeveloped
+  parent: MobXeno
   abstract: true
   name: Xeno Developed (base)
   components:

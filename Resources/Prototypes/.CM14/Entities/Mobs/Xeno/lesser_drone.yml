@@ -4,7 +4,7 @@
   name: Lesser Drone
   components:
   - type: Sprite
-    sprite: .CM14/Mobs/Xenos/Drone/drone.rsi
+    sprite: Mobs/Aliens/Xenos/drone.rsi
   - type: MobState
     allowedStates:
     - Alive

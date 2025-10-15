@@ -5,7 +5,7 @@
   description: The most vital member of the hive.
   components:
   - type: Sprite
-    sprite: .CM14/Mobs/Xenos/Queen/queen.rsi
+    sprite: Mobs/Aliens/Xenos/queen.rsi
   - type: MobState
     allowedStates:
     - Alive

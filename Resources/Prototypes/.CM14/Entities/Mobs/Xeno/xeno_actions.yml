@@ -1,8 +1,6 @@
 ﻿- type: entity
   id: ActionXenoEvolve
   name: Evolve # TODO CM14 description
-  categories:
-  - hideSpawnMenu
   components:
   - type: InstantAction
     itemIconStyle: NoItem

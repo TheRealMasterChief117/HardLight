@@ -1,4 +1,7 @@
-﻿- type: entity
+﻿- type: entityCategory
+  id: CMEntity
+
+- type: entity
   id: CMEntityBase
   abstract: true
   categories:

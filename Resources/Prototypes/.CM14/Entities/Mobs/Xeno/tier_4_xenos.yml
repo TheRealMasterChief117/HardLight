@@ -1,7 +1,7 @@
 ﻿- type: entity # todo cm14 make base cm14 xeno, this is just a test mob
   parent: CMXenoDeveloped
-  id: CMXenoQueen
-  name: Queen
+  id: CMXenoQueen_Test
+  name: Queen (Test)
   description: The most vital member of the hive.
   components:
     - type: Sprite

@@ -67,9 +67,9 @@
 
 - type: listing
   id: UplinkSecurityCash75000
-  name: uplink-security-cash75000-name
-  description: uplink-security-cash75000-desc
-  productEntity: SpaceCash10000
+  name: uplink-security-cash20000-name
+  description: uplink-security-cash20000-desc
+  productEntity: SpaceCash20000
   icon: { sprite: _NF/Objects/Economy/cash.rsi, state: cash_100000 }
   cost:
     FrontierUplinkCoin: 10

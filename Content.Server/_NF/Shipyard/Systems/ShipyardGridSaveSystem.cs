@@ -49,8 +49,8 @@ using YamlDotNet.Core;
 using Robust.Shared.Serialization;
 using Content.Shared.Storage.Components;
 using Robust.Shared.GameStates;
-using Content.Shared.Wall;
-using Robust.Shared.Physics; // WallMountComponent for preserving wall-mounted fixtures
+using Content.Shared.Wall; // WallMountComponent for preserving wall-mounted fixtures
+using Robust.Shared.Physics;
 
 // Suppress RA0004 for this file. There is no Task<Result> usage here, but the analyzer
 // occasionally reports a false positive during Release/integration builds.

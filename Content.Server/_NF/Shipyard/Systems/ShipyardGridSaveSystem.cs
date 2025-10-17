@@ -453,8 +453,8 @@ public sealed class ShipyardGridSaveSystem : EntitySystem
         // Preserve entities with static body types, such as drains or sinks.
         if (_entityManager.TryGetComponent<PhysicsComponent>(ent, out var physics) && physics.BodyType == BodyType.Static)
             return false;
-        // Preserve solutions inside of containers
-        if (_entityManager.HasComponent<ContainedSolutionComponent>(ent))
+        // Preserve solutions
+        if (_entityManager.HasComponent<ContainedSolutionComponent>(ent) || _entityManager.HasComponent<SolutionComponent>(ent))
             return false;
         var anchored = false;
         if (_entityManager.TryGetComponent<TransformComponent>(ent, out var xform))

@@ -5,6 +5,7 @@ using Content.Server.Shuttles.Systems;
 using Content.Server.Shuttles.Components;
 using Content.Server.Station.Components;
 using Content.Shared.Station.Components; // For StationMemberComponent
+using StationMemberComponent = Content.Shared.Station.Components.StationMemberComponent;
 using Content.Server.Cargo.Systems;
 using Content.Server.Station.Systems;
 using Content.Shared._NF.Shipyard.Components;
@@ -21,6 +22,7 @@ using System.Linq;
 using System.Numerics;
 using System.Threading.Tasks;
 using Content.Shared._NF.Shipyard.Events;
+using Content.Shared._NF.Bank.Components; // For BankAccountComponent
 using Content.Shared.Mobs.Components;
 using Robust.Shared.Containers;
 using Content.Server._NF.Station.Components;
@@ -63,6 +65,8 @@ using Robust.Shared.Physics; // Physics Transform
 using Robust.Shared.Utility; // Box2 helpers
 using Robust.Shared.Map.Events; // For BeforeEntityReadEvent
 using Robust.Shared.Containers; // For SharedContainerSystem, ContainerManagerComponent
+using Content.Shared.Timing;
+using Content.Server.Gravity; // For GravitySystem
 
 // Suppress naming rule for _NF namespace prefix (modding convention)
 #pragma warning disable IDE1006
@@ -97,6 +101,9 @@ public sealed partial class ShipyardSystem : SharedShipyardSystem
     [Dependency] private readonly ITileDefinitionManager _tileDefManager = default!; // For tile lookups in clipping resolver
     [Dependency] private readonly EntityLookupSystem _lookup = default!; // For physics overlap checks
     [Dependency] private readonly SharedContainerSystem _container = default!; // For safe container removal before deletion
+    [Dependency] private readonly SharedPopupSystem _popupSystem = default!; // For user feedback popups
+    [Dependency] private readonly UseDelaySystem _useDelay = default!;
+    [Dependency] private readonly GravitySystem _gravitySystem = default!; // For post-load gravity refresh
 
     public MapId? ShipyardMap { get; private set; }
     private float _shuttleIndex;
@@ -137,6 +144,7 @@ public sealed partial class ShipyardSystem : SharedShipyardSystem
         SubscribeLocalEvent<ShipyardConsoleComponent, ComponentStartup>(OnShipyardStartup);
         SubscribeLocalEvent<ShipyardConsoleComponent, BoundUIOpenedEvent>(OnConsoleUIOpened);
         SubscribeLocalEvent<ShipyardConsoleComponent, ShipyardConsoleSellMessage>(OnSellMessage);
+        // Docked-grid deed creation is handled in Shuttle Records, not Shipyard
         SubscribeLocalEvent<ShipyardConsoleComponent, ShipyardConsolePurchaseMessage>(OnPurchaseMessage);
         // Ship saving/loading functionality
         SubscribeLocalEvent<ShipyardConsoleComponent, ShipyardConsoleLoadMessage>(OnLoadMessage);
@@ -180,6 +188,8 @@ public sealed partial class ShipyardSystem : SharedShipyardSystem
     {
         _baseSaleRate = Math.Clamp(value, 0.0f, 1.0f);
     }
+
+    // Docked-grid deed creation logic removed from Shipyard; use Shuttle Records console instead
 
     /// <summary>
     /// Adds a ship to the shipyard, calculates its price, and attempts to ftl-dock it to the given station
@@ -285,6 +295,16 @@ public sealed partial class ShipyardSystem : SharedShipyardSystem
         {
             _sawmill.Warning($"[ShipLoad] PurgeJointsAndResetDocks failed on {grid}: {ex.Message}");
         }
+
+        try
+        {
+            TryResetUseDelays(grid);
+        }
+        catch (Exception ex)
+        {
+            _sawmill.Warning($"[ShipLoad] TryResetUseDelays failed on {grid}: {ex.Message}");
+        }
+
         // Add new grid to the same station as the console's grid (for IFF / ownership), if any
         if (TryComp<StationMemberComponent>(consoleXform.GridUid, out var stationMember))
         {
@@ -352,6 +372,31 @@ public sealed partial class ShipyardSystem : SharedShipyardSystem
                 PurgeJointsAndResetDocks(loadedGrid.Value);
                 CleanupDuplicateLooseParts(loadedGrid.Value);
                 AutoAnchorInfrastructure(loadedGrid.Value);
+                // Ensure gravity state is properly reflected after load so generators work without manual re-anchoring.
+                try
+                {
+                    if (TryComp<Content.Shared.Gravity.GravityComponent>(loadedGrid.Value, out var grav))
+                        _gravitySystem.RefreshGravity(loadedGrid.Value, grav);
+                }
+                catch (Exception gravEx)
+                {
+                    _sawmill.Warning($"[ShipLoad] Gravity refresh failed on {loadedGrid.Value}: {gravEx.Message}");
+                }
+
+                // IMPORTANT:
+                // Previously we removed the StationMemberComponent from loaded ships so that station-wide
+                // events (alerts, random events, etc.) would not include them. However, a number of systems
+                // (expedition consoles, salvage / persistence restoration, ownership queries, pricing, etc.)
+                // rely on the ship retaining its station membership. Stripping it caused consoles to lose
+                // their backing SalvageExpeditionData and "station member" lookups to fail.
+                //
+                // Purchased shuttles never had this problem because we never removed their membership; the
+                // regression only affected the YAML load path. We now keep the membership exactly like a
+                // purchased shuttle. If we still need to suppress certain station-wide events from targeting
+                // loaded ships, the correct follow-up is to introduce a marker component (e.g.
+                // ExcludeFromStationEventsComponent) and have the station event system filter on that marker
+                // instead of mutating core membership state here.
+                // (No action needed here; membership is intentionally preserved.)
             }
             catch (Exception postEx)
             {
@@ -628,6 +673,23 @@ public sealed partial class ShipyardSystem : SharedShipyardSystem
 
         if (anchored > 0)
             _sawmill.Info($"Auto-anchored {anchored} infrastructure entities on loaded ship {shuttleGrid}");
+    }
+
+    /// <summary>
+    /// Tries to reset the delays on any entities with the UseDelayComponent.
+    /// Needed to ensure items don't have prolonged delays after saving.
+    /// </summary>
+    private void TryResetUseDelays(EntityUid shuttleGrid)
+    {
+        var useDelayQuery = _entityManager.EntityQueryEnumerator<UseDelayComponent, TransformComponent>();
+
+        while (useDelayQuery.MoveNext(out var uid, out var comp, out var xform))
+        {
+            if (xform.GridUid != shuttleGrid)
+                continue;
+
+            _useDelay.ResetAllDelays((uid, comp));
+        }
     }
 
     /// <summary>
@@ -1713,7 +1775,7 @@ public sealed partial class ShipyardSystem : SharedShipyardSystem
             RaiseLocalEvent(shipLoadedEvent);
             _sawmill.Info($"Fired ShipLoadedEvent for ship '{shipName}'");
 
-            // Commented out for now 
+            // Commented out for now
             /*
             // If this load originated from a client-side file, notify the client to delete it now
             if (!string.IsNullOrEmpty(filePath) && playerSession != null)

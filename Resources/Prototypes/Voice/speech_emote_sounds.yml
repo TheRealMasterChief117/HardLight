@@ -122,6 +122,10 @@
       collection: DeathGasp
     Belch: # Frontier
       collection: Belch # Frontier
+    Purr: # RMC14
+      path: /Audio/_RMC14/Voice/Reptilian/lizard_purr.ogg
+      params:
+        variation: 0.125
 
 - type: emoteSounds
   id: FemaleReptilian
@@ -154,6 +158,11 @@
       collection: FemaleDeathGasp
     Belch: # Frontier
       collection: Belch # Frontier
+    Purr: # RMC14
+      path: /Audio/_RMC14/Voice/Reptilian/lizard_purr.ogg
+      params:
+        variation: 0.125
+        volume: -5
 
 - type: emoteSounds
   id: MaleSlime
@@ -601,6 +610,11 @@
       collection: Salutes
     Crack: # Imp
       collection: Cracks # Imp
+    RMCReptileRattle: # RMC14
+      path: /Audio/_RMC14/Voice/Reptilian/lizard_rattle.ogg
+      params:
+        variation: 0.125
+        volume: -1
 
 # mobs
 - type: emoteSounds
@@ -671,3 +685,51 @@
     path: /Audio/Animals/goat_bah.ogg
     params:
       variation: 0.125
+
+- type: emoteSounds
+  id: Scurret
+  params:
+    variation: 0.125
+  sounds:
+    Thump:
+      path: /Audio/Effects/soft_thump.ogg
+      params:
+        variation: 0.125
+    Clap:
+      collection: Claps
+    ClapSingle:
+      collection: ClapSingle
+    Snap:
+      collection: Snaps
+      params:
+        volume: -6
+    Salute:
+      collection: Salutes
+    Laugh:
+      collection: WawaLaugh
+    Sneeze:
+      collection: WawaSneeze
+    Cough:
+      collection: MaleCoughs
+    Whistle:
+      collection: Whistles
+    Sigh:
+      collection: WawaSigh
+    Scream:
+      collection: WawaScream
+    Yawn:
+      collection: WawaYawn
+    Crying:
+      collection: WawaCry
+    Snore:
+      collection: Snores
+    Weh:
+      collection: Weh
+    Hew:
+      collection: Hew
+    Honk:
+      collection: BikeHorn
+    Gasp:
+      collection: MaleGasp
+    DefaultDeathgasp:
+      collection: WawaDeath

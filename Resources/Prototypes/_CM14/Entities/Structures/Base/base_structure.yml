@@ -84,7 +84,7 @@
   components:
   - type: Damageable
     damageContainer: StructuralXeno
-    damageModifierSet: StructuralXeno
+    damageModifierSet: Resin
   - type: Appearance
   - type: RadiationBlocker
     resistance: 5
